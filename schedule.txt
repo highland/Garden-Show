@@ -1,0 +1,105 @@
+20th August 2022
+Section A	VEGETABLES
+A1	 potatoes - white
+A2	 potatoes - coloured
+A3	 pods of peas
+A4	 mange tout/s-snap peas
+A5	 broad beans
+A6	 runner beans
+A7	 french beans
+A8	3 onions from sets
+A10	3 carrots -pointed
+A11	3 carrots - stump/ball
+A12	1 cabbage
+A14	5 cherry tomatoes
+A15	3 tomatoes
+A16	1 cucumber
+A17	3 courgettes
+A19	3 early turnips
+A20	1 lettuce
+A21	3 rhubarb stalks
+A22	anything else (1-3 same veg)
+A23	anything else (1-3 same fruit)
+A24	herb bunches
+A25	oddly shaped veg
+Section B	CUT FLOWERS
+B1	annuals: 1 kind (same colour)
+B2	annuals: 5 kinds (mixed colours)
+B3	perennials: 1 kind (same colour)
+B4	perennials: 5 kinds (mixed colours)
+B5	dahlias: 1 cultivar 1 bloom
+B7	annual sweet peas: 1 named cultivar 5 stems
+B8	annual sweet peas: mixed cultivars:  7 stems
+B10	cluster-flowered rose: 1 stem
+B11	specimen rose: 1 bloom
+B12	fragrant rose: 1 stem
+B14	herbaceous flowers (mixed)
+B15	mixed flowering shrubs
+Section C	CACTI & SUCCULENTS
+C1	single cactus
+C2	cactus/succulent collection
+C3	single succulent
+Section D	POT PLANTS
+D1	foliage plant: small pot
+D2	foliage plant: large pot
+D3	flowering plant: small pot
+D4	flowering plant: larga pot
+D5	Orchid
+D6	Club flowering plant
+Section E	FLORAL ART
+El	Lemon Zing!
+E2	Floating arrangement
+E3	Summer in a Basket
+Section F	FUCHSIA
+Fl	fuchsia
+Section G	OUTDOOR CONTAINERS
+GI	hanging basket/pouch
+G2	planted outdoor container
+Section K	PRESERVES & SWEETS
+K1	jar of pickle, chutney or relish
+K2	jar of apricot jam
+K3	jar of strawberry jam
+K4	jar of raspberry jam
+K5	jar of blackcurrant jam
+K6	jar of redcurrant jelly
+K7	jar of marmalade
+K8	jar of lemon curd
+K9	jar of any other preserve
+K10	6 squares of tablet
+Section L	BAKING
+L1	4 pancakes
+L2	gingerbread
+L3	lemon drizzle cake
+L4	4 pieces of brownies
+L5	4 plain oven scones
+L6	4 pieces of shortbread
+L7	gluten-free cake
+L8	4 meringues (no filling)
+L9	fruit loaf
+L10	white bread (hand made)
+L11	wholemeal bread (hand made)
+L12	loaf of another bread recipe
+L13	loaf of white bread (machine)
+L14	wholemeal bread (machine)
+L15	3 American style muffins
+Section M	HOME PRODUCED BEVERAGES
+M1	Red wine
+M2	White wine
+M3	Beer
+M4	Non-alcoholic
+M5	Liqueur
+Section N	JUST FOR FUN
+N1	Pot o' Spuds
+N2	Magical Muck
+Section Q	YOUNG GARDENERS (Primary 1, 2, & 3)
+Q1	Painted Stone
+Q2	Jam-jar of wild flowers
+Q3	Decorated fruit or vegetable
+Section R	YOUNG GARDENERS (Primary 4 & 5)
+R1  Bug Hotel
+R2  Scarecrow of Garden Person
+R3  Decorated biscuit (flower pattern)
+Section Q	YOUNG GARDENERS (Primary 6 & 7)
+S1  Bug Holtel
+S2  Poem
+S3  Poster
