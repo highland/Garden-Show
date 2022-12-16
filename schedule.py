@@ -5,12 +5,10 @@ Spyder Editor
 This is a temporary script file.
 """
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import List
-from datetime import date
 import pickle
 
-SCHEDULEFILE: Path = "D:/BGC Show/Garden-Show/schedule.txt"
+SCHEDULEFILE: str = "D:/BGC Show/Garden-Show/schedule.txt"
 SAVEDSCEDULE = "D:/BGC Show/Garden-Show/schedule.pkl"
 
 
@@ -18,7 +16,7 @@ SAVEDSCEDULE = "D:/BGC Show/Garden-Show/schedule.pkl"
 class Schedule:
     """ The classes of entries for the show """
     year: int
-    date: date
+    date: str
     sections: List["Section"] = field(default_factory=list)
 
     def __repr__(self) -> str:
@@ -47,7 +45,7 @@ class Section:
 class SubSection:
     """ One of the minor categories of entries """
     section: Section
-    _id: int
+    _id: str
     description: str
 
     def __repr__(self) -> str:
@@ -56,11 +54,10 @@ class SubSection:
 
 def load_schedule_from_file() -> Schedule:
     """ Initial load of schedule from file """
-    with open(SCHEDULEFILE) as data:
+    with open(SCHEDULEFILE, encoding="UTF-8") as data:
         date = data.readline().rstrip()
         _, _, year = date.split()
         schedule = Schedule(int(year), date)
-        current_section = None
         for line in data:
             if line.startswith('Section'):
                 _, _id, *rest = line.split()
