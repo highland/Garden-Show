@@ -29,7 +29,7 @@ class Section:
     """ One of the major categories of entries """
     _id: str
     description: str
-    sub_sections: Dict[int, "SubSection"] = field(default_factory=dict)
+    sub_sections: Dict[str, "SubSection"] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = '\n'.join([f'\t\t{sub_section}'
