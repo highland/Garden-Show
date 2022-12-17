@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Classes for the schedule of the garden show
 
-This is a temporary script file.
+@author: Mark
 """
 from dataclasses import dataclass, field
 from typing import Dict
 import pickle
-
-SCHEDULEFILE: str = "D:/BGC Show/Garden-Show/schedule.txt"
-SAVEDSCEDULE = "D:/BGC Show/Garden-Show/schedule.pkl"
+from configuration import SCHEDULEFILE, SAVEDSCEDULE
 
 
 @dataclass
@@ -87,6 +85,8 @@ def load_schedule() -> Schedule:
 def main() -> None:
     """ Runs only as tests """
     schedule = load_schedule_from_file()
+    save_schedule(schedule)
+    schedule = load_schedule()
     print(schedule)
 
 
