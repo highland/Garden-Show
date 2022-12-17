@@ -12,3 +12,5 @@ SAVEDSCEDULE: str = _ROOT + "/schedule.pkl"
 
 MEMBERFILE: str = _ROOT + "/members.txt"
 SAVEDMEMBERS: str = _ROOT + "/members.pkl"
+
+SAVEDENTRIES: str = _ROOT + "/entries.pkl"
