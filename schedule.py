@@ -5,7 +5,7 @@ Spyder Editor
 This is a temporary script file.
 """
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict
 import pickle
 
 SCHEDULEFILE: str = "D:/BGC Show/Garden-Show/schedule.txt"
@@ -17,11 +17,11 @@ class Schedule:
     """ The classes of entries for the show """
     year: int
     date: str
-    sections: List["Section"] = field(default_factory=list)
+    sections: Dict[str, "Section"] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = '\n'.join([f'\t{section}'
-                             for section in self.sections])
+                             for section in self.sections.values()])
         return (f'Schedule for {self.year} show on {self.date}\n'
                 f'{display}')
 
@@ -31,12 +31,12 @@ class Section:
     """ One of the major categories of entries """
     _id: str
     description: str
-    sub_sections: List["SubSection"] = field(default_factory=list)
+    sub_sections: Dict[int, "SubSection"] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = '\n'.join([f'\t\t{sub_section}'
                              for sub_section
-                             in self.sub_sections])
+                             in self.sub_sections.values()])
         return (f'SECTION {self._id}\t{self.description}\n'
                 f'{display}')
 
@@ -63,11 +63,11 @@ def load_schedule_from_file() -> Schedule:
                 _, _id, *rest = line.split()
                 description = ' '.join(rest)
                 current_section = Section(_id, description)
-                schedule.sections.append(current_section)
+                schedule.sections[_id] = (current_section)
             else:
                 _id, *rest = line.split()
                 description = ' '.join(rest)
-                current_section.sub_sections.append(
+                current_section.sub_sections[_id] = (
                     SubSection(current_section, _id, description))
     return schedule
 
@@ -87,8 +87,6 @@ def load_schedule() -> Schedule:
 def main() -> None:
     """ Runs only as tests """
     schedule = load_schedule_from_file()
-    save_schedule(schedule)
-    schedule = load_schedule()
     print(schedule)
 
 
