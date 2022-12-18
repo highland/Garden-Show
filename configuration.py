@@ -5,7 +5,7 @@ Locations of data files
 @author: Mark
 """
 
-_ROOT: str = "D:/BGC Show/Garden-Show"
+_ROOT: str = "D:/BGC Show/Garden-Show/Data"
 
 SCHEDULEFILE: str = _ROOT + "/schedule.txt"
 SAVEDSCEDULE: str = _ROOT + "/schedule.pkl"

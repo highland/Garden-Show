@@ -6,7 +6,7 @@ Class for an entry in the Show by a member of the garden club
 """
 from dataclasses import dataclass
 import pickle
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Literal
 from schedule import SubSection
 from members import Member
 from configuration import SAVEDENTRIES
@@ -17,20 +17,10 @@ class Entry:
     """ Current member of Garden Club """
     member: Member
     _class: SubSection
+    count: Literal[1, 2] = 1
 
     def __repr__(self) -> str:
         return f'{self.member}\t {self._class}'
-
-
-# def load_entries_from_file() -> Tuple[Dict[Member, Entry],
-#                                       Dict[SubSection, Entry]]:
-#     """ Initial load of members from file """
-#     members: List[Member] = []
-#     with open(MEMBERFILE, encoding="UTF-8") as data:
-#         for line in data:
-#             name = line.split()
-#             members.append(Member(*name))
-#     return members
 
 
 def save_entries(member_entries: Dict[Member, Entry],
