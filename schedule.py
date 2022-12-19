@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Classes for the schedule of the garden show
+ShowClasses for the schedule of the garden show
 
 @author: Mark
 """
@@ -27,27 +27,27 @@ class Schedule:
 @dataclass
 class Section:
     """ One of the major categories of entries """
-    _id: str
+    section_id: str
     description: str
-    sub_sections: Dict[str, "SubSection"] = field(default_factory=dict)
+    sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = '\n'.join([f'\t\t{sub_section}'
                              for sub_section
                              in self.sub_sections.values()])
-        return (f'SECTION {self._id}\t{self.description}\n'
+        return (f'SECTION {self.section_id}\t{self.description}\n'
                 f'{display}')
 
 
 @dataclass
-class SubSection:
+class ShowClass:
     """ One of the minor categories of entries """
     section: Section
-    _id: str
+    class_id: str
     description: str
 
     def __repr__(self) -> str:
-        return f'{self._id}\t{self.description}'
+        return f'{self.class_id}\t{self.description}'
 
 
 def load_schedule_from_file() -> Schedule:
@@ -58,15 +58,15 @@ def load_schedule_from_file() -> Schedule:
         schedule = Schedule(int(year), date)
         for line in data:
             if line.startswith('Section'):
-                _, _id, *rest = line.split()
+                _, section_id, *rest = line.split()
                 description = ' '.join(rest)
-                current_section = Section(_id, description)
-                schedule.sections[_id] = (current_section)
+                current_section = Section(section_id, description)
+                schedule.sections[section_id] = (current_section)
             else:
-                _id, *rest = line.split()
+                class_id, *rest = line.split()
                 description = ' '.join(rest)
-                current_section.sub_sections[_id] = (
-                    SubSection(current_section, _id, description))
+                current_section.sub_sections[class_id] = (
+                    ShowClass(current_section, class_id, description))
     return schedule
 
 
