@@ -10,7 +10,7 @@ Date = str
 _ROOT: str = "D:/BGC Show/Garden-Show/Data"
 
 SCHEDULEFILE: str = _ROOT + "/schedule.txt"
-SAVEDSCEDULE: str = _ROOT + "/schedule.pkl"
+SAVEDSCHEDULE: str = _ROOT + "/schedule.pkl"
 
 EXHIBITORFILE: str = _ROOT + "/exhibitors.txt"
 SAVEDEXHIBITORS: str = _ROOT + "/exhibitors.pkl"

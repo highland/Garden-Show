@@ -5,7 +5,7 @@ Class representing a Façade for the GUI to access model data
 @author: Mark
 """
 
-from schedule import load_schedule, Schedule, Section, ShowClass
+from schedule import load_schedule, ShowClass
 from exhibitors import load_exhibitors, Exhibitor
 from entries import load_entries, Entry
 from typing import List, Dict
