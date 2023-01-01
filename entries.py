@@ -7,31 +7,31 @@ Class for an entry in the Show by a member of the garden club
 from dataclasses import dataclass
 import pickle
 from typing import Dict, Tuple, Literal
-from schedule import SubSection
-from members import Member
+from schedule import ShowClass
+from exhibitors import Exhibitor
 from configuration import SAVEDENTRIES
 
 
 @dataclass
 class Entry:
     """ Current member of Garden Club """
-    member: Member
-    _class: SubSection
+    member: Exhibitor
+    _class: ShowClass
     count: Literal[1, 2] = 1
 
     def __repr__(self) -> str:
         return f'{self.member}\t {self._class}'
 
 
-def save_entries(member_entries: Dict[Member, Entry],
-                 class_entries: Dict[SubSection, Entry]) -> None:
+def save_entries(exhibitor_entries: Dict[Exhibitor, Entry],
+                 class_entries: Dict[ShowClass, Entry]) -> None:
     """ Back up entries to disk """
     with open(SAVEDENTRIES, 'wb') as save_file:
-        pickle.dump(member_entries, save_file)
+        pickle.dump(exhibitor_entries, save_file)
         pickle.dump(class_entries, save_file)
 
 
-def load_entries() -> Tuple[Dict[Member, Entry], Dict[SubSection, Entry]]:
+def load_entries() -> Tuple[Dict[Exhibitor, Entry], Dict[ShowClass, Entry]]:
     """ Load schedule from disk """
     with open(SAVEDENTRIES, 'rb') as read_file:
         return pickle.load(read_file)
@@ -39,13 +39,13 @@ def load_entries() -> Tuple[Dict[Member, Entry], Dict[SubSection, Entry]]:
 
 def main() -> None:
     """ Runs only as tests """
-    member_entries: Dict[Member, Entry] = {}
-    class_entries: Dict[SubSection, Entry] = {}
+    exhibitor_entries: Dict[Exhibitor, Entry] = {}
+    class_entries: Dict[ShowClass, Entry] = {}
 
-#    member_entries, class_entries = load_entries_from_file()
-    save_entries(member_entries, class_entries)
-    member_entries, class_entries = load_entries()
-    print(member_entries, class_entries)
+#   exhibitor_entries, class_entries = load_entries_from_file()
+#    save_entries(exhibitor_entries, class_entries)
+#    exhibitor_entries, class_entries = load_entries()
+    print(exhibitor_entries, class_entries)
 
 
 if __name__ == '__main__':

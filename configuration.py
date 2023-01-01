@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Locations of data files
+Locations of data files and Constants
 
 @author: Mark
 """
+
+Date = str
 
 _ROOT: str = "D:/BGC Show/Garden-Show/Data"
 

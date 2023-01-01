@@ -80,15 +80,3 @@ def load_schedule() -> Schedule:
     """ Load schedule from disk """
     with open(SAVEDSCEDULE, 'rb') as read_file:
         return pickle.load(read_file)
-
-
-def main() -> None:
-    """ Runs only as tests """
-    schedule = load_schedule_from_file()
-    save_schedule(schedule)
-    schedule = load_schedule()
-    print(schedule)
-
-
-if __name__ == '__main__':
-    main()

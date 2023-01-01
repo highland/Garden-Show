@@ -20,6 +20,10 @@ class Exhibitor:
     def __repr__(self) -> str:
         return f'{self.first_name} {self.last_name}'
 
+    def __eq__(self, other: "Exhibitor") -> bool:
+        return (self.first_name == other.first_name
+                and self.last_name == other.last_name)
+
 
 def load_exhibitors_from_file() -> List[Exhibitor]:
     """ Initial load of exhibitors from file """
@@ -43,13 +47,13 @@ def load_exhibitors() -> List[Exhibitor]:
         return pickle.load(read_file)
 
 
-def main() -> None:
-    """ Runs only as tests """
-    exhibitors = load_exhibitors_from_file()
-    save_exhibitors(exhibitors)
-    exhibitors = load_exhibitors()
-    print(exhibitors)
+# def main() -> None:
+#     """ Runs only as tests """
+#     exhibitors = load_exhibitors_from_file()
+#     save_exhibitors(exhibitors)
+#     exhibitors = load_exhibitors()
+#     print(exhibitors)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
