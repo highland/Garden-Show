@@ -5,7 +5,7 @@
  This had become unmanageable over the year as changes accumulated.
 
  The replacement project will be written in python with a simple frontend.
- Uses Tkinter, pickle, and batch input from text files.
+ Uses flet, pickle, and batch input from text files.
 
  Intended for use by Badenoch Gardening Club, it should however be suitable
  for any Gardening Club that runs a traditional Garden Show
