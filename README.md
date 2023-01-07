@@ -5,7 +5,8 @@
  This had become unmanageable over the year as changes accumulated.
 
  The replacement project will be written in python with a simple frontend.
- Uses flet, pickle, and batch input from text files.
+ Uses flet for GUI, pickle for data persistence,Applications
+ and batch input of the schedule from a text file.
 
  Intended for use by Badenoch Gardening Club, it should however be suitable
  for any Gardening Club that runs a traditional Garden Show

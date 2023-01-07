@@ -27,7 +27,9 @@ def exhibitor_check(name: str) -> Optional[List[str]]:
 
     """
     first, *_, last = name.split()
-    exhibitor = Show.Exhibitor(first, last)
-    if exhibitor in Show.exhibitors:
-        return [str(entry) for entry in exhibitor.entries]
+    test_exhibitor = Show.Exhibitor(first, last)
+    if test_exhibitor in Show.exhibitors:
+        return [
+            str(entry) for entry in Show.get_actual_exhibitor(test_exhibitor)
+        ]
     return None
