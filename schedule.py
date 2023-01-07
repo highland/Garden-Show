@@ -5,8 +5,9 @@ ShowClasses for the schedule of the garden show
 @author: Mark
 """
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, List
 import pickle
+import os
 from configuration import SCHEDULEFILE, SAVEDSCHEDULE
 
 
@@ -17,6 +18,8 @@ class Schedule:
     year: int
     date: str
     sections: Dict[str, "Section"] = field(default_factory=dict)
+    classes: Dict[str, "ShowClass"] = field(default_factory=dict)
+    locked: bool = False
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -47,14 +50,15 @@ class ShowClass:
     section: Section
     class_id: str
     description: str
+    entries: List = field(default_factory=list)
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
 
 
-def load_schedule_from_file() -> Schedule:
+def load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
-    with open(SCHEDULEFILE, encoding="UTF-8") as data:
+    with open(file, encoding="UTF-8") as data:
         date = data.readline().rstrip()
         _, _, year = date.split()
         schedule = Schedule(int(year), date)
@@ -67,9 +71,9 @@ def load_schedule_from_file() -> Schedule:
             else:
                 class_id, *rest = line.split()
                 description = " ".join(rest)
-                current_section.sub_sections[class_id] = ShowClass(
-                    current_section, class_id, description
-                )
+                show_class = ShowClass(current_section, class_id, description)
+                schedule.classes[class_id] = show_class
+                current_section.sub_sections[class_id] = show_class
     return schedule
 
 
@@ -81,8 +85,13 @@ def save_schedule(schedule: Schedule) -> None:
 
 def load_schedule() -> Schedule:
     """Load schedule from disk"""
-    with open(SAVEDSCHEDULE, "rb") as read_file:
-        return pickle.load(read_file)
+    if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
+        schedule = load_schedule_from_file()
+        save_schedule(schedule)
+    else:
+        with open(SAVEDSCHEDULE, "rb") as read_file:
+            schedule = pickle.load(read_file)
+    return schedule
 
 
 def main() -> None:
