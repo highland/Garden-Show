@@ -61,23 +61,23 @@ def load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     with open(file, encoding="UTF-8") as data:
         date = data.readline().rstrip()
         _, _, year = date.split()
-        schedule = Schedule(int(year), date)
+        new_schedule = Schedule(int(year), date)
         for line in data:
             if line.startswith("Section"):
                 _, section_id, *rest = line.split()
                 description = " ".join(rest)
                 current_section = Section(section_id, description)
-                schedule.sections[section_id] = current_section
+                new_schedule.sections[section_id] = current_section
             else:
                 class_id, *rest = line.split()
                 description = " ".join(rest)
                 show_class = ShowClass(current_section, class_id, description)
-                schedule.classes[class_id] = show_class
+                new_schedule.classes[class_id] = show_class
                 current_section.sub_sections[class_id] = show_class
-    return schedule
+    return new_schedule
 
 
-def save_schedule(schedule: Schedule) -> None:
+def save_schedule() -> None:
     """Back up schedule to disk"""
     with open(SAVEDSCHEDULE, "wb") as save_file:
         pickle.dump(schedule, save_file)
@@ -86,12 +86,11 @@ def save_schedule(schedule: Schedule) -> None:
 def load_schedule() -> Schedule:
     """Load schedule from disk"""
     if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
-        schedule = load_schedule_from_file()
-        save_schedule(schedule)
+        new_schedule = load_schedule_from_file()
     else:
         with open(SAVEDSCHEDULE, "rb") as read_file:
-            schedule = pickle.load(read_file)
-    return schedule
+            new_schedule = pickle.load(read_file)
+    return new_schedule
 
 
 @dataclass
@@ -116,7 +115,7 @@ class Exhibitor:
         return hash((self.first_name, self.last_name))
 
 
-def save_exhibitors(exhibitors: List[Exhibitor]) -> None:
+def save_exhibitors() -> None:
     """Back up exhibitors to disk"""
     with open(SAVEDEXHIBITORS, "wb") as save_file:
         pickle.dump(exhibitors, save_file)
@@ -130,20 +129,21 @@ def load_exhibitors() -> List[Exhibitor]:
         return []
     with open(SAVEDEXHIBITORS, "rb") as read_file:
         return pickle.load(read_file)
-    with open(SAVEDEXHIBITORS, "rb") as read_file:
-        return pickle.load(read_file)
 
 
 @dataclass
 class Entry:
-    """Current member of Garden Club"""
+    """An entry by an exhibitor for a class in the show
+
+    2 entries max are allowed for a single class.
+    """
 
     member: Exhibitor
     show_class: ShowClass
     count: Literal[1, 2] = 1
 
     def __repr__(self) -> str:
-        return f"{self.member}\t {self.show_class}"
+        return f"Entry({self.member}, {self.show_class}, {self.count})"
 
     def __str__(self) -> str:
         return f"{repr(self.show_class)}\t{self.count}"
@@ -157,6 +157,7 @@ def add_entries(exhibitor: Exhibitor, entries: List[Entry]) -> None:
     exhibitor.entries = entries
     for entry in entries:
         schedule.classes[entry.show_class].append(entry)
+    schedule.locked = True
     save_show_data()
 
 
@@ -168,6 +169,8 @@ def delete_entries(exhibitor: Exhibitor) -> None:
         schedule.classes[entry.show_class].entries.remove(entry)
         del entry
     exhibitors.remove(exhibitor)
+    if not exhibitors:
+        schedule.locked = False
     save_show_data()
 
 
@@ -179,27 +182,20 @@ def getshow_class_entries(show_class: ShowClass) -> List[Entry]:
     return schedule.classes[show_class].entries
 
 
+# All the show data in these two objects
 schedule: Schedule = load_schedule()
 exhibitors: List[Exhibitor] = load_exhibitors()
 
 
 def save_show_data():
-    save_schedule(schedule)
-    save_exhibitors(exhibitors)
-
-
-def get_actual_exhibitor(match: Exhibitor) -> Exhibitor:
-    """Replace an Exbibitor object created for matching
-    with the actual exhabitor stored by the Show
-    """
-    exhibitor_index = exhibitors.index(match)
-    return exhibitors[exhibitor_index]
+    save_schedule()
+    save_exhibitors()
 
 
 def main() -> None:
     """Runs only as tests"""
     schedule = load_schedule_from_file()
-    save_schedule(schedule)
+    save_schedule()
     schedule = load_schedule()
     print(schedule)
 
