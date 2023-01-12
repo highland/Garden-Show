@@ -97,6 +97,15 @@ def check_existing_exibitor(event: Event) -> None:
 
 
 def clear_all(event):
+    exhibitor_name.value = ""
+    member.value = False
+    display_class.value = ""
+    description.value = ""
+    count.value = "1"
+    entries.controls = []
+    tally_count()
+    exhibitor_name.focus()
+    event.page.update()
     if _debug:
         print("clear_all")
         print(event)
