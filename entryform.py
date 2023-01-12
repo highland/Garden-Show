@@ -39,6 +39,12 @@ class Entry(UserControl):
         self.description = description
         self.count = count
 
+    def __eq__(self, other):
+        return self.entry == other.entry
+
+    def __hash__(self):
+        return hash(self.entry)
+
     def build(self):
         self.entry_row = Row(
             width=700,
@@ -63,7 +69,7 @@ class Entry(UserControl):
         return Column(controls=[self.entry_row])
 
     def delete_clicked(self, e):
-        delete_entry(self)
+        delete_entry(e, self)
 
     def switch_count(self, event):
         if event.control.value not in ("1", "2"):
@@ -98,15 +104,23 @@ def clear_all(event):
 
 
 def create_entry(event):
-    if not description.value or description.value == "Class Description":
+    entry_class = display_class.value
+    entry_description = description.value
+    entry_count = count.value
+    if not entry_description or entry_description.startswith("Class"):
         set_description(event)
-    if description.value.startswith("No such"):
-        return None
-    entries.controls.append(
-        Entry(display_class.value, description.value, count.value)
-    )
-    display_class.value = ""
+        if description.value.startswith("No such"):
+            return None
+    for entry in entries.controls:
+        if entry.entry == display_class.value:
+            description.value = "Class already entered"
+            break
+    else:
+        entries.controls.append(
+            Entry(entry_class, description.value, entry_count)
+        )
     description.value = ""
+    display_class.value = ""
     count.value = "1"
     tally_count()
     event.page.update()
@@ -124,13 +138,22 @@ def tally_count():
     entry_count.value = f"Total entries {sum}"
 
 
-def delete_entry(entry):
+def delete_entry(event, entry):
+    entries.controls.remove(entry)
+    tally_count()
+    event.page.update()
     if _debug:
         print("delete_entry")
         sys.stdout.flush()
 
 
 def post_to_model(event):
+    if not exhibitor_name:
+        exhibitor_name.focus()
+        return None
+    if not entries.controls:
+        display_class.focus()
+        return None
     if _debug:
         print("post_to_model")
         print(event)
