@@ -70,10 +70,11 @@ def add_exhibitor_and_entries(
         new_entry = Show.Entry(exhibitor, show_class, int(entry_count))
         exhibitor.entries.append(new_entry)
         Show.schedule.classes[show_class].entries.append(new_entry)
+    Show.save_show_data()
 
 
 def _clear_exhibitor(exhibitor: Show.Exhibitor) -> None:
     previous_exhibitor = _get_actual_exhibitor(exhibitor)
     for entry in previous_exhibitor.entries:
-        entry.show_class.entries.remove(entry)
+        Show.schedule.classes[entry.show_class].entries.remove(entry)
     Show.exhibitors.remove(previous_exhibitor)

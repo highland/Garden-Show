@@ -90,10 +90,11 @@ def check_existing_exibitor(event: Event) -> None:
         print("check_existing_exibitor")
         print(name)
         sys.stdout.flush()
-    values = model.exhibitor_check(name)
+    is_member, values = model.exhibitor_check(name)
     if values:  # already entered
-        pass  # TODO populate entries
-    return []
+        member.value = is_member
+        entries.controls = [Entry(*value) for value in values]
+    event.page.update()
 
 
 def clear_all(event):
@@ -157,12 +158,17 @@ def delete_entry(event, entry):
 
 
 def post_to_model(event):
-    if not exhibitor_name:
+    if not exhibitor_name.value:
         exhibitor_name.focus()
         return None
     if not entries.controls:
         display_class.focus()
         return None
+    entry_list = [(entry.entry, entry.count) for entry in entries.controls]
+    model.add_exhibitor_and_entries(
+        exhibitor_name.value, member.value, entry_list
+    )
+    clear_all(event)
     if _debug:
         print("post_to_model")
         print(event)
