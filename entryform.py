@@ -240,7 +240,6 @@ def main(page: Page):
     """
 
     page.title = "Badenoch Gardening Club"
-    print(page.title)
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
     page.add(title)
