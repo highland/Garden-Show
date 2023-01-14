@@ -190,15 +190,3 @@ exhibitors: List[Exhibitor] = load_exhibitors()
 def save_show_data():
     save_schedule()
     save_exhibitors()
-
-
-def main() -> None:
-    """Runs only as tests"""
-    schedule = load_schedule_from_file()
-    save_schedule()
-    schedule = load_schedule()
-    print(schedule)
-
-
-if __name__ == "__main__":
-    main()
