@@ -9,6 +9,7 @@ import sys
 # from typing import List
 from flet import (
     app,
+    ControlEvent,
     Text,
     TextField,
     Checkbox,
@@ -26,10 +27,11 @@ from flet import (
     InputBorder,
     TextCapitalization,
 )
-from flet.event import Event
 import model
 
-_debug = True  # False to eliminate debug printing from callback functions.
+_debug: bool = (
+    True  # False to eliminate debug printing from callback functions.
+)
 
 
 class Entry(UserControl):
@@ -39,13 +41,13 @@ class Entry(UserControl):
         self.description = description
         self.count = count
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Entry") -> bool:
         return self.entry == other.entry
 
     def __hash__(self):
         return hash(self.entry)
 
-    def build(self):
+    def build(self) -> Column:
         self.entry_row = Row(
             width=700,
             alignment="spaceBetween",
@@ -68,10 +70,10 @@ class Entry(UserControl):
         )
         return Column(controls=[self.entry_row])
 
-    def delete_clicked(self, e):
-        delete_entry(e, self)
+    def delete_clicked(self, event: ControlEvent) -> None:
+        delete_entry(event, self)
 
-    def switch_count(self, event):
+    def switch_count(self, event: ControlEvent) -> None:
         if event.control.value not in ("1", "2"):
             event.control.value = "1"
         self.count = event.control.value
@@ -83,7 +85,7 @@ class Entry(UserControl):
             sys.stdout.flush()
 
 
-def check_existing_exibitor(event: Event) -> None:
+def check_existing_exibitor(event: ControlEvent) -> None:
     name = exhibitor_name.value
     event.page.update()
     if _debug:
@@ -97,7 +99,7 @@ def check_existing_exibitor(event: Event) -> None:
     event.page.update()
 
 
-def clear_all(event):
+def clear_all(event: ControlEvent) -> None:
     exhibitor_name.value = ""
     member.value = False
     display_class.value = ""
@@ -113,7 +115,7 @@ def clear_all(event):
         sys.stdout.flush()
 
 
-def create_entry(event):
+def create_entry(event: ControlEvent) -> None:
     entry_class = display_class.value
     entry_description = description.value
     entry_count = count.value
@@ -141,14 +143,14 @@ def create_entry(event):
         sys.stdout.flush()
 
 
-def tally_count():
+def tally_count() -> None:
     sum = 0
     for entry in entries.controls:
         sum += int(entry.count)
     entry_count.value = f"Total entries {sum}"
 
 
-def delete_entry(event, entry):
+def delete_entry(event: ControlEvent, entry: Entry) -> None:
     entries.controls.remove(entry)
     tally_count()
     event.page.update()
@@ -157,7 +159,7 @@ def delete_entry(event, entry):
         sys.stdout.flush()
 
 
-def post_to_model(event):
+def post_to_model(event: ControlEvent) -> None:
     if not exhibitor_name.value:
         exhibitor_name.focus()
         return None
@@ -175,7 +177,7 @@ def post_to_model(event):
         sys.stdout.flush()
 
 
-def set_description(event):
+def set_description(event: ControlEvent) -> None:
     class_entered = display_class.value
     description.value = model.get_class_description(class_entered)
     if description.value.startswith("No such"):
@@ -237,7 +239,7 @@ def main(page: Page):
 
     """
 
-    #    page.title("Badenoch Gardening Club")
+    page.title = "Badenoch Gardening Club"
     print(page.title)
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
