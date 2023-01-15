@@ -5,7 +5,7 @@ Module to load and hold all show data
 @author: Mark
 """
 from dataclasses import dataclass, field
-from typing import Dict, List, Literal
+from typing import Dict, List
 import pickle
 import os
 from configuration import SCHEDULEFILE, SAVEDSCHEDULE, SAVEDEXHIBITORS
@@ -50,7 +50,7 @@ class ShowClass:
     section: Section
     class_id: str
     description: str
-    entries: List = field(default_factory=list)
+    entries: List["Entry"] = field(default_factory=list)
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
@@ -99,20 +99,26 @@ class Exhibitor:
 
     first_name: str
     last_name: str
+    other_names: List[str] = field(default_factory=list)
     member: bool = True
     entries: List["Entry"] = field(default_factory=list)
 
     def __repr__(self) -> str:
+        if self.other_names:
+            return f"{self.first_name} {' '.join(self.other_names)} {self.last_name}"
         return f"{self.first_name} {self.last_name}"
 
-    def __eq__(self, other: "Exhibitor") -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Exhibitor):
+            return NotImplemented
         return (
             self.first_name == other.first_name
             and self.last_name == other.last_name
+            and self.other_names == other.other_names
         )
 
     def __hash__(self) -> int:
-        return hash((self.first_name, self.last_name))
+        return hash((self.first_name, self.last_name, self.other_names))
 
 
 def save_exhibitors() -> None:
@@ -140,7 +146,7 @@ class Entry:
 
     member: Exhibitor
     show_class: ShowClass
-    count: Literal[1, 2] = 1
+    count: int = 1
 
     def __repr__(self) -> str:
         return f"Entry({self.member}, {self.show_class}, {self.count})"
@@ -153,10 +159,10 @@ def add_entries(exhibitor: Exhibitor, entries: List[Entry]) -> None:
     """
     Add the entries for a new exhibitor
     """
-    exhibitors.add(exhibitor)
+    exhibitors.append(exhibitor)
     exhibitor.entries = entries
     for entry in entries:
-        schedule.classes[entry.show_class].append(entry)
+        schedule.classes[entry.show_class.class_id].entries.append(entry)
     schedule.locked = True
     save_show_data()
 
@@ -166,20 +172,19 @@ def delete_entries(exhibitor: Exhibitor) -> None:
     Remove the entries for an exhibitor and the exhibitor itself
     """
     for entry in exhibitor.entries:
-        schedule.classes[entry.show_class].entries.remove(entry)
+        schedule.classes[entry.show_class.class_id].entries.remove(entry)
         del entry
     exhibitors.remove(exhibitor)
     if not exhibitors:
         schedule.locked = False
-    save_show_data()
 
 
-def get_exhibitor_entries(exhibitor) -> List[Entry]:
+def get_exhibitor_entries(exhibitor: Exhibitor) -> List[Entry]:
     return exhibitor.entries
 
 
 def getshow_class_entries(show_class: ShowClass) -> List[Entry]:
-    return schedule.classes[show_class].entries
+    return schedule.classes[show_class.class_id].entries
 
 
 # All the show data in these two objects
@@ -187,6 +192,6 @@ schedule: Schedule = load_schedule()
 exhibitors: List[Exhibitor] = load_exhibitors()
 
 
-def save_show_data():
+def save_show_data() -> None:
     save_schedule()
     save_exhibitors()

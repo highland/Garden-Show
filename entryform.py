@@ -35,16 +35,18 @@ _debug: bool = (
 
 
 class Entry(UserControl):
-    def __init__(self, entry, description, count):
+    def __init__(self, entry, description, count) -> None:
         super().__init__()
         self.entry = entry
         self.description = description
         self.count = count
 
-    def __eq__(self, other: "Entry") -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Entry):
+            return NotImplemented
         return self.entry == other.entry
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.entry)
 
     def build(self) -> Column:
@@ -87,11 +89,6 @@ class Entry(UserControl):
 
 def check_existing_exibitor(event: ControlEvent) -> None:
     name = exhibitor_name.value
-    event.page.update()
-    if _debug:
-        print("check_existing_exibitor")
-        print(name)
-        sys.stdout.flush()
     is_member, values = model.exhibitor_check(name)
     if values:  # already entered
         member.value = is_member
@@ -227,7 +224,7 @@ cancel = ElevatedButton("Cancel", icon=icons.CANCEL, on_click=clear_all)
 save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
 
 
-def main(page: Page):
+def main(page: Page) -> None:
     """
     Entry point for flet application
 
