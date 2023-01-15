@@ -4,10 +4,11 @@ Module to load and hold all show data
 
 @author: Mark
 """
+import os
+import pickle
 from dataclasses import dataclass, field
 from typing import Dict, List
-import pickle
-import os
+
 from configuration import SCHEDULEFILE, SAVEDSCHEDULE, SAVEDEXHIBITORS
 
 
@@ -112,9 +113,9 @@ class Exhibitor:
         if not isinstance(other, Exhibitor):
             return NotImplemented
         return (
-            self.first_name == other.first_name
-            and self.last_name == other.last_name
-            and self.other_names == other.other_names
+                self.first_name == other.first_name
+                and self.last_name == other.last_name
+                and self.other_names == other.other_names
         )
 
     def __hash__(self) -> int:
@@ -183,7 +184,7 @@ def get_exhibitor_entries(exhibitor: Exhibitor) -> List[Entry]:
     return exhibitor.entries
 
 
-def getshow_class_entries(show_class: ShowClass) -> List[Entry]:
+def get_show_class_entries(show_class: ShowClass) -> List[Entry]:
     return schedule.classes[show_class.class_id].entries
 
 

@@ -16,7 +16,7 @@ import Show
 
 
 def exhibitor_check(
-    name: str,
+        name: str,
 ) -> Tuple[Optional[bool], List[Tuple[str, str, str]]]:
     """
     If the exhibitor exists, return their entries, else None.
@@ -44,8 +44,8 @@ def exhibitor_check(
 
 
 def _get_actual_exhibitor(match: Show.Exhibitor) -> Show.Exhibitor:
-    """Replace an Exbibitor object created for matching
-    with the actual exhabitor stored by the Show
+    """Replace an Exhibitor object created for matching
+    with the actual exhibitor stored by the Show
     """
     exhibitor_index = Show.exhibitors.index(match)
     return Show.exhibitors[exhibitor_index]
@@ -59,7 +59,7 @@ def get_class_description(show_class_id: str) -> str:
 
 
 def add_exhibitor_and_entries(
-    name: str, is_member: bool, entries: List[Tuple[str, str]]
+        name: str, is_member: bool, entries: List[Tuple[str, str]]
 ) -> None:
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
