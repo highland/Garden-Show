@@ -59,12 +59,12 @@ class ShowClass:
         return f"{self.class_id}\t{self.description}"
 
     def record_winners(
-        self, first: "Exhibitor", second: "Exhibitor", third: "Exhibitor"
+        self, first: "Winner", second: "Winner", third: "Winner"
     ) -> None:
         self.winners = (first, second, third)
 
 
-def load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
+def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
     with open(file, encoding="UTF-8") as data:
         date = data.readline().rstrip()
@@ -85,16 +85,16 @@ def load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     return new_schedule
 
 
-def save_schedule() -> None:
+def _save_schedule() -> None:
     """Back up schedule to disk"""
     with open(SAVEDSCHEDULE, "wb") as save_file:
         pickle.dump(schedule, save_file)
 
 
-def load_schedule() -> Schedule:
+def _load_schedule() -> Schedule:
     """Load schedule from disk"""
     if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
-        new_schedule = load_schedule_from_file()
+        new_schedule = _load_schedule_from_file()
     else:
         with open(SAVEDSCHEDULE, "rb") as read_file:
             new_schedule = pickle.load(read_file)
@@ -161,13 +161,13 @@ class Exhibitor:
         save_show_data()
 
 
-def save_exhibitors() -> None:
+def _save_exhibitors() -> None:
     """Back up exhibitors to disk"""
     with open(SAVEDEXHIBITORS, "wb") as save_file:
         pickle.dump(exhibitors, save_file)
 
 
-def load_exhibitors() -> List[Exhibitor]:
+def _load_exhibitors() -> List[Exhibitor]:
     """Load schedule from disk
     return empty list if file does not exist
     """
@@ -195,15 +195,11 @@ class Entry:
         return f"{repr(self.show_class)}\t{self.count}"
 
 
-def get_show_class_entries(show_class: ShowClass) -> List[Entry]:
-    return schedule.classes[show_class.class_id].entries
-
-
 # All the show data in these two objects
-schedule: Schedule = load_schedule()
-exhibitors: List[Exhibitor] = load_exhibitors()
+schedule: Schedule = _load_schedule()
+exhibitors: List[Exhibitor] = _load_exhibitors()
 
 
 def save_show_data() -> None:
-    save_schedule()
-    save_exhibitors()
+    _save_schedule()
+    _save_exhibitors()
