@@ -16,7 +16,7 @@ import Show
 
 
 def exhibitor_check(
-        name: str,
+    name: str,
 ) -> Tuple[Optional[bool], List[Tuple[str, str, str]]]:
     """
     If the exhibitor exists, return their entries, else None.
@@ -59,23 +59,21 @@ def get_class_description(show_class_id: str) -> str:
 
 
 def add_exhibitor_and_entries(
-        name: str, is_member: bool, entries: List[Tuple[str, str]]
+    name: str, is_member: bool, entries: List[Tuple[str, str]]
 ) -> None:
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
         _clear_exhibitor(exhibitor)
-    Show.exhibitors.append(exhibitor)
-    for show_class, entry_count in entries:
-        actual_class = Show.schedule.classes[show_class]
-        new_entry = Show.Entry(exhibitor, actual_class, int(entry_count))
-        exhibitor.entries.append(new_entry)
-        actual_class.entries.append(new_entry)
-    Show.save_show_data()
+    entry_classes = [
+        Show.Entry(
+            exhibitor, Show.schedule.classes[show_class], int(entry_count)
+        )
+        for (show_class, entry_count) in entries
+    ]
+    exhibitor.add_entries(entry_classes)
 
 
 def _clear_exhibitor(exhibitor: Show.Exhibitor) -> None:
     previous_exhibitor = _get_actual_exhibitor(exhibitor)
-    for entry in previous_exhibitor.entries:
-        Show.schedule.classes[entry.show_class.class_id].entries.remove(entry)
-    Show.exhibitors.remove(previous_exhibitor)
+    previous_exhibitor.delete_entries()

@@ -29,10 +29,6 @@ from flet import (
 )
 import model
 
-_debug: bool = (
-    True  # False to eliminate debug printing from callback functions.
-)
-
 
 class Entry(UserControl):
     def __init__(self, entry, description, count) -> None:
@@ -81,10 +77,6 @@ class Entry(UserControl):
         self.count = event.control.value
         tally_count()
         event.page.update()
-        if _debug:
-            print("switch_count")
-            print(event)
-            sys.stdout.flush()
 
 
 def check_existing_exibitor(event: ControlEvent) -> None:
@@ -106,10 +98,6 @@ def clear_all(event: ControlEvent) -> None:
     tally_count()
     exhibitor_name.focus()
     event.page.update()
-    if _debug:
-        print("clear_all")
-        print(event)
-        sys.stdout.flush()
 
 
 def create_entry(event: ControlEvent) -> None:
@@ -134,10 +122,6 @@ def create_entry(event: ControlEvent) -> None:
     tally_count()
     event.page.update()
     display_class.focus()
-    if _debug:
-        print("create_entry")
-        print(event)
-        sys.stdout.flush()
 
 
 def tally_count() -> None:
@@ -151,9 +135,6 @@ def delete_entry(event: ControlEvent, entry: Entry) -> None:
     entries.controls.remove(entry)
     tally_count()
     event.page.update()
-    if _debug:
-        print("delete_entry")
-        sys.stdout.flush()
 
 
 def post_to_model(event: ControlEvent) -> None:
@@ -168,10 +149,6 @@ def post_to_model(event: ControlEvent) -> None:
         exhibitor_name.value, member.value, entry_list
     )
     clear_all(event)
-    if _debug:
-        print("post_to_model")
-        print(event)
-        sys.stdout.flush()
 
 
 def set_description(event: ControlEvent) -> None:
@@ -181,10 +158,6 @@ def set_description(event: ControlEvent) -> None:
         display_class.value = ""
         display_class.focus()
     event.page.update()
-    if _debug:
-        print("set_description")
-        print(event)
-        sys.stdout.flush()
 
 
 title = Text("Entry Form", style=TextThemeStyle.HEADLINE_SMALL)

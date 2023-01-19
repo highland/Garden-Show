@@ -7,7 +7,7 @@ Module to load and hold all show data
 import os
 import pickle
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 
 from configuration import SCHEDULEFILE, SAVEDSCHEDULE, SAVEDEXHIBITORS
 
@@ -36,6 +36,7 @@ class Section:
     section_id: str
     description: str
     sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
+    best: Optional["Winner"] = None
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -52,9 +53,15 @@ class ShowClass:
     class_id: str
     description: str
     entries: List["Entry"] = field(default_factory=list)
+    winners: Tuple["Winner", "Winner", "Winner"] = field(default_factory=tuple)
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
+
+    def record_winners(
+        self, first: "Exhibitor", second: "Exhibitor", third: "Exhibitor"
+    ) -> None:
+        self.winners = (first, second, third)
 
 
 def load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
@@ -95,6 +102,15 @@ def load_schedule() -> Schedule:
 
 
 @dataclass
+class Winner:
+    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)
+    or a Section (best in section).
+    """
+
+    exhibitor: "Exhibitor"
+
+
+@dataclass
 class Exhibitor:
     """Current member of Garden Club"""
 
@@ -113,13 +129,36 @@ class Exhibitor:
         if not isinstance(other, Exhibitor):
             return NotImplemented
         return (
-                self.first_name == other.first_name
-                and self.last_name == other.last_name
-                and self.other_names == other.other_names
+            self.first_name == other.first_name
+            and self.last_name == other.last_name
+            and self.other_names == other.other_names
         )
 
     def __hash__(self) -> int:
         return hash((self.first_name, self.last_name, self.other_names))
+
+    def delete_entries(self) -> None:
+        """
+        Remove the entries for this exhibitor and the exhibitor itself
+        """
+        for entry in self.entries:
+            schedule.classes[entry.show_class.class_id].entries.remove(entry)
+            del entry
+        exhibitors.remove(self)
+        if not exhibitors:
+            schedule.locked = False
+        save_show_data()
+
+    def add_entries(self, entries: List["Entry"]) -> None:
+        """
+        Add the entries for a new exhibitor
+        """
+        exhibitors.append(self)
+        self.entries = entries
+        for entry in entries:
+            schedule.classes[entry.show_class.class_id].entries.append(entry)
+        schedule.locked = True
+        save_show_data()
 
 
 def save_exhibitors() -> None:
@@ -154,34 +193,6 @@ class Entry:
 
     def __str__(self) -> str:
         return f"{repr(self.show_class)}\t{self.count}"
-
-
-def add_entries(exhibitor: Exhibitor, entries: List[Entry]) -> None:
-    """
-    Add the entries for a new exhibitor
-    """
-    exhibitors.append(exhibitor)
-    exhibitor.entries = entries
-    for entry in entries:
-        schedule.classes[entry.show_class.class_id].entries.append(entry)
-    schedule.locked = True
-    save_show_data()
-
-
-def delete_entries(exhibitor: Exhibitor) -> None:
-    """
-    Remove the entries for an exhibitor and the exhibitor itself
-    """
-    for entry in exhibitor.entries:
-        schedule.classes[entry.show_class.class_id].entries.remove(entry)
-        del entry
-    exhibitors.remove(exhibitor)
-    if not exhibitors:
-        schedule.locked = False
-
-
-def get_exhibitor_entries(exhibitor: Exhibitor) -> List[Entry]:
-    return exhibitor.entries
 
 
 def get_show_class_entries(show_class: ShowClass) -> List[Entry]:
