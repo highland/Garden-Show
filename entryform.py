@@ -4,7 +4,6 @@ GUI supporting recording and editing the Entry Forms
 
 @author: Mark
 """
-import sys
 
 # from typing import List
 from flet import (
@@ -174,6 +173,7 @@ display_class = TextField(
     width=70,
     capitalization=TextCapitalization.WORDS,
     on_submit=set_description,
+    on_blur=set_description
 )
 description = Text("Class Description", width=500, size=20)
 count = Dropdown(
