@@ -6,6 +6,8 @@ Module to load and hold all show data
 """
 import os
 import pickle
+from dateutil.parser import parse
+import datetime
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional
 
@@ -21,7 +23,7 @@ class Schedule:
     """The classes of entries for the show"""
 
     year: int
-    date: str
+    date: datetime.date
     sections: Dict[str, "Section"] = field(default_factory=dict)
     classes: Dict[str, "ShowClass"] = field(default_factory=dict)
 
@@ -73,12 +75,13 @@ class ShowClass:
 def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
     with open(file, encoding="UTF-8") as data:
-        date = data.readline().rstrip()
-        _, _, year = date.split()
-        new_schedule = Schedule(int(year), date)
+        date_line = parse(data.readline().rstrip())
+        date = date_line.date()
+        new_schedule = Schedule(date.year, date)
         for line in data:
             if line.startswith("Section"):
                 _, section_id, *rest = line.split()
+                section_id = section_id[0]  # 1 char section id
                 description = " ".join(rest)
                 current_section = Section(section_id, description)
                 new_schedule.sections[section_id] = current_section
@@ -91,7 +94,7 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     return new_schedule
 
 
-def _save_schedule() -> None:
+def _save_schedule(schedule: Schedule) -> None:
     """Back up schedule to disk"""
     with open(SAVEDSCHEDULE, "wb") as save_file:
         pickle.dump(schedule, save_file)
@@ -101,6 +104,7 @@ def _load_schedule() -> Schedule:
     """Load schedule from disk"""
     if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
         new_schedule = _load_schedule_from_file()
+        _save_schedule(new_schedule)
     else:
         with open(SAVEDSCHEDULE, "rb") as read_file:
             new_schedule = pickle.load(read_file)
@@ -163,7 +167,7 @@ class Exhibitor:
         save_show_data()
 
 
-def _save_exhibitors() -> None:
+def _save_exhibitors(exhibitors: List[Exhibitor]) -> None:
     """Back up exhibitors to disk"""
     with open(SAVEDEXHIBITORS, "wb") as save_file:
         pickle.dump(exhibitors, save_file)
@@ -203,5 +207,5 @@ exhibitors: List[Exhibitor] = _load_exhibitors()
 
 
 def save_show_data() -> None:
-    _save_schedule()
-    _save_exhibitors()
+    _save_schedule(schedule)
+    _save_exhibitors(exhibitors)

@@ -66,6 +66,7 @@ def add_exhibitor_and_entries(
 ) -> None:
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
+    # TODO Fix recursive error here
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
         _clear_exhibitor(exhibitor)
     entry_classes = [
