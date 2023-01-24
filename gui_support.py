@@ -20,9 +20,11 @@ class NameChooser(TextField):
 
     def offer_candidate(self, _: ControlEvent) -> None:
         """Capture input as it is entered and supply completion suggestions."""
-        input_so_far = self.value
+        input_so_far = self.value.upper()
         matches = [
-            name for name in self.candidates if name.startswith(input_so_far)
+            name
+            for name in self.candidates
+            if name.upper().startswith(input_so_far)
         ]
         if len(matches) == 1:
             self.helper_text = matches[0]
@@ -46,7 +48,7 @@ def capture_input(event: ControlEvent) -> None:
         return None
     offer = target.helper_text
     target.helper_text = ""
-    if offer and offer.startswith(target.value):
+    if offer and offer.upper().startswith(target.value.upper()):
         target.value = offer
     target.candidates.add(target.value)
     target.save_names()

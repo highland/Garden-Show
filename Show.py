@@ -13,7 +13,6 @@ from configuration import (
     SCHEDULEFILE,
     SAVEDSCHEDULE,
     SAVEDEXHIBITORS,
-    NAMESFILE,
 )
 
 
@@ -25,7 +24,6 @@ class Schedule:
     date: str
     sections: Dict[str, "Section"] = field(default_factory=dict)
     classes: Dict[str, "ShowClass"] = field(default_factory=dict)
-    locked: bool = False
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -152,8 +150,6 @@ class Exhibitor:
         for entry in self.entries:
             schedule.classes[entry.show_class.class_id].entries.remove(entry)
         exhibitors.remove(self)
-        if not exhibitors:
-            schedule.locked = False
         save_show_data()
 
     def add_entries(self, entries: List["Entry"]) -> None:
@@ -164,7 +160,6 @@ class Exhibitor:
         self.entries = entries
         for entry in entries:
             schedule.classes[entry.show_class.class_id].entries.append(entry)
-        schedule.locked = True
         save_show_data()
 
 
