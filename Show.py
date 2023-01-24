@@ -9,7 +9,12 @@ import pickle
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional
 
-from configuration import SCHEDULEFILE, SAVEDSCHEDULE, SAVEDEXHIBITORS
+from configuration import (
+    SCHEDULEFILE,
+    SAVEDSCHEDULE,
+    SAVEDEXHIBITORS,
+    NAMESFILE,
+)
 
 
 @dataclass
@@ -40,7 +45,10 @@ class Section:
 
     def __repr__(self) -> str:
         display = "\n".join(
-            [f"\t\t{sub_section}" for sub_section in self.sub_sections.values()]
+            [
+                f"\t\t{sub_section}"
+                for sub_section in self.sub_sections.values()
+            ]
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
@@ -143,7 +151,6 @@ class Exhibitor:
         """
         for entry in self.entries:
             schedule.classes[entry.show_class.class_id].entries.remove(entry)
-            del entry
         exhibitors.remove(self)
         if not exhibitors:
             schedule.locked = False

@@ -28,7 +28,10 @@ def exhibitor_check(
         list of entries for this exhibitor and None
 
     """
-    first, *other, last = name.split()
+    try:
+        first, *other, last = name.split()
+    except ValueError:  # invalid name - need at least first & last
+        return None, []
     test_exhibitor = Show.Exhibitor(first, last, other)
     if test_exhibitor in Show.exhibitors:
         exhibitor = _get_actual_exhibitor(test_exhibitor)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 GUI supporting recording and editing the Entry Forms
-
 @author: Mark
 """
 
@@ -27,14 +26,15 @@ from flet import (
     TextCapitalization,
 )
 import model
+from gui_support import name_hints, NameChooser, capture_input
 
 
 class Entry(UserControl):
-    def __init__(self, entry, description, count) -> None:
+    def __init__(self, entry, description, how_many) -> None:
         super().__init__()
         self.entry = entry
         self.description = description
-        self.count = count
+        self.how_many = how_many
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entry):
@@ -53,7 +53,7 @@ class Entry(UserControl):
                 Text(self.entry, width=70),
                 Text(self.description, width=500),
                 TextField(
-                    value=self.count,
+                    value=self.how_many,
                     width=80,
                     border=InputBorder.NONE,
                     on_submit=self.switch_count,
@@ -73,12 +73,13 @@ class Entry(UserControl):
     def switch_count(self, event: ControlEvent) -> None:
         if event.control.value not in ("1", "2"):
             event.control.value = "1"
-        self.count = event.control.value
+        self.how_many = event.control.value
         tally_count()
         event.page.update()
 
 
 def check_existing_exibitor(event: ControlEvent) -> None:
+    capture_input(event)
     name = exhibitor_name.value
     is_member, values = model.exhibitor_check(name)
     if values:  # already entered
@@ -102,7 +103,7 @@ def clear_all(event: ControlEvent) -> None:
 def create_entry(event: ControlEvent) -> None:
     entry_class = display_class.value
     entry_description = description.value
-    entry_count = count.value
+    how_many = count.value
     if not entry_description or entry_description.startswith("Class"):
         set_description(event)
         if description.value.startswith("No such"):
@@ -113,7 +114,7 @@ def create_entry(event: ControlEvent) -> None:
             break
     else:
         entries.controls.append(
-            Entry(entry_class, description.value, entry_count)
+            Entry(entry_class, description.value, how_many)
         )
     description.value = ""
     display_class.value = ""
@@ -124,10 +125,10 @@ def create_entry(event: ControlEvent) -> None:
 
 
 def tally_count() -> None:
-    sum = 0
+    total = 0
     for entry in entries.controls:
-        sum += int(entry.count)
-    entry_count.value = f"Total entries {sum}"
+        total += int(entry.how_many)
+    entry_count.value = f"Total entries {total}"
 
 
 def delete_entry(event: ControlEvent, entry: Entry) -> None:
@@ -137,13 +138,9 @@ def delete_entry(event: ControlEvent, entry: Entry) -> None:
 
 
 def post_to_model(event: ControlEvent) -> None:
-    if not exhibitor_name.value:
-        exhibitor_name.focus()
+    if not exhibitor_name.value or not entries.controls:
         return None
-    if not entries.controls:
-        display_class.focus()
-        return None
-    entry_list = [(entry.entry, entry.count) for entry in entries.controls]
+    entry_list = [(entry.entry, entry.how_many) for entry in entries.controls]
     model.add_exhibitor_and_entries(
         exhibitor_name.value, member.value, entry_list
     )
@@ -155,15 +152,16 @@ def set_description(event: ControlEvent) -> None:
     description.value = model.get_class_description(class_entered)
     if description.value.startswith("No such"):
         display_class.value = ""
-        display_class.focus()
     event.page.update()
 
 
 title = Text("Entry Form", style=TextThemeStyle.HEADLINE_SMALL)
 # first line
-exhibitor_name = TextField(
-    label="Name", autofocus=True, on_submit=check_existing_exibitor
-)
+exhibitor_name = NameChooser(name_hints)
+exhibitor_name.label = "Name"
+exhibitor_name.autofocus = True
+exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exibitor
+
 member = Checkbox(label="Member?", label_position="right")
 add = ElevatedButton("Add", icon=icons.ADD, on_click=create_entry)
 # second line
@@ -173,7 +171,7 @@ display_class = TextField(
     width=70,
     capitalization=TextCapitalization.WORDS,
     on_submit=set_description,
-    on_blur=set_description
+    on_blur=set_description,
 )
 description = Text("Class Description", width=500, size=20)
 count = Dropdown(
@@ -200,13 +198,10 @@ save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
 def main(page: Page) -> None:
     """
     Entry point for flet application
-
     Args:
         page (Page): The window supplied by flet
-
     Returns:
         None.
-
     """
 
     page.title = "Badenoch Gardening Club"
