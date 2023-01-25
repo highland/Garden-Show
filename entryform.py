@@ -95,7 +95,6 @@ def clear_all(event: ControlEvent) -> None:
     description.value = ""
     count.value = "1"
     entries.controls = []
-    tally_count()
     exhibitor_name.focus()
     event.page.update()
 

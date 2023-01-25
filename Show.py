@@ -71,6 +71,11 @@ class ShowClass:
     ) -> None:
         self.winners = (first, second, third)
 
+    def __eq__(self, other):
+        if not isinstance(other, ShowClass):
+            return NotImplemented
+        return self.class_id == other.class_id
+
 
 def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
@@ -122,7 +127,7 @@ class Winner:
 
 @dataclass
 class Exhibitor:
-    """Current member of Garden Club"""
+    """Exhibitor in the Garden Show"""
 
     first_name: str
     last_name: str
@@ -149,18 +154,21 @@ class Exhibitor:
 
     def delete_entries(self) -> None:
         """
-        Remove the entries for this exhibitor and the exhibitor itself
+        Remove the entries for this exhibitor
         """
-        for entry in self.entries:
+        dead_entries = self.entries
+        for entry in dead_entries:
+            print(schedule.classes[entry.show_class.class_id].entries)
+            self.entries.remove(entry)
             schedule.classes[entry.show_class.class_id].entries.remove(entry)
-        exhibitors.remove(self)
+            del entry
+        self.entries = []  # none left
         save_show_data()
 
     def add_entries(self, entries: List["Entry"]) -> None:
         """
-        Add the entries for a new exhibitor
+        Add the entries for an exhibitor
         """
-        exhibitors.append(self)
         self.entries = entries
         for entry in entries:
             schedule.classes[entry.show_class.class_id].entries.append(entry)
@@ -190,15 +198,22 @@ class Entry:
     2 entries max are allowed for a single class.
     """
 
-    member: Exhibitor
+    exhibitor: Exhibitor
     show_class: ShowClass
     count: int = 1
 
     def __repr__(self) -> str:
-        return f"Entry({self.member}, {self.show_class}, {self.count})"
+        return f"Entry({self.exhibitor}, {self.show_class}, {self.count})"
 
     def __str__(self) -> str:
-        return f"{repr(self.show_class)}\t{self.count}"
+        return f"{self.exhibitor}{repr(self.show_class)}\t{self.count}"
+
+    def __eq__(self, other):
+        if not isinstance(other, Entry):
+            return NotImplemented
+        return (
+            self.exhibitor == other.exhibitor and self.show_class == other.show_class
+        )
 
 
 # All the show data in these two objects

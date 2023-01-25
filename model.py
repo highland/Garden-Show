@@ -66,9 +66,11 @@ def add_exhibitor_and_entries(
 ) -> None:
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
-    # TODO Fix recursive error here
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
-        _clear_exhibitor(exhibitor)
+        exhibitor = _get_actual_exhibitor(exhibitor)
+        exhibitor.delete_entries()
+    else:
+        Show.exhibitors.append(exhibitor)
     entry_classes = [
         Show.Entry(
             exhibitor, Show.schedule.classes[show_class], int(entry_count)
@@ -76,8 +78,3 @@ def add_exhibitor_and_entries(
         for (show_class, entry_count) in entries
     ]
     exhibitor.add_entries(entry_classes)
-
-
-def _clear_exhibitor(exhibitor: Show.Exhibitor) -> None:
-    previous_exhibitor = _get_actual_exhibitor(exhibitor)
-    previous_exhibitor.delete_entries()
