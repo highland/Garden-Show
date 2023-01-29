@@ -119,7 +119,8 @@ def _load_schedule() -> Schedule:
 @dataclass
 class Winner:
     """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)
-    or a Section (best in section).
+       or a Section (best in section)
+       or overall (best in show).
     """
 
     exhibitor: "Exhibitor"
@@ -136,9 +137,9 @@ class Exhibitor:
     entries: List["Entry"] = field(default_factory=list)
 
     def __repr__(self) -> str:
-        if self.other_names:
-            return f"{self.first_name} {' '.join(self.other_names)} {self.last_name}"
-        return f"{self.first_name} {self.last_name}"
+        return " ".join(
+            [self.first_name] + self.other_names + [self.last_name]
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Exhibitor):
@@ -156,12 +157,8 @@ class Exhibitor:
         """
         Remove the entries for this exhibitor
         """
-        dead_entries = self.entries
-        for entry in dead_entries:
-            print(schedule.classes[entry.show_class.class_id].entries)
-            self.entries.remove(entry)
+        for entry in self.entries:
             schedule.classes[entry.show_class.class_id].entries.remove(entry)
-            del entry
         self.entries = []  # none left
         save_show_data()
 
@@ -212,7 +209,8 @@ class Entry:
         if not isinstance(other, Entry):
             return NotImplemented
         return (
-            self.exhibitor == other.exhibitor and self.show_class == other.show_class
+            self.exhibitor == other.exhibitor
+            and self.show_class == other.show_class
         )
 
 

@@ -11,13 +11,17 @@ As the entries rely on a stable schedule,
 
 @author: Mark
 """
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Literal
 import Show
+
+Exhibitor_name = str
+Entry_count = Literal["1", "2"]
+Class_id = str  # r'\D\d*'
 
 
 def exhibitor_check(
-    name: str,
-) -> Tuple[Optional[bool], List[Tuple[str, str, str]]]:
+    name: Exhibitor_name,
+) -> Tuple[Optional[bool], List[Tuple[Class_id, str, Entry_count]]]:
     """
     If the exhibitor exists, return their entries, else None.
 
@@ -54,7 +58,8 @@ def _get_actual_exhibitor(match: Show.Exhibitor) -> Show.Exhibitor:
     return Show.exhibitors[exhibitor_index]
 
 
-def get_class_description(show_class_id: str) -> str:
+def get_class_description(show_class_id: Class_id) -> str:
+    """Get the description for a given show class"""
     try:
         return Show.schedule.classes[show_class_id].description
     except KeyError:
@@ -62,8 +67,12 @@ def get_class_description(show_class_id: str) -> str:
 
 
 def add_exhibitor_and_entries(
-    name: str, is_member: bool, entries: List[Tuple[str, str]]
+    name: Exhibitor_name,
+    is_member: bool,
+    entries: List[Tuple[Class_id, Entry_count]],
 ) -> None:
+    """Add new exhibitor (removing previous exhibitor if one exists)
+    Create Entries and connect to both exhibitor and Show_classes."""
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
@@ -71,10 +80,9 @@ def add_exhibitor_and_entries(
         exhibitor.delete_entries()
     else:
         Show.exhibitors.append(exhibitor)
-    entry_classes = [
-        Show.Entry(
-            exhibitor, Show.schedule.classes[show_class], int(entry_count)
-        )
-        for (show_class, entry_count) in entries
-    ]
-    exhibitor.add_entries(entry_classes)
+
+    for show_class, entry_count in entries:
+        class_object = Show.schedule.classes[show_class]
+        entry = Show.Entry(exhibitor, class_object, int(entry_count))
+        exhibitor.entries.append(entry)
+        class_object.entries.append(entry)

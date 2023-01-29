@@ -11,7 +11,7 @@ from configuration import NAMESFILE
 
 
 class NameChooser(TextField):
-    """Allow fast entry of names by providing suggestions from a supplied set."""
+    """Allow fast entry of names by providing suggestions from a given set."""
 
     def __init__(self, candidates: Set[str], **rest) -> None:
         super().__init__(**rest)
