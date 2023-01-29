@@ -78,13 +78,15 @@ class Entry(UserControl):
         event.page.update()
 
 
-def check_existing_exibitor(event: ControlEvent) -> None:
+def check_existing_exhibitor(event: ControlEvent) -> None:
     capture_input(event)
     name = exhibitor_name.value
     is_member, values = model.exhibitor_check(name)
     if values:  # already entered
         member.value = is_member
         entries.controls = [Entry(*value) for value in values]
+    else:
+        entries.controls = []
     event.page.update()
 
 
@@ -131,6 +133,7 @@ def tally_count() -> None:
 
 
 def delete_entry(event: ControlEvent, entry: Entry) -> None:
+    print('Delete',entry)
     entries.controls.remove(entry)
     tally_count()
     event.page.update()
@@ -159,7 +162,7 @@ title = Text("Entry Form", style=TextThemeStyle.HEADLINE_SMALL)
 exhibitor_name = NameChooser(name_hints)
 exhibitor_name.label = "Name"
 exhibitor_name.autofocus = True
-exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exibitor
+exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exhibitor
 
 member = Checkbox(label="Member?", label_position="right")
 add = ElevatedButton("Add", icon=icons.ADD, on_click=create_entry)

@@ -9,7 +9,7 @@ import pickle
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 
 from configuration import (
     SCHEDULEFILE,
@@ -71,7 +71,7 @@ class ShowClass:
     ) -> None:
         self.winners = (first, second, third)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ShowClass):
             return NotImplemented
         return self.class_id == other.class_id
@@ -99,10 +99,10 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     return new_schedule
 
 
-def _save_schedule(schedule: Schedule) -> None:
+def _save_schedule(a_schedule: Schedule) -> None:
     """Back up schedule to disk"""
     with open(SAVEDSCHEDULE, "wb") as save_file:
-        pickle.dump(schedule, save_file)
+        pickle.dump(a_schedule, save_file)
 
 
 def _load_schedule() -> Schedule:
@@ -119,8 +119,8 @@ def _load_schedule() -> Schedule:
 @dataclass
 class Winner:
     """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)
-       or a Section (best in section)
-       or overall (best in show).
+    or a Section (best in section)
+    or overall (best in show).
     """
 
     exhibitor: "Exhibitor"
@@ -172,10 +172,10 @@ class Exhibitor:
         save_show_data()
 
 
-def _save_exhibitors(exhibitors: List[Exhibitor]) -> None:
+def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
     """Back up exhibitors to disk"""
     with open(SAVEDEXHIBITORS, "wb") as save_file:
-        pickle.dump(exhibitors, save_file)
+        pickle.dump(exhibitor_list, save_file)
 
 
 def _load_exhibitors() -> List[Exhibitor]:
@@ -205,7 +205,7 @@ class Entry:
     def __str__(self) -> str:
         return f"{self.exhibitor}{repr(self.show_class)}\t{self.count}"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Entry):
             return NotImplemented
         return (

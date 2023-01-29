@@ -73,6 +73,7 @@ def add_exhibitor_and_entries(
 ) -> None:
     """Add new exhibitor (removing previous exhibitor if one exists)
     Create Entries and connect to both exhibitor and Show_classes."""
+    print(name, entries)
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
@@ -80,9 +81,10 @@ def add_exhibitor_and_entries(
         exhibitor.delete_entries()
     else:
         Show.exhibitors.append(exhibitor)
-
-    for show_class, entry_count in entries:
-        class_object = Show.schedule.classes[show_class]
-        entry = Show.Entry(exhibitor, class_object, int(entry_count))
-        exhibitor.entries.append(entry)
-        class_object.entries.append(entry)
+    entries = [
+        Show.Entry(
+            exhibitor, Show.schedule.classes[show_class], int(entry_count)
+        )
+        for show_class, entry_count in entries
+    ]
+    exhibitor.add_entries(entries)
