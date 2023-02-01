@@ -17,6 +17,7 @@ import Show
 Exhibitor_name = str
 Entry_count = Literal["1", "2"]
 Class_id = str  # r'\D\d*'
+Section_id = str  # r"\D"
 
 
 def exhibitor_check(
@@ -64,6 +65,24 @@ def get_class_description(show_class_id: Class_id) -> str:
         return Show.schedule.classes[show_class_id].description
     except KeyError:
         return "No such class in schedule"
+
+
+def get_section_description(section_id: Section_id) -> str:
+    """Get the description for a given section"""
+    try:
+        return Show.schedule.sections[section_id].description
+    except KeyError:
+        return "No such section in schedule"
+
+
+def get_section_classes(section_id: Section_id) -> List[Class_id]:
+    """ Return all the show class ids for a given section """
+    return [
+        show_class.class_id
+        for show_class in Show.schedule.sections[
+            section_id
+        ].sub_sections.values()
+    ]
 
 
 def add_exhibitor_and_entries(

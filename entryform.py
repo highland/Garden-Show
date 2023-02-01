@@ -133,7 +133,6 @@ def tally_count() -> None:
 
 
 def delete_entry(event: ControlEvent, entry: Entry) -> None:
-    print('Delete',entry)
     entries.controls.remove(entry)
     tally_count()
     event.page.update()

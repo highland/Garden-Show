@@ -38,7 +38,7 @@ class Schedule:
 class Section:
     """One of the major categories of entries"""
 
-    section_id: str
+    section_id: str     # r"\D"
     description: str
     sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
     best: Optional["Winner"] = None
