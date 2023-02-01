@@ -21,6 +21,10 @@ class NameChooser(TextField):
     def offer_candidate(self, _: ControlEvent) -> None:
         """Capture input as it is entered and supply completion suggestions."""
         input_so_far = self.value.upper()
+        if input_so_far == "=":    # special value
+            self.value = ""
+            self.on_special(self, input_so_far)
+            return None
         matches = [
             name
             for name in self.candidates
@@ -31,6 +35,9 @@ class NameChooser(TextField):
         else:
             self.helper_text = ""
         self.update()
+
+    def on_special(self, keys: str) -> None:
+        raise NotImplementedError
 
     def save_names(self) -> None:
         name_list = list(self.candidates)
