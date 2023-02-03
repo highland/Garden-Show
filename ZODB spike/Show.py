@@ -1,32 +1,37 @@
 # -*- coding: utf-8 -*-
 """
-Module to load and hold all show data
+ZODB Spike
 
 @author: Mark
 """
-import os
-import pickle
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Any
-
+from typing import List, Tuple, Optional, Any
+from ZODB import DB, FileStorage
+from persistent import Persistent
+from persistent.dict import PersistentDict
+from persistent.list import PersistentList
+import transaction
 
 from configuration import (
     SCHEDULEFILE,
-    SAVEDSCHEDULE,
-    SAVEDEXHIBITORS,
+    DATABASE,
 )
 
 
 @dataclass
-class Schedule:
+class Schedule(Persistent):
     """The classes of entries for the show"""
 
     year: int
     date: datetime.date
-    sections: Dict[str, "Section"] = field(default_factory=dict)
-    classes: Dict[str, "ShowClass"] = field(default_factory=dict)
+    sections: PersistentDict[str, "Section"] = field(
+        default_factory=PersistentDict
+    )
+    classes: PersistentDict[str, "ShowClass"] = field(
+        default_factory=PersistentDict
+    )
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -36,12 +41,14 @@ class Schedule:
 
 
 @dataclass
-class Section:
+class Section(Persistent):
     """One of the major categories of entries"""
 
-    section_id: str     # r"\D"
+    section_id: str  # r"\D"
     description: str
-    sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
+    sub_sections: PersistentDict[str, "ShowClass"] = field(
+        default_factory=PersistentDict
+    )
     best: Optional["Winner"] = None
 
     def __repr__(self) -> str:
@@ -55,13 +62,13 @@ class Section:
 
 
 @dataclass
-class ShowClass:
-    """One of the minor categories of entries"""
+class ShowClass(Persistent):
+    """One of the categories of entries"""
 
     section: Section
     class_id: str
     description: str
-    entries: List["Entry"] = field(default_factory=list)
+    entries: PersistentList["Entry"] = field(default_factory=PersistentList)
     winners: Tuple["Winner", "Winner", "Winner"] = field(default_factory=tuple)
 
     def __repr__(self) -> str:
@@ -78,7 +85,7 @@ class ShowClass:
         return self.class_id == other.class_id
 
 
-def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
+def _load_schedule_from_file(file: str = SCHEDULEFILE) -> None:
     """Initial load of schedule from file"""
     with open(file, encoding="UTF-8") as data:
         date_line = parse(data.readline().rstrip())
@@ -97,28 +104,11 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
                 show_class = ShowClass(current_section, class_id, description)
                 new_schedule.classes[class_id] = show_class
                 current_section.sub_sections[class_id] = show_class
-    return new_schedule
-
-
-def _save_schedule(a_schedule: Schedule) -> None:
-    """Back up schedule to disk"""
-    with open(SAVEDSCHEDULE, "wb") as save_file:
-        pickle.dump(a_schedule, save_file)
-
-
-def _load_schedule() -> Schedule:
-    """Load schedule from disk"""
-    if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
-        new_schedule = _load_schedule_from_file()
-        _save_schedule(new_schedule)
-    else:
-        with open(SAVEDSCHEDULE, "rb") as read_file:
-            new_schedule = pickle.load(read_file)
-    return new_schedule
+    root["schedule"] = new_schedule
 
 
 @dataclass
-class Winner:
+class Winner(Persistent):
     """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)
     or a Section (best in section)
     or overall (best in show).
@@ -128,14 +118,14 @@ class Winner:
 
 
 @dataclass
-class Exhibitor:
+class Exhibitor(Persistent):
     """Exhibitor in the Garden Show"""
 
     first_name: str
     last_name: str
-    other_names: List[str] = field(default_factory=list)
+    other_names: PersistentList[str] = field(default_factory=PersistentList)
     member: bool = True
-    entries: List["Entry"] = field(default_factory=list)
+    entries: PersistentList["Entry"] = field(default_factory=PersistentList)
 
     def __repr__(self) -> str:
         return " ".join(
@@ -173,24 +163,8 @@ class Exhibitor:
         save_show_data()
 
 
-def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
-    """Back up exhibitors to disk"""
-    with open(SAVEDEXHIBITORS, "wb") as save_file:
-        pickle.dump(exhibitor_list, save_file)
-
-
-def _load_exhibitors() -> List[Exhibitor]:
-    """Load schedule from disk
-    return empty list if file does not exist
-    """
-    if not os.path.exists(SAVEDEXHIBITORS):  # not yet loaded from file
-        return []
-    with open(SAVEDEXHIBITORS, "rb") as read_file:
-        return pickle.load(read_file)
-
-
 @dataclass
-class Entry:
+class Entry(Persistent):
     """An entry by an exhibitor for a class in the show
 
     2 entries max are allowed for a single class.
@@ -215,11 +189,16 @@ class Entry:
         )
 
 
-# All the show data in these two objects
-schedule: Schedule = _load_schedule()
-exhibitors: List[Exhibitor] = _load_exhibitors()
+storage = FileStorage.FileStorage(DATABASE)
+db = DB(storage)
+
+
+# All the show data in the root dict
+with db.transaction() as conn:
+    root: PersistentDict[str, Any] = conn.root()
+    schedule: Schedule = root["schedule"]
+    exhibitors: PersistentList[Exhibitor] = root["exhibitors"]
 
 
 def save_show_data() -> None:
-    _save_schedule(schedule)
-    _save_exhibitors(exhibitors)
+    transaction.commit()
