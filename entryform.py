@@ -10,7 +10,6 @@ from flet import (
     ControlEvent,
     Text,
     TextField,
-    Checkbox,
     ElevatedButton,
     IconButton,
     Dropdown,
@@ -24,6 +23,7 @@ from flet import (
     UserControl,
     InputBorder,
     TextCapitalization,
+    Switch,
 )
 import model
 from gui_support import name_hints, NameChooser, capture_input
@@ -163,7 +163,7 @@ exhibitor_name.label = "Name"
 exhibitor_name.autofocus = True
 exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exhibitor
 
-member = Checkbox(label="Member?", label_position="right")
+member = Switch(label="Member?", label_position="left", value=False)
 add = ElevatedButton("Add", icon=icons.ADD, on_click=create_entry)
 # second line
 display_class = TextField(
