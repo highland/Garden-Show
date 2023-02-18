@@ -19,14 +19,14 @@ from flet import (
     icons,
     app,
 )
-from gui_support import Show_class_results
+from gui_support import Show_class_results, NameChooser, name_hints
 import model
 
 
 def populate_page(event: flet.ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
-    section_entered = event.control.value
+    section.value = section_entered = section.value[-1].upper()
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
         section.value = ""
@@ -45,7 +45,10 @@ section = TextField(
     capitalization=TextCapitalization.WORDS,
     on_blur=populate_page,
 )
-description = Text(width=500, size=20)
+description = Text(width=585, size=20)
+section_winner = NameChooser(name_hints)
+section_winner.label = "Best in Section"
+section_winner.height = 50
 
 get_names = Column()
 entry_box = ListView(
@@ -76,7 +79,7 @@ def main(page: Page) -> None:
     page.add(title)
     #    page.add(Show_class_results("A1"))
 
-    page.add(Row([section, description]))
+    page.add(Row([section, description, section_winner]))
     page.add(entry_box)
     page.add(Row([cancel, save]))
     page.update()

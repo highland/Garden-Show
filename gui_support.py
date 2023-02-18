@@ -54,7 +54,6 @@ def capture_input(event: ControlEvent) -> None:
     in order to pick up value from hints"""
 
     target = event.control
-    print(target, target.value, target.helper_text)
     if not target.value:  # nothing to capture
         return None
     offer = target.helper_text
