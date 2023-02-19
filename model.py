@@ -76,7 +76,7 @@ def get_section_description(section_id: Section_id) -> str:
 
 
 def get_section_classes(section_id: Section_id) -> List[Class_id]:
-    """ Return all the show class ids for a given section """
+    """Return all the show class ids for a given section"""
     return [
         show_class.class_id
         for show_class in Show.schedule.sections[
@@ -91,8 +91,7 @@ def add_exhibitor_and_entries(
     entries: List[Tuple[Class_id, Entry_count]],
 ) -> None:
     """Add new exhibitor (removing previous exhibitor if one exists)
-    Create Entries and connect to both exhibitor and Show_classes."""
-    print(name, entries)
+    Create Entries and connect to both Exhibitor and Show_classes."""
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
@@ -107,3 +106,42 @@ def add_exhibitor_and_entries(
         for show_class, entry_count in entries
     ]
     exhibitor.add_entries(entries)
+
+
+def add_class_winners(
+    winner_list: List[Class_id, List[Exhibitor_name]]
+) -> None:
+    """Add winners (removing previous winners if they exist)
+    Create Winners and connect to both Exhibitor and Show_classes."""
+    class_id, winners = winner_list
+    show_class = Show.schedule.classes[class_id]
+    if show_class.results:
+        remove_class_results(show_class)
+    for index, name in enumerate(winners):
+        first, *other, last = name.split()
+        exhibitor = _get_actual_exhibitor(Show.Exhibitor(first, last, other))
+        place = ("1st", "2nd", "3rd", "1st=")[index]
+        points = (3, 2, 1, 3)[index]
+        winner = Show.Winner(exhibitor, show_class, place, points)
+        exhibitor.results.append(winner)
+        show_class.results.append(winner)
+
+
+def remove_class_results(show_class: Show.ShowClass) -> None:
+    """Remove previous entries for class results from both the class
+    and the corresponding exhibitor results."""
+    for winner in show_class.results:
+        winner.exhibitor.results.remove(winner)
+    show_class.results = []
+
+
+def add_section_winner(section_id: Section_id, name: Exhibitor_name) -> None:
+    section = Show.schedule.sections[section_id]
+    first, *other, last = name.split()
+    exhibitor = _get_actual_exhibitor(Show.Exhibitor(first, last, other))
+    if section.best:
+        old_winner = section.best
+        old_winner.results.remove(old_winner)
+    winner = Show.SectionWinner(exhibitor, section)
+    exhibitor.results.append(winner)
+    section.best = winner

@@ -9,7 +9,7 @@ import pickle
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any, Literal
 
 
 from configuration import (
@@ -62,15 +62,10 @@ class ShowClass:
     class_id: str
     description: str
     entries: List["Entry"] = field(default_factory=list)
-    winners: Tuple["Winner", "Winner", "Winner"] = field(default_factory=tuple)
+    results: List["Winner"] = field(default_factory=list)
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
-
-    def record_winners(
-        self, first: "Winner", second: "Winner", third: "Winner"
-    ) -> None:
-        self.winners = (first, second, third)
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ShowClass):
@@ -118,16 +113,6 @@ def _load_schedule() -> Schedule:
 
 
 @dataclass
-class Winner:
-    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)
-    or a Section (best in section)
-    or overall (best in show).
-    """
-
-    exhibitor: "Exhibitor"
-
-
-@dataclass
 class Exhibitor:
     """Exhibitor in the Garden Show"""
 
@@ -136,6 +121,7 @@ class Exhibitor:
     other_names: List[str] = field(default_factory=list)
     member: bool = True
     entries: List["Entry"] = field(default_factory=list)
+    results: List["Winner"] = field(default_factory=list)
 
     def __repr__(self) -> str:
         return " ".join(
@@ -213,6 +199,26 @@ class Entry:
             self.exhibitor == other.exhibitor
             and self.show_class == other.show_class
         )
+
+
+@dataclass
+class Winner:
+    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd).
+    """
+
+    exhibitor: Exhibitor
+    show_class: ShowClass
+    place: Literal["1st", "2nd", "3rd", "1st="]
+    points: int
+
+
+@dataclass
+class SectionWinner:
+    """Winning entry for a Show Section (best in section)
+    """
+
+    exhibitor: Exhibitor
+    section: Section
 
 
 # All the show data in these two objects

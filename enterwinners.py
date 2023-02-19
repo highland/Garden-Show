@@ -5,7 +5,6 @@ Gui for entering the winners of each section in the show.
 @author: Mark
 """
 
-import flet
 from flet import (
     Page,
     Text,
@@ -18,12 +17,13 @@ from flet import (
     ElevatedButton,
     icons,
     app,
+    ControlEvent,
 )
 from gui_support import Show_class_results, NameChooser, name_hints
 import model
 
 
-def populate_page(event: flet.ControlEvent) -> None:
+def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
     section.value = section_entered = section.value[-1].upper()
@@ -34,6 +34,28 @@ def populate_page(event: flet.ControlEvent) -> None:
         get_names.controls = []
         for show_class in model.get_section_classes(section_entered):
             get_names.controls.append(Show_class_results(show_class))
+    event.page.update()
+
+
+def post_to_model(event: ControlEvent) -> None:
+    if not section.value or not get_names.controls:
+        return None
+    if section_winner.value:
+        model.add_section_winner(section.value, section_winner.value)
+    winner_list = [
+        (result.class_id, [winner.value for winner in result.winners])
+        for result in get_names.controls
+    ]
+    model.add_class_winners(winner_list)
+    clear_all(event)
+
+
+def clear_all(event: ControlEvent) -> None:
+    section.value = ""
+    description.value = ""
+    section_winner.value = ""
+    get_names.controls = []
+    section.focus()
     event.page.update()
 
 
