@@ -22,16 +22,9 @@ Section_id = str  # r"\D"
 
 def exhibitor_check(
     name: Exhibitor_name,
-) -> Tuple[Optional[bool], List[Tuple[Class_id, str, Entry_count]]]:
+) -> Optional[bool, List[Tuple[Class_id, str, Entry_count]]]:
     """
     If the exhibitor exists, return their entries, else None.
-
-    Args:
-        name (str): Exhibitor name
-
-    Returns:
-        list of entries for this exhibitor and None
-
     """
     try:
         first, *other, last = name.split()
@@ -48,7 +41,7 @@ def exhibitor_check(
             )
             for entry in exhibitor.entries
         ]
-    return None, []
+    return None
 
 
 def _get_actual_exhibitor(match: Show.Exhibitor) -> Show.Exhibitor:
@@ -107,6 +100,31 @@ def add_exhibitor_and_entries(
     ]
     exhibitor.add_entries(entries)
 
+
+def get_previous_winners(
+    section_id: Section_id,
+) -> Optional[Exhibitor_name, List[Tuple[Class_id, Tuple[Exhibitor_name]]]]:
+    """
+    If the section has winners, return the section winner
+    and all the winners for classes in that section.
+    """
+    # try:
+    #     first, *other, last = name.split()
+    # except ValueError:  # invalid name - need at least first & last
+    #     return None, []
+    # test_exhibitor = Show.Exhibitor(first, last, other)
+    # if test_exhibitor in Show.exhibitors:
+    #     exhibitor = _get_actual_exhibitor(test_exhibitor)
+    #     return exhibitor.member, [
+    #         (
+    #             entry.show_class.class_id,
+    #             get_class_description(entry.show_class.class_id),
+    #             str(entry.count),
+    #         )
+    #         for entry in exhibitor.entries
+    #     ]
+    # return None
+    pass  # TODO complete method
 
 def add_class_winners(
     winner_list: List[Class_id, List[Exhibitor_name]]

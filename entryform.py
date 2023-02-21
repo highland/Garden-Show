@@ -81,8 +81,8 @@ class Entry(UserControl):
 def check_existing_exhibitor(event: ControlEvent) -> None:
     capture_input(event)
     name = exhibitor_name.value
-    is_member, values = model.exhibitor_check(name)
-    if values:  # already entered
+    if (check_return := model.exhibitor_check(name)):   # already entered
+        is_member, values = check_return
         member.value = is_member
         entries.controls = [Entry(*value) for value in values]
     else:

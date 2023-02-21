@@ -42,7 +42,7 @@ class Section:
     section_id: str     # r"\D"
     description: str
     sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
-    best: Optional["Winner"] = None
+    best: Optional["SectionWinner"] = None
 
     def __repr__(self) -> str:
         display = "\n".join(
