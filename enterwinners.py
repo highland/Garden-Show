@@ -30,9 +30,13 @@ def populate_page(event: ControlEvent) -> None:
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
         section.value = ""
-    elif previous_results := model.get_previous_winners(section_entered):
-        # TODO fill in previous winners for section
-        pass  # it up
+    elif previous_results := model.get_previous_winners(
+        section_entered
+    ):  # editing previous results
+        best, class_bests = previous_results
+        section_winner.value = best
+        for class_id, names in class_bests:
+            get_names.controls.append(Show_class_results(class_id, names))
     else:
         get_names.controls = []
         for show_class in model.get_section_classes(section_entered):

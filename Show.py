@@ -39,7 +39,7 @@ class Schedule:
 class Section:
     """One of the major categories of entries"""
 
-    section_id: str     # r"\D"
+    section_id: str  # r"\D"
     description: str
     sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
     best: Optional["SectionWinner"] = None
@@ -137,6 +137,10 @@ class Exhibitor:
             and self.other_names == other.other_names
         )
 
+    @property
+    def full_name(self) -> str:
+        return " ".join((self.first_name, self.other_names, self.last_name))
+
     def __hash__(self) -> int:
         return hash((self.first_name, self.last_name, self.other_names))
 
@@ -203,8 +207,7 @@ class Entry:
 
 @dataclass
 class Winner:
-    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd).
-    """
+    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)."""
 
     exhibitor: Exhibitor
     show_class: ShowClass
@@ -214,8 +217,7 @@ class Winner:
 
 @dataclass
 class SectionWinner:
-    """Winning entry for a Show Section (best in section)
-    """
+    """Winning entry for a Show Section (best in section)"""
 
     exhibitor: Exhibitor
     section: Section

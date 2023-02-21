@@ -108,23 +108,23 @@ def get_previous_winners(
     If the section has winners, return the section winner
     and all the winners for classes in that section.
     """
-    # try:
-    #     first, *other, last = name.split()
-    # except ValueError:  # invalid name - need at least first & last
-    #     return None, []
-    # test_exhibitor = Show.Exhibitor(first, last, other)
-    # if test_exhibitor in Show.exhibitors:
-    #     exhibitor = _get_actual_exhibitor(test_exhibitor)
-    #     return exhibitor.member, [
-    #         (
-    #             entry.show_class.class_id,
-    #             get_class_description(entry.show_class.class_id),
-    #             str(entry.count),
-    #         )
-    #         for entry in exhibitor.entries
-    #     ]
-    # return None
-    pass  # TODO complete method
+    section = Show.schedule.sections[section_id]
+    section_winner = section.best
+    winner_name = (
+        section_winner.best.exhibitor.full_name if section_winner else None
+    )
+    section_results = []
+    for show_class in section.sub_sections:
+        if not show_class.results:
+            return None
+        section_results.append(
+            (
+                show_class.class_id,
+                (winner.exhibitor.full_name for winner in show_class.results),
+            )
+        )
+    return winner_name, section_results
+
 
 def add_class_winners(
     winner_list: List[Class_id, List[Exhibitor_name]]

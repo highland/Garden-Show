@@ -5,7 +5,7 @@ Gui support with flet extensions
 @author: Mark
 """
 
-from typing import Set, Tuple
+from typing import Set, Tuple, List
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 from configuration import NAMESFILE
 
@@ -68,7 +68,7 @@ def capture_input(event: ControlEvent) -> None:
 class Show_class_results(UserControl):
     """Allow entry of winners for a show class"""
 
-    def __init__(self, class_id: Class_id) -> None:
+    def __init__(self, class_id: Class_id, names: List(str) = []) -> None:
         super().__init__()
         self.class_id = class_id
         self.winners = (
@@ -76,6 +76,9 @@ class Show_class_results(UserControl):
             NameChooser(name_hints),
             NameChooser(name_hints),
         )
+        if names:  # previous entry
+            for winner, name in zip(self.winners, names):
+                winner.value = name
 
     def build(self) -> Column:
         labels = ("First", "Second", "Third")
