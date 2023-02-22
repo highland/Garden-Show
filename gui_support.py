@@ -8,6 +8,7 @@ Gui support with flet extensions
 from typing import Set, Tuple, List
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 from configuration import NAMESFILE
+import model
 
 Class_id = str  # r"\D\d*"
 
@@ -68,7 +69,7 @@ def capture_input(event: ControlEvent) -> None:
 class Show_class_results(UserControl):
     """Allow entry of winners for a show class"""
 
-    def __init__(self, class_id: Class_id, names: List(str) = []) -> None:
+    def __init__(self, class_id: Class_id, names: List[str] = []) -> None:
         super().__init__()
         self.class_id = class_id
         self.winners = (
@@ -91,7 +92,15 @@ class Show_class_results(UserControl):
             winner.label = label
         return Column(
             [
-                Row([Text(self.class_id, size=16), *self.winners]),
+                Row(
+                    [
+                        Text(
+                            f"{self.class_id}\t{model.get_class_description(self.class_id)}",
+                            size=16, width=250,
+                        ),
+                        *self.winners,
+                    ]
+                ),
             ]
         )
 
@@ -105,17 +114,15 @@ class Show_class_results(UserControl):
         """Change the labels on input fields if there are ties for first
         or second"""
         if keys == "=":
-            if target is winners[0]:
+            if target is winners[0] or target is winners[1]:
                 labels = ("First equals", "First equals", "Second")
+                for winner, label in zip(winners, labels):
+                    winner.label = label
+                if target is winners[1]:
+                    winners[1].value = winners[0].value  # copy first entry
             else:
-                if target is winners[1] and target.label == "First equals":
-                    winners[1].value = winners[0].value
-                    labels = ("First equals", "First equals", "Second")
-                else:
-                    labels = ("First", "Second equals", "Second equals")
-            for winner, label in zip(winners, labels):
-                winner.label = label
-                winner.update()
+                winners[2].value = winners[1].value  # copy second entry
+            winner.update()
 
 
 def _get_names() -> Set[str]:

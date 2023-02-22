@@ -112,7 +112,7 @@ def create_entry(event: ControlEvent) -> None:
     for entry in entries.controls:
         if entry.entry == display_class.value:
             description.value = "Class already entered"
-            break
+            break  # it up
     else:
         entries.controls.append(
             Entry(entry_class, description.value, how_many)

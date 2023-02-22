@@ -19,19 +19,39 @@ from flet import (
     app,
     ControlEvent,
 )
-from gui_support import Show_class_results, NameChooser, name_hints
+from gui_support import (
+    Show_class_results,
+    NameChooser,
+    name_hints,
+    capture_input,
+)
 import model
+
+
+def get_section_description(event: ControlEvent) -> None:
+    """On choosing the section to be entered,
+    fill in the description for that section."""
+    section.value = section_entered = section.value[-1].upper()
+    description.value = model.get_section_description(section_entered)
+    if description.value.startswith("No such"):
+        section.value = ""
+        section.focus()
+    else:
+        section_winner.focus()
+    event.page.update()
+
+
+def capture_input_and_populate_page(event: ControlEvent) -> None:
+    """Combining callbacks"""
+    capture_input(event)
+    populate_page(event)
 
 
 def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
-    section.value = section_entered = section.value[-1].upper()
-    description.value = model.get_section_description(section_entered)
-    if description.value.startswith("No such"):
-        section.value = ""
-    elif previous_results := model.get_previous_winners(
-        section_entered
+    if previous_results := model.get_previous_winners(
+        section.value
     ):  # editing previous results
         best, class_bests = previous_results
         section_winner.value = best
@@ -39,7 +59,7 @@ def populate_page(event: ControlEvent) -> None:
             get_names.controls.append(Show_class_results(class_id, names))
     else:
         get_names.controls = []
-        for show_class in model.get_section_classes(section_entered):
+        for show_class in model.get_section_classes(section.value):
             get_names.controls.append(Show_class_results(show_class))
     event.page.update()
 
@@ -72,12 +92,16 @@ section = TextField(
     value="",
     width=50,
     capitalization=TextCapitalization.WORDS,
-    on_blur=populate_page,
+    on_blur=get_section_description,
+    on_submit=get_section_description,
 )
-description = Text(width=585, size=20)
+description = Text(width=800, size=20)
 section_winner = NameChooser(name_hints)
 section_winner.label = "Best in Section"
 section_winner.height = 50
+section_winner.on_blur = (
+    section_winner.on_submit
+) = capture_input_and_populate_page
 
 get_names = Column()
 entry_box = ListView(

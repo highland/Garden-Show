@@ -22,7 +22,7 @@ Section_id = str  # r"\D"
 
 def exhibitor_check(
     name: Exhibitor_name,
-) -> Optional[bool, List[Tuple[Class_id, str, Entry_count]]]:
+) -> Optional[Tuple[bool, List[Tuple[Class_id, str, Entry_count]]]]:
     """
     If the exhibitor exists, return their entries, else None.
     """
@@ -103,7 +103,9 @@ def add_exhibitor_and_entries(
 
 def get_previous_winners(
     section_id: Section_id,
-) -> Optional[Exhibitor_name, List[Tuple[Class_id, Tuple[Exhibitor_name]]]]:
+) -> Optional[
+    Tuple[Exhibitor_name, List[Tuple[Class_id, Tuple[Exhibitor_name]]]]
+]:
     """
     If the section has winners, return the section winner
     and all the winners for classes in that section.
@@ -114,7 +116,7 @@ def get_previous_winners(
         section_winner.best.exhibitor.full_name if section_winner else None
     )
     section_results = []
-    for show_class in section.sub_sections:
+    for show_class in section.sub_sections.values():
         if not show_class.results:
             return None
         section_results.append(
@@ -127,7 +129,7 @@ def get_previous_winners(
 
 
 def add_class_winners(
-    winner_list: List[Class_id, List[Exhibitor_name]]
+    winner_list: Tuple[Class_id, List[Exhibitor_name]]
 ) -> None:
     """Add winners (removing previous winners if they exist)
     Create Winners and connect to both Exhibitor and Show_classes."""
