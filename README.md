@@ -5,7 +5,7 @@
  This had become unmanageable over the years as changes accumulated.
 
  The replacement project will be written in python with a simple frontend.
- Uses flet for GUI, pickle for data persistence*,
+ Uses flet for GUI, dill for data persistence*,
  fpdf for report generation as Pdfs,
  and batch input of the schedule from a text file.
 
@@ -13,4 +13,5 @@
  for any Gardening Club that runs a traditional Garden Show
 
 (*) A spike to try out ZODB instead of straight pickle came to the
-conclusion that ZODB was overkill for this application
+conclusion that ZODB was overkill for this application, whereas pickle kept
+throwing errors.  dill fixed that.
