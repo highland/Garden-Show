@@ -1,0 +1,98 @@
+[trophies]
+[[trophies.best]]
+name = "Evelyn Littlejohn Trophy"
+section = [ "A",]
+
+[[trophies.best]]
+name = "Enid Furness Trophy"
+show_class = [ "B7", "B8",]
+description = "Best sweet pea"
+
+[[trophies.best]]
+name = "Barclay Trophy"
+show_class = [ "B10", "B11", "B12",]
+description = "Best rose"
+
+[[trophies.best]]
+name = "Badenoch Gardening Club Trophy"
+show_class = [ "B1", "B2", "B3", "B4", "B5", "B6", "B13", "B14",]
+description = "Best cut flower, not sweet pea or rose"
+
+[[trophies.best]]
+name = "Badenoch Gardening Club Trophy"
+section = [ "C",]
+
+[[trophies.best]]
+name = "Jean Burnard Trophy"
+show_class = [ "D1", "D2",]
+description = "Best foliage pot plant"
+
+[[trophies.best]]
+name = "Hutchison Bros Trophy"
+show_class = [ "D3", "D4", "D5",]
+description = "Best flowering pot plant"
+
+[[trophies.best]]
+name = "Betty Murray Trophy"
+show_class = [ "D6",]
+description = "Best club plant"
+restriction = "in members.txt"
+
+[[trophies.best]]
+name = "Sutherland Cup"
+section = [ "E",]
+
+[[trophies.best]]
+name = "Archie Peebles Trophy"
+section = [ "F",]
+
+[[trophies.best]]
+name = "Iain MacDonald Trophy"
+section = [ "G",]
+
+[[trophies.best]]
+name = "Marielle Barclay Picture"
+section = [ "K",]
+
+[[trophies.points]]
+name = "Stuart Sim Cup"
+section = [ "A",]
+
+[[trophies.points]]
+name = "Green Gardener Trophy"
+section = [ "A",]
+restriction = "not in previous_veg_trophy_winners.txt"
+
+[[trophies.points]]
+name = "Buchanan Trophy"
+section = [ "B",]
+
+[[trophies.points]]
+name = "Iain MacDonald Cup"
+section = [ "Q", "R", "S",]
+
+[[trophies.points]]
+name = "Jeanette MacDonald Shield"
+section = [ "K",]
+
+[[trophies.points]]
+name = "Balgonie Dairy Cup"
+section = [ "L",]
+
+[rosettes]
+[[rosettes.best]]
+section = [ "A", "B", "C", "E", "F", "G", "K", "L", "M",]
+
+[[rosettes.points]]
+section = [ "A", "B", "K", "L", "M",]
+
+[[rosettes.position]]
+section = [ "Q", "R", "S",]
+
+[cards]
+[[cards.best]]
+section = [ "A", "B", "C", "E", "F", "G", "K", "L", "M", "Q", "R", "S",]
+
+[[cards.position]]
+section = [ "A", "B", "C", "D", "E", "F", "G", "K", "L", "M", "Q", "R", "S",]
+
