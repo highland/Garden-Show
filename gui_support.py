@@ -114,12 +114,12 @@ class Show_class_results(UserControl):
         """Change the labels on input fields if there are ties for first
         or second"""
         if keys == "=":
-            if target is winners[0] or target is winners[1]:
-                labels = ("First equals", "First equals", "Second")
+            if target is winners[0]:
+                labels = ("First equals", "First equals", "Third")
                 for winner, label in zip(winners, labels):
                     winner.label = label
-                if target is winners[1]:
-                    winners[1].value = winners[0].value  # copy first entry
+            elif target is winners[1]:
+                winners[1].value = winners[0].value  # copy first entry
             else:
                 winners[2].value = winners[1].value  # copy second entry
             winner.update()
