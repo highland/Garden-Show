@@ -216,4 +216,4 @@ def main(page: Page) -> None:
     page.update()
 
 
-app("Entry Form", target=main)
+app(target=main)

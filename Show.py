@@ -5,7 +5,7 @@ Module to load and hold all show data
 @author: Mark
 """
 import os
-import pickle
+import dill
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
@@ -53,6 +53,19 @@ class Section:
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
+    def add_winner(self, name: str) -> None:
+        """Add winner (removing previous winner if they exist)
+        Create Winner and connect to both Exhibitor and Section."""
+        first, *other, last = name.split()
+        exhibitor = Exhibitor.get_actual_exhibitor(
+            Exhibitor(first, last, other)
+        )
+        if self.best:
+            self.best.remove_from_exhibitor()
+        winner = SectionWinner(exhibitor, self)
+        exhibitor.results.append(winner)
+        self.best = winner
+
 
 @dataclass
 class ShowClass:
@@ -63,6 +76,32 @@ class ShowClass:
     description: str
     entries: List["Entry"] = field(default_factory=list)
     results: List["Winner"] = field(default_factory=list)
+
+    def add_winners(self, winners: List[str], has_first_equal: bool) -> None:
+        """Add winners (removing previous winners if they exist)
+        Create Winners and connect to both Exhibitor and this show class."""
+        if self.results:
+            self.remove_results()
+        for index, name in enumerate(winners):
+            first, *other, last = name.split()
+            exhibitor = Exhibitor.get_actual_exhibitor(
+                Exhibitor(first, last, other)
+            )
+            if has_first_equal:
+                place = ("1st=", "1st=", "3rd")[index]
+                points = (3, 3, 1)[index]
+            else:
+                place = ("1st", "2nd", "3rd")[index]
+                points = (3, 2, 1)[index]
+            winner = Winner(exhibitor, self, place, points)
+            exhibitor.results.append(winner)
+            self.results.append(winner)
+
+    def remove_results(self) -> None:
+        """Remove any existing results"""
+        for winner in self.results:
+            winner.exhibitor.results.remove(winner)
+        self.results = []
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
@@ -92,23 +131,6 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
                 show_class = ShowClass(current_section, class_id, description)
                 new_schedule.classes[class_id] = show_class
                 current_section.sub_sections[class_id] = show_class
-    return new_schedule
-
-
-def _save_schedule(a_schedule: Schedule) -> None:
-    """Back up schedule to disk"""
-    with open(SAVEDSCHEDULE, "wb") as save_file:
-        pickle.dump(a_schedule, save_file)
-
-
-def _load_schedule() -> Schedule:
-    """Load schedule from disk"""
-    if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
-        new_schedule = _load_schedule_from_file()
-        _save_schedule(new_schedule)
-    else:
-        with open(SAVEDSCHEDULE, "rb") as read_file:
-            new_schedule = pickle.load(read_file)
     return new_schedule
 
 
@@ -162,21 +184,17 @@ class Exhibitor:
             schedule.classes[entry.show_class.class_id].entries.append(entry)
         save_show_data()
 
+    def remove_result(self, result: "Winner") -> None:
+        """Remove a single result"""
+        self.results.remove((result))
 
-def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
-    """Back up exhibitors to disk"""
-    with open(SAVEDEXHIBITORS, "wb") as save_file:
-        pickle.dump(exhibitor_list, save_file)
-
-
-def _load_exhibitors() -> List[Exhibitor]:
-    """Load schedule from disk
-    return empty list if file does not exist
-    """
-    if not os.path.exists(SAVEDEXHIBITORS):  # not yet loaded from file
-        return []
-    with open(SAVEDEXHIBITORS, "rb") as read_file:
-        return pickle.load(read_file)
+    @staticmethod
+    def get_actual_exhibitor(match: "Exhibitor") -> "Exhibitor":
+        """Replace an Exhibitor object created for matching
+        with the actual exhibitor stored by the Show
+        """
+        exhibitor_index = exhibitors.index(match)
+        return exhibitors[exhibitor_index]
 
 
 @dataclass
@@ -214,6 +232,10 @@ class Winner:
     place: Literal["1st", "2nd", "3rd", "1st="]
     points: int
 
+    def remove_from_exhibitor(self) -> None:
+        """Unlink this result from exhibitor"""
+        self.exhibitor.remove_result(self)
+
 
 @dataclass
 class SectionWinner:
@@ -221,6 +243,43 @@ class SectionWinner:
 
     exhibitor: Exhibitor
     section: Section
+
+    def remove_from_exhibitor(self) -> None:
+        """Unlink this result from exhibitor"""
+        self.exhibitor.remove_result(self)
+
+
+def _save_schedule(a_schedule: Schedule) -> None:
+    """Back up schedule to disk"""
+    with open(SAVEDSCHEDULE, "wb") as save_file:
+        dill.dump(a_schedule, save_file)
+
+
+def _load_schedule() -> Schedule:
+    """Load schedule from disk"""
+    if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
+        new_schedule = _load_schedule_from_file()
+        _save_schedule(new_schedule)
+    else:
+        with open(SAVEDSCHEDULE, "rb") as read_file:
+            new_schedule = dill.load(read_file)
+    return new_schedule
+
+
+def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
+    """Back up exhibitors to disk"""
+    with open(SAVEDEXHIBITORS, "wb") as save_file:
+        dill.dump(exhibitor_list, save_file)
+
+
+def _load_exhibitors() -> List[Exhibitor]:
+    """Load schedule from disk
+    return empty list if file does not exist
+    """
+    if not os.path.exists(SAVEDEXHIBITORS):  # not yet loaded from file
+        return []
+    with open(SAVEDEXHIBITORS, "rb") as read_file:
+        return dill.load(read_file)
 
 
 # All the show data in these two objects

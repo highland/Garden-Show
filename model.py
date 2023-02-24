@@ -32,7 +32,7 @@ def exhibitor_check(
         return None, []
     test_exhibitor = Show.Exhibitor(first, last, other)
     if test_exhibitor in Show.exhibitors:
-        exhibitor = _get_actual_exhibitor(test_exhibitor)
+        exhibitor = Show.Exhibitor.get_actual_exhibitor(test_exhibitor)
         return exhibitor.member, [
             (
                 entry.show_class.class_id,
@@ -42,14 +42,6 @@ def exhibitor_check(
             for entry in exhibitor.entries
         ]
     return None
-
-
-def _get_actual_exhibitor(match: Show.Exhibitor) -> Show.Exhibitor:
-    """Replace an Exhibitor object created for matching
-    with the actual exhibitor stored by the Show
-    """
-    exhibitor_index = Show.exhibitors.index(match)
-    return Show.exhibitors[exhibitor_index]
 
 
 def get_class_description(show_class_id: Class_id) -> str:
@@ -88,7 +80,7 @@ def add_exhibitor_and_entries(
     first, *other, last = name.split()
     exhibitor = Show.Exhibitor(first, last, other, is_member)
     if exhibitor in Show.exhibitors:  # exhibitor previously entered
-        exhibitor = _get_actual_exhibitor(exhibitor)
+        exhibitor = Show.Exhibitor.get_actual_exhibitor(exhibitor)
         exhibitor.delete_entries()
     else:
         Show.exhibitors.append(exhibitor)
@@ -129,39 +121,23 @@ def get_previous_winners(
 
 
 def add_class_winners(
-    winner_list: Tuple[Class_id, List[Exhibitor_name]]
+    winner_list: List[Tuple[Class_id, List[Exhibitor_name], bool]]
 ) -> None:
-    """Add winners (removing previous winners if they exist)
-    Create Winners and connect to both Exhibitor and Show_classes."""
-    class_id, winners = winner_list
-    show_class = Show.schedule.classes[class_id]
-    if show_class.results:
-        remove_class_results(show_class)
-    for index, name in enumerate(winners):
-        first, *other, last = name.split()
-        exhibitor = _get_actual_exhibitor(Show.Exhibitor(first, last, other))
-        place = ("1st", "2nd", "3rd", "1st=")[index]
-        points = (3, 2, 1, 3)[index]
-        winner = Show.Winner(exhibitor, show_class, place, points)
-        exhibitor.results.append(winner)
-        show_class.results.append(winner)
+    """Add winners to a Show_class"""
+    for class_winners in winner_list:  # each show class in current section
+        class_id, winners, has_first_equal = class_winners
+        show_class = Show.schedule.classes[class_id]
+        show_class.add_winners(winners, has_first_equal)
 
 
 def remove_class_results(show_class: Show.ShowClass) -> None:
     """Remove previous entries for class results from both the class
     and the corresponding exhibitor results."""
-    for winner in show_class.results:
-        winner.exhibitor.results.remove(winner)
-    show_class.results = []
+    show_class.remove_results()
 
 
 def add_section_winner(section_id: Section_id, name: Exhibitor_name) -> None:
+    """Add winner (removing previous winner if they exist)
+    Create Winner and connect to both Exhibitor and Section."""
     section = Show.schedule.sections[section_id]
-    first, *other, last = name.split()
-    exhibitor = _get_actual_exhibitor(Show.Exhibitor(first, last, other))
-    if section.best:
-        old_winner = section.best
-        old_winner.results.remove(old_winner)
-    winner = Show.SectionWinner(exhibitor, section)
-    exhibitor.results.append(winner)
-    section.best = winner
+    section.add_winner(name)

@@ -31,6 +31,9 @@ import model
 def get_section_description(event: ControlEvent) -> None:
     """On choosing the section to be entered,
     fill in the description for that section."""
+    if not section.value:
+        return None
+    new_section()
     section.value = section_entered = section.value[-1].upper()
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
@@ -58,9 +61,10 @@ def populate_page(event: ControlEvent) -> None:
         for class_id, names in class_bests:
             get_names.controls.append(Show_class_results(class_id, names))
     else:
-        get_names.controls = []
-        for show_class in model.get_section_classes(section.value):
-            get_names.controls.append(Show_class_results(show_class))
+        if not get_names.controls:  # empty so far
+            for show_class in model.get_section_classes(section.value):
+                get_names.controls.append(Show_class_results(show_class))
+            section_winner.read_only = True
     event.page.update()
 
 
@@ -70,7 +74,11 @@ def post_to_model(event: ControlEvent) -> None:
     if section_winner.value:
         model.add_section_winner(section.value, section_winner.value)
     winner_list = [
-        (result.class_id, [winner.value for winner in result.winners])
+        (
+            result.class_id,
+            [winner.value for winner in result.winners],
+            result.winners[0].label == "First equals",
+        )
         for result in get_names.controls
     ]
     model.add_class_winners(winner_list)
@@ -79,11 +87,16 @@ def post_to_model(event: ControlEvent) -> None:
 
 def clear_all(event: ControlEvent) -> None:
     section.value = ""
+    new_section()
+    section.focus()
+    event.page.update()
+
+
+def new_section() -> None:
     description.value = ""
     section_winner.value = ""
     get_names.controls = []
-    section.focus()
-    event.page.update()
+    section_winner.read_only = False
 
 
 title = Text("Enter Section Winners", style=TextThemeStyle.HEADLINE_SMALL)
@@ -95,7 +108,7 @@ section = TextField(
     on_blur=get_section_description,
     on_submit=get_section_description,
 )
-description = Text(width=800, size=20)
+description = Text(width=800, size=16)
 section_winner = NameChooser(name_hints)
 section_winner.label = "Best in Section"
 section_winner.height = 50
@@ -113,7 +126,7 @@ entry_box = ListView(
 )
 # page footer
 
-cancel = ElevatedButton("Cancel", icon=icons.CANCEL)  # , on_click=clear_all)
+cancel = ElevatedButton("Cancel", icon=icons.CANCEL, on_click=clear_all)
 save = ElevatedButton("Save", icon=icons.SAVE)  # , on_click=post_to_model)
 
 
@@ -138,4 +151,4 @@ def main(page: Page) -> None:
     page.update()
 
 
-app("Entry Form", target=main)
+app(target=main)
