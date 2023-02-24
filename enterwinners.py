@@ -127,7 +127,7 @@ entry_box = ListView(
 # page footer
 
 cancel = ElevatedButton("Cancel", icon=icons.CANCEL, on_click=clear_all)
-save = ElevatedButton("Save", icon=icons.SAVE)  # , on_click=post_to_model)
+save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
 
 
 def main(page: Page) -> None:
