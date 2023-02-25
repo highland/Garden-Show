@@ -4,12 +4,13 @@ Module to load and hold all show data
 
 @author: Mark
 """
+from __future__ import annotations
 import os
 import dill
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Literal
+from typing import Dict, List, Optional, Any
 
 
 from configuration import (
@@ -20,13 +21,77 @@ from configuration import (
 
 
 @dataclass
+class Exhibitor:
+    """Exhibitor in the Garden Show"""
+
+    first_name: str
+    last_name: str
+    other_names: List[str] = field(default_factory=list)
+    member: bool = True
+    entries: List[Entry] = field(default_factory=list)
+    results: List[Result] = field(default_factory=list)
+
+    def __repr__(self) -> str:
+        return " ".join(
+            [self.first_name] + self.other_names + [self.last_name]
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Exhibitor):
+            return NotImplemented
+        return (
+            self.first_name == other.first_name
+            and self.last_name == other.last_name
+            and self.other_names == other.other_names
+        )
+
+    @property
+    def full_name(self) -> str:
+        if self.other_names:
+            middle = ' ' + ' '.join(self.other_names) + ' '
+        else:
+            middle = ' '
+        return f"{self.first_name}{middle}{self.last_name}"
+
+    def __hash__(self) -> int:
+        return hash((self.first_name, self.last_name, self.other_names))
+
+    def delete_entries(self) -> None:
+        """
+        Remove the entries for this exhibitor
+        """
+        self.entries = []  # none left
+        save_show_data()
+
+    def add_entries(self, entries: List[Entry]) -> None:
+        """
+        Add the entries for an exhibitor
+        """
+        self.entries = entries
+        save_show_data()
+
+    def remove_result(self, result: Result) -> None:
+        """Remove a single result"""
+        self.results.remove((result))
+
+
+def get_actual_exhibitor(first_name: str, last_name: str) -> Exhibitor:
+    """Replace an Exhibitor object created for matching
+    with the actual exhibitor stored by the Show
+    """
+    match = Exhibitor(first_name, last_name)
+    index = exhibitors.index(match)
+    return exhibitors[index]
+
+
+@dataclass
 class Schedule:
     """The classes of entries for the show"""
 
     year: int
     date: datetime.date
-    sections: Dict[str, "Section"] = field(default_factory=dict)
-    classes: Dict[str, "ShowClass"] = field(default_factory=dict)
+    sections: Dict[str, Section] = field(default_factory=dict)
+    classes: Dict[str, ShowClass] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -41,7 +106,7 @@ class Section:
 
     section_id: str  # r"\D"
     description: str
-    sub_sections: Dict[str, "ShowClass"] = field(default_factory=dict)
+    sub_sections: Dict[str, ShowClass] = field(default_factory=dict)
     best: Optional["SectionWinner"] = None
 
     def __repr__(self) -> str:
@@ -74,8 +139,7 @@ class ShowClass:
     section: Section
     class_id: str
     description: str
-    entries: List["Entry"] = field(default_factory=list)
-    results: List["Winner"] = field(default_factory=list)
+    results: List[Winner] = field(default_factory=list)
 
     def add_winners(self, winners: List[str], has_first_equal: bool) -> None:
         """Add winners (removing previous winners if they exist)
@@ -84,9 +148,7 @@ class ShowClass:
             self.remove_results()
         for index, name in enumerate(winners):
             first, *other, last = name.split()
-            exhibitor = Exhibitor.get_actual_exhibitor(
-                Exhibitor(first, last, other)
-            )
+            exhibitor = get_actual_exhibitor(first, last)
             if has_first_equal:
                 place = ("1st=", "1st=", "3rd")[index]
                 points = (3, 3, 1)[index]
@@ -135,69 +197,6 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
 
 
 @dataclass
-class Exhibitor:
-    """Exhibitor in the Garden Show"""
-
-    first_name: str
-    last_name: str
-    other_names: List[str] = field(default_factory=list)
-    member: bool = True
-    entries: List["Entry"] = field(default_factory=list)
-    results: List["Winner"] = field(default_factory=list)
-
-    def __repr__(self) -> str:
-        return " ".join(
-            [self.first_name] + self.other_names + [self.last_name]
-        )
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Exhibitor):
-            return NotImplemented
-        return (
-            self.first_name == other.first_name
-            and self.last_name == other.last_name
-            and self.other_names == other.other_names
-        )
-
-    @property
-    def full_name(self) -> str:
-        return " ".join((self.first_name, self.other_names, self.last_name))
-
-    def __hash__(self) -> int:
-        return hash((self.first_name, self.last_name, self.other_names))
-
-    def delete_entries(self) -> None:
-        """
-        Remove the entries for this exhibitor
-        """
-        for entry in self.entries:
-            schedule.classes[entry.show_class.class_id].entries.remove(entry)
-        self.entries = []  # none left
-        save_show_data()
-
-    def add_entries(self, entries: List["Entry"]) -> None:
-        """
-        Add the entries for an exhibitor
-        """
-        self.entries = entries
-        for entry in entries:
-            schedule.classes[entry.show_class.class_id].entries.append(entry)
-        save_show_data()
-
-    def remove_result(self, result: "Winner") -> None:
-        """Remove a single result"""
-        self.results.remove((result))
-
-    @staticmethod
-    def get_actual_exhibitor(match: "Exhibitor") -> "Exhibitor":
-        """Replace an Exhibitor object created for matching
-        with the actual exhibitor stored by the Show
-        """
-        exhibitor_index = exhibitors.index(match)
-        return exhibitors[exhibitor_index]
-
-
-@dataclass
 class Entry:
     """An entry by an exhibitor for a class in the show
 
@@ -223,13 +222,17 @@ class Entry:
         )
 
 
+class Result:
+    pass
+
+
 @dataclass
-class Winner:
+class Winner(Result):
     """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)."""
 
     exhibitor: Exhibitor
     show_class: ShowClass
-    place: Literal["1st", "2nd", "3rd", "1st="]
+    place: str  # one of ["1st", "2nd", "3rd", "1st="]
     points: int
 
     def remove_from_exhibitor(self) -> None:
@@ -238,7 +241,7 @@ class Winner:
 
 
 @dataclass
-class SectionWinner:
+class SectionWinner(Result):
     """Winning entry for a Show Section (best in section)"""
 
     exhibitor: Exhibitor
@@ -272,7 +275,7 @@ def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
         dill.dump(exhibitor_list, save_file)
 
 
-def _load_exhibitors() -> List[Exhibitor]:
+def _load_exhibitors() -> Any:
     """Load schedule from disk
     return empty list if file does not exist
     """

@@ -26,7 +26,7 @@ class NameChooser(TextField):
         input_so_far = self.value.upper()
         if input_so_far == "=":  # special value
             self.value = ""
-            self.on_special(self, input_so_far)
+            self.on_special(input_so_far)
             return None
         matches = [
             name
@@ -122,7 +122,7 @@ class Show_class_results(UserControl):
                 winners[1].value = winners[0].value  # copy first entry
             else:
                 winners[2].value = winners[1].value  # copy second entry
-            winner.update()
+            winners.update()
 
 
 def _get_names() -> Set[str]:

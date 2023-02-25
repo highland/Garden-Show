@@ -120,6 +120,7 @@ def get_previous_winners(
     return winner_name, section_results
 
 
+
 def add_class_winners(
     winner_list: List[Tuple[Class_id, List[Exhibitor_name], bool]]
 ) -> None:
@@ -128,12 +129,6 @@ def add_class_winners(
         class_id, winners, has_first_equal = class_winners
         show_class = Show.schedule.classes[class_id]
         show_class.add_winners(winners, has_first_equal)
-
-
-def remove_class_results(show_class: Show.ShowClass) -> None:
-    """Remove previous entries for class results from both the class
-    and the corresponding exhibitor results."""
-    show_class.remove_results()
 
 
 def add_section_winner(section_id: Section_id, name: Exhibitor_name) -> None:
