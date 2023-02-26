@@ -11,7 +11,7 @@ from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
-
+from abc import ABC
 
 from configuration import (
     SCHEDULEFILE,
@@ -71,9 +71,17 @@ class Exhibitor:
         self.entries = entries
         save_show_data()
 
-    def remove_result(self, result: Result) -> None:
-        """Remove a single result"""
-        self.results.remove((result))
+    def _remove_result(self, result: Result) -> None:
+        """Remove a single result.
+        Only called by result object """
+        self.results.remove(result)
+
+    def _add_result(self, result: Result) -> None:
+        """Add a single result.
+        Only called by result object """
+        if not self.results:
+            self.results = []
+        self.results.append(result)
 
 
 def get_actual_exhibitor(
@@ -127,16 +135,10 @@ class Section:
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
-    def add_winner(self, name: Name) -> None:
-        """Add winner (removing previous winner if they exist)
-        Create Winner and connect to both Exhibitor and Section."""
-        first, *other, last = name.split()
-        exhibitor = get_actual_exhibitor(first, last, other)
-        if self.best:
-            self.best.remove_from_exhibitor()
-        winner = SectionWinner(exhibitor, self)
-        exhibitor.results.append(winner)
-        self.best = winner
+    def _add_result(self, result: Result) -> None:
+        """Add a single result.
+        Only called by result object """
+        self.best = result
 
 
 @dataclass
@@ -164,15 +166,20 @@ class ShowClass:
             else:
                 place = ("1st", "2nd", "3rd")[index]
                 points = (3, 2, 1)[index]
-            winner = Winner(exhibitor, self, place, points)
-            exhibitor.results.append(winner)
-            self.results.append(winner)
+            Winner(exhibitor, self, place, points)
 
     def remove_results(self) -> None:
         """Remove any existing results"""
         for winner in self.results:
-            winner.exhibitor.results.remove(winner)
-        self.results = []
+            winner.remove.result()
+        self.results == []
+
+    def _add_result(self, result: Result) -> None:
+        """Add a single result.
+        Only called by result object """
+        if not self.results:
+            self.results = []
+        self.results.append(result)
 
     def __repr__(self) -> str:
         return f"{self.class_id}\t{self.description}"
@@ -231,34 +238,35 @@ class Entry:
         )
 
 
-class Result:
-    pass
+@dataclass
+class Result(ABC):
+    """ Abstract bas class for Winner and SectionWinner """
+    exhibitor: Exhibitor
+    target: ShowClass | Section
+
+    def __post_init__(self):
+        """ Link to collections in exhibitor and target """
+        self.exhibitor._add_result(self)
+        self.target._add_result(self)
+
+    def remove_result(self) -> None:
+        """Unlink this result from exhibitor and target"""
+        self.exhibitor._remove_result(self)
 
 
 @dataclass
 class Winner(Result):
-    """Winning entry for a Show_Class (one of 1st, 2nd, 3rd)."""
+    """Winning result for a Show_Class."""
 
-    exhibitor: Exhibitor
-    show_class: ShowClass
     place: str  # one of ["1st", "2nd", "3rd", "1st="]
     points: int
-
-    def remove_from_exhibitor(self) -> None:
-        """Unlink this result from exhibitor"""
-        self.exhibitor.remove_result(self)
 
 
 @dataclass
 class SectionWinner(Result):
-    """Winning entry for a Show Section (best in section)"""
+    """Winning result for a Show Section (best in section)"""
 
-    exhibitor: Exhibitor
-    section: Section
-
-    def remove_from_exhibitor(self) -> None:
-        """Unlink this result from exhibitor"""
-        self.exhibitor.remove_result(self)
+    pass
 
 
 def _save_schedule(a_schedule: Schedule) -> None:
