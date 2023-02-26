@@ -19,22 +19,24 @@ from configuration import (
     SAVEDEXHIBITORS,
 )
 
+Name = str
+
 
 @dataclass
 class Exhibitor:
     """Exhibitor in the Garden Show"""
 
-    first_name: str
-    last_name: str
-    other_names: List[str] = field(default_factory=list)
+    first_name: Name
+    last_name: Name
+    other_names: List[Name] = field(default_factory=list)
     member: bool = True
     entries: List[Entry] = field(default_factory=list)
     results: List[Result] = field(default_factory=list)
 
     def __repr__(self) -> str:
-        return " ".join(
-            [self.first_name] + self.other_names + [self.last_name]
-        )
+        if self.other_names:
+            return f"Exhibitor({self.first_name}, {self.last_name}, {self.other_names})"
+        return f"Exhibitor({self.first_name}, {self.last_name})"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Exhibitor):
@@ -42,15 +44,14 @@ class Exhibitor:
         return (
             self.first_name == other.first_name
             and self.last_name == other.last_name
-            and self.other_names == other.other_names
         )
 
     @property
-    def full_name(self) -> str:
+    def full_name(self) -> Name:
         if self.other_names:
-            middle = ' ' + ' '.join(self.other_names) + ' '
+            middle = " " + "".join(self.other_names) + " "
         else:
-            middle = ' '
+            middle = " "
         return f"{self.first_name}{middle}{self.last_name}"
 
     def __hash__(self) -> int:
@@ -75,13 +76,21 @@ class Exhibitor:
         self.results.remove((result))
 
 
-def get_actual_exhibitor(first_name: str, last_name: str) -> Exhibitor:
-    """Replace an Exhibitor object created for matching
-    with the actual exhibitor stored by the Show
+def get_actual_exhibitor(
+    first_name: Name, last_name: Name, other_names: List = []
+) -> Exhibitor:
+    """Return either a new Exhibitor object storing it in the lists
+    of exhibitors or, if one already exists,
+    the actual exhibitor stored by the Show
     """
-    match = Exhibitor(first_name, last_name)
-    index = exhibitors.index(match)
-    return exhibitors[index]
+    match = Exhibitor(
+        first_name, last_name, other_names if other_names else None
+    )
+    if match in exhibitors:
+        index = exhibitors.index(match)
+        return exhibitors[index]
+    exhibitors.append(match)
+    return match
 
 
 @dataclass
@@ -118,13 +127,11 @@ class Section:
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
-    def add_winner(self, name: str) -> None:
+    def add_winner(self, name: Name) -> None:
         """Add winner (removing previous winner if they exist)
         Create Winner and connect to both Exhibitor and Section."""
         first, *other, last = name.split()
-        exhibitor = Exhibitor.get_actual_exhibitor(
-            Exhibitor(first, last, other)
-        )
+        exhibitor = get_actual_exhibitor(first, last, other)
         if self.best:
             self.best.remove_from_exhibitor()
         winner = SectionWinner(exhibitor, self)
@@ -141,14 +148,16 @@ class ShowClass:
     description: str
     results: List[Winner] = field(default_factory=list)
 
-    def add_winners(self, winners: List[str], has_first_equal: bool) -> None:
+    def add_winners(
+        self, winners: List[Name], has_first_equal: bool = False
+    ) -> None:
         """Add winners (removing previous winners if they exist)
         Create Winners and connect to both Exhibitor and this show class."""
         if self.results:
             self.remove_results()
         for index, name in enumerate(winners):
             first, *other, last = name.split()
-            exhibitor = get_actual_exhibitor(first, last)
+            exhibitor = get_actual_exhibitor(first, last, other)
             if has_first_equal:
                 place = ("1st=", "1st=", "3rd")[index]
                 points = (3, 3, 1)[index]
