@@ -76,10 +76,13 @@ def post_to_model(event: ControlEvent) -> None:
     winner_list = [
         (
             result.class_id,
-            [winner.value for winner in result.winners],
+            [winner.value for winner in result.winners if winner.value],
             result.winners[0].label == "First equals",
         )
         for result in get_names.controls
+        if result.winners[0].value != "None"
+        and result.winners[1].value
+        and result.winners[2].value
     ]
     model.add_class_winners(winner_list)
     clear_all(event)

@@ -6,21 +6,21 @@ Module to load and hold all show data
 """
 from __future__ import annotations
 import os
-import dill
+import pickle
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
+from collections import namedtuple
 from abc import ABC
 
 from configuration import (
     SCHEDULEFILE,
-    SAVEDSCHEDULE,
-    SAVEDEXHIBITORS,
+    SAVEDDATA,
 )
 
 Name = str
-
+ShowData = namedtuple("ShowData", "schedule, exhibitors")
 
 @dataclass
 class Exhibitor:
@@ -64,24 +64,23 @@ class Exhibitor:
         self.entries = []  # none left
         save_show_data()
 
-    def add_entries(self, entries: List[Entry]) -> None:
-        """
-        Add the entries for an exhibitor
-        """
-        self.entries = entries
+    def _add_entry(self, entry: Entry) -> None:
+        """Add a single entry.
+        Only called by the entry object"""
+        self.entries.append(entry)
         save_show_data()
-
-    def _remove_result(self, result: Result) -> None:
-        """Remove a single result.
-        Only called by result object """
-        self.results.remove(result)
 
     def _add_result(self, result: Result) -> None:
         """Add a single result.
-        Only called by result object """
+        Only called by result object"""
         if not self.results:
             self.results = []
         self.results.append(result)
+
+    def _remove_result(self, result: Result) -> None:
+        """Remove a single result.
+        Only called by result object"""
+        self.results.remove(result)
 
 
 def get_actual_exhibitor(
@@ -137,7 +136,7 @@ class Section:
 
     def _add_result(self, result: Result) -> None:
         """Add a single result.
-        Only called by result object """
+        Only called by result object"""
         self.best = result
 
 
@@ -145,7 +144,6 @@ class Section:
 class ShowClass:
     """One of the minor categories of entries"""
 
-    section: Section
     class_id: str
     description: str
     results: List[Winner] = field(default_factory=list)
@@ -158,6 +156,8 @@ class ShowClass:
         if self.results:
             self.remove_results()
         for index, name in enumerate(winners):
+            if name == "None" or not name:
+                break
             first, *other, last = name.split()
             exhibitor = get_actual_exhibitor(first, last, other)
             if has_first_equal:
@@ -176,7 +176,7 @@ class ShowClass:
 
     def _add_result(self, result: Result) -> None:
         """Add a single result.
-        Only called by result object """
+        Only called by the result object"""
         if not self.results:
             self.results = []
         self.results.append(result)
@@ -206,7 +206,7 @@ def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
             else:
                 class_id, *rest = line.split()
                 description = " ".join(rest)
-                show_class = ShowClass(current_section, class_id, description)
+                show_class = ShowClass(class_id, description)
                 new_schedule.classes[class_id] = show_class
                 current_section.sub_sections[class_id] = show_class
     return new_schedule
@@ -223,29 +223,26 @@ class Entry:
     show_class: ShowClass
     count: int = 1
 
+    def __post_init__(self):
+        """Link to collections in exhibitor and show class"""
+        self.exhibitor._add_entry(self)
+
     def __repr__(self) -> str:
         return f"Entry({self.exhibitor}, {self.show_class}, {self.count})"
 
     def __str__(self) -> str:
         return f"{self.exhibitor}{repr(self.show_class)}\t{self.count}"
 
-    def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, Entry):
-            return NotImplemented
-        return (
-            self.exhibitor == other.exhibitor
-            and self.show_class == other.show_class
-        )
-
 
 @dataclass
 class Result(ABC):
-    """ Abstract bas class for Winner and SectionWinner """
+    """Abstract bas class for Winner and SectionWinner"""
+
     exhibitor: Exhibitor
     target: ShowClass | Section
 
     def __post_init__(self):
-        """ Link to collections in exhibitor and target """
+        """Link to collections in exhibitor and target"""
         self.exhibitor._add_result(self)
         self.target._add_result(self)
 
@@ -255,11 +252,22 @@ class Result(ABC):
 
 
 @dataclass
-class Winner(Result):
+class Winner:
     """Winning result for a Show_Class."""
 
+    exhibitor: Exhibitor
+    show_class: ShowClass | Section
     place: str  # one of ["1st", "2nd", "3rd", "1st="]
     points: int
+
+    def __post_init__(self):
+        """Link to collections in exhibitor and target"""
+        self.exhibitor._add_result(self)
+        self.show_class._add_result(self)
+
+    def remove_result(self) -> None:
+        """Unlink this result from exhibitor and target"""
+        self.exhibitor._remove_result(self)
 
 
 @dataclass
@@ -269,44 +277,25 @@ class SectionWinner(Result):
     pass
 
 
-def _save_schedule(a_schedule: Schedule) -> None:
-    """Back up schedule to disk"""
-    with open(SAVEDSCHEDULE, "wb") as save_file:
-        dill.dump(a_schedule, save_file)
-
-
-def _load_schedule() -> Schedule:
+def _load_data() -> ShowData:
     """Load schedule from disk"""
-    if not os.path.exists(SAVEDSCHEDULE):  # not yet loaded from file
+    if not os.path.exists(SAVEDDATA):  # not yet loaded from file
         new_schedule = _load_schedule_from_file()
-        _save_schedule(new_schedule)
+        data = ShowData(new_schedule, [])
+        save_show_data()
     else:
-        with open(SAVEDSCHEDULE, "rb") as read_file:
-            new_schedule = dill.load(read_file)
-    return new_schedule
+        with open(SAVEDDATA, "rb") as read_file:
+            data = ShowData._make(pickle.load(read_file))
+    return data
 
 
-def _save_exhibitors(exhibitor_list: List[Exhibitor]) -> None:
-    """Back up exhibitors to disk"""
-    with open(SAVEDEXHIBITORS, "wb") as save_file:
-        dill.dump(exhibitor_list, save_file)
-
-
-def _load_exhibitors() -> Any:
-    """Load schedule from disk
-    return empty list if file does not exist
-    """
-    if not os.path.exists(SAVEDEXHIBITORS):  # not yet loaded from file
-        return []
-    with open(SAVEDEXHIBITORS, "rb") as read_file:
-        return dill.load(read_file)
-
-
+data: ShowData = _load_data()
 # All the show data in these two objects
-schedule: Schedule = _load_schedule()
-exhibitors: List[Exhibitor] = _load_exhibitors()
+schedule: Schedule = data.schedule
+exhibitors: List[Exhibitor] = data.exhibitors
 
 
 def save_show_data() -> None:
-    _save_schedule(schedule)
-    _save_exhibitors(exhibitors)
+    """Back up schedule to disk"""
+    with open(SAVEDDATA, "wb") as save_file:
+        pickle.dump(data, save_file)

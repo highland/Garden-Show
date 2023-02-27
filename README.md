@@ -13,5 +13,4 @@
  for any Gardening Club that runs a traditional Garden Show
 
 (*) A spike to try out ZODB instead of straight pickle came to the
-conclusion that ZODB was overkill for this application, whereas pickle kept
-throwing errors.  dill fixed that.
+conclusion that ZODB was overkill for this application.

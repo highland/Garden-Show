@@ -32,7 +32,7 @@ def exhibitor_check(
         return None, []
     test_exhibitor = Show.Exhibitor(first, last, other)
     if test_exhibitor in Show.exhibitors:
-        exhibitor = Show.Exhibitor.get_actual_exhibitor(test_exhibitor)
+        exhibitor = Show.get_actual_exhibitor(first, last, other)
         return exhibitor.member, [
             (
                 entry.show_class.class_id,
@@ -75,22 +75,15 @@ def add_exhibitor_and_entries(
     is_member: bool,
     entries: List[Tuple[Class_id, Entry_count]],
 ) -> None:
-    """Add new exhibitor (removing previous exhibitor if one exists)
-    Create Entries and connect to both Exhibitor and Show_classes."""
+    """Add new exhibitor (removing previous entries if they exist)
+    Create Entries."""
     first, *other, last = name.split()
-    exhibitor = Show.Exhibitor(first, last, other, is_member)
-    if exhibitor in Show.exhibitors:  # exhibitor previously entered
-        exhibitor = Show.Exhibitor.get_actual_exhibitor(exhibitor)
-        exhibitor.delete_entries()
-    else:
-        Show.exhibitors.append(exhibitor)
-    entries = [
-        Show.Entry(
-            exhibitor, Show.schedule.classes[show_class], int(entry_count)
-        )
-        for show_class, entry_count in entries
-    ]
-    exhibitor.add_entries(entries)
+    exhibitor = Show.get_actual_exhibitor(first, last, other)
+    exhibitor.member = is_member
+    exhibitor.delete_entries()
+    Show.exhibitors.append(exhibitor)
+    for show_class, entry_count in entries:
+        Show.Entry(exhibitor, show_class, entry_count)
 
 
 def get_previous_winners(
@@ -118,7 +111,6 @@ def get_previous_winners(
             )
         )
     return winner_name, section_results
-
 
 
 def add_class_winners(
