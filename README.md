@@ -1,5 +1,5 @@
 # Garden Show
- Applications to support a garden club annual show
+ Application to support a garden club annual show
 
  Originally done with VBA in an Excel spreadsheet.
  This had become unmanageable over the years as changes accumulated.

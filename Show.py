@@ -10,7 +10,7 @@ import pickle
 from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from collections import namedtuple
 from abc import ABC
 
@@ -21,6 +21,7 @@ from configuration import (
 
 Name = str
 ShowData = namedtuple("ShowData", "schedule, exhibitors")
+
 
 @dataclass
 class Exhibitor:

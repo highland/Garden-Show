@@ -7,21 +7,32 @@ Created on Wed Jan 25 19:54:58 2023
 import Show
 
 
-def show_entries_by_class():
+def show_results_by_class():
     print(
         """
-        Entries by Show Class
+        Results by Show Class
         =====================
         """
     )
     for show_class in Show.schedule.classes.values():
-        if show_class.entries:
+        if show_class.results:
             print(f"class {show_class}")
-            for entry in show_class.entries:
-                print(
-                    f"\t{entry.exhibitor}"
-                    f"\t{entry.count if entry.count> 1 else ''}"
-                )
+            for result in show_class.results:
+                print(result)
+
+
+def show_results_by_exhibitor():
+    print(
+        """
+        Results by Exhibitor
+        ====================
+        """
+    )
+    for exhibitor in Show.exhibitors:
+        if exhibitor.results:
+            print(f"Exhibitor {exhibitor}")
+            for result in exhibitor.results:
+                print(result)
 
 
 def show_entries_by_exhibitor():
@@ -63,6 +74,7 @@ def show_schedule():
             print(f"{show_class.class_id}\t{show_class.description}")
 
 
-show_entries_by_class()
+show_results_by_class()
+show_results_by_exhibitor()
 show_entries_by_exhibitor()
 show_schedule()
