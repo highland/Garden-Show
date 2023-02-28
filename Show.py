@@ -7,12 +7,11 @@ Module to load and hold all show data
 from __future__ import annotations
 import os
 import pickle
-from dateutil.parser import parse
 import datetime
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from collections import namedtuple
-from abc import ABC
+from dateutil.parser import parse
 
 from configuration import (
     SCHEDULEFILE,
@@ -32,7 +31,7 @@ class Exhibitor:
     other_names: List[Name] = field(default_factory=list)
     member: bool = True
     entries: List[Entry] = field(default_factory=list)
-    results: List[Result] = field(default_factory=list)
+    results: List[Winner] = field(default_factory=list)
 
     def __repr__(self) -> str:
         if self.other_names:
@@ -49,6 +48,7 @@ class Exhibitor:
 
     @property
     def full_name(self) -> Name:
+        """ Return names as a single full name """
         if self.other_names:
             middle = " " + "".join(self.other_names) + " "
         else:
@@ -69,31 +69,28 @@ class Exhibitor:
         """Add a single entry.
         Only called by the entry object"""
         self.entries.append(entry)
-        save_show_data()
 
-    def _add_result(self, result: Result) -> None:
+    def _add_result(self, result: Winner) -> None:
         """Add a single result.
         Only called by result object"""
         if not self.results:
             self.results = []
         self.results.append(result)
 
-    def _remove_result(self, result: Result) -> None:
+    def _remove_result(self, result: Winner) -> None:
         """Remove a single result.
         Only called by result object"""
         self.results.remove(result)
 
 
 def get_actual_exhibitor(
-    first_name: Name, last_name: Name, other_names: List = []
+    first_name: Name, last_name: Name, other_names: List[Name] = []
 ) -> Exhibitor:
     """Return either a new Exhibitor object storing it in the lists
     of exhibitors or, if one already exists,
     the actual exhibitor stored by the Show
     """
-    match = Exhibitor(
-        first_name, last_name, other_names if other_names else None
-    )
+    match = Exhibitor(first_name, last_name, other_names)
     if match in exhibitors:
         index = exhibitors.index(match)
         return exhibitors[index]
@@ -124,7 +121,7 @@ class Section:
     section_id: str  # r"\D"
     description: str
     sub_sections: Dict[str, ShowClass] = field(default_factory=dict)
-    best: Optional["SectionWinner"] = None
+    best: Optional[SectionWinner] = None
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -135,7 +132,7 @@ class Section:
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
-    def _add_result(self, result: Result) -> None:
+    def _add_result(self, result: SectionWinner) -> None:
         """Add a single result.
         Only called by result object"""
         self.best = result
@@ -172,10 +169,11 @@ class ShowClass:
     def remove_results(self) -> None:
         """Remove any existing results"""
         for winner in self.results:
-            winner.remove.result()
-        self.results == []
+            winner._remove_result()
+        self.results = []
+        save_show_data()
 
-    def _add_result(self, result: Result) -> None:
+    def _add_result(self, result: Winner) -> None:
         """Add a single result.
         Only called by the result object"""
         if not self.results:
@@ -193,11 +191,11 @@ class ShowClass:
 
 def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
-    with open(file, encoding="UTF-8") as data:
-        date_line = parse(data.readline().rstrip())
+    with open(file, encoding="UTF-8") as datafile:
+        date_line = parse(datafile.readline().rstrip())
         date = date_line.date()
         new_schedule = Schedule(date.year, date)
-        for line in data:
+        for line in datafile:
             if line.startswith("Section"):
                 _, section_id, *rest = line.split()
                 section_id = section_id[0]  # 1 char section id
@@ -224,9 +222,10 @@ class Entry:
     show_class: ShowClass
     count: int = 1
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Link to collections in exhibitor and show class"""
         self.exhibitor._add_entry(self)
+        save_show_data()
 
     def __repr__(self) -> str:
         return f"Entry({self.exhibitor}, {self.show_class}, {self.count})"
@@ -236,46 +235,29 @@ class Entry:
 
 
 @dataclass
-class Result(ABC):
-    """Abstract bas class for Winner and SectionWinner"""
-
-    exhibitor: Exhibitor
-    target: ShowClass | Section
-
-    def __post_init__(self):
-        """Link to collections in exhibitor and target"""
-        self.exhibitor._add_result(self)
-        self.target._add_result(self)
-
-    def remove_result(self) -> None:
-        """Unlink this result from exhibitor and target"""
-        self.exhibitor._remove_result(self)
-
-
-@dataclass
 class Winner:
     """Winning result for a Show_Class."""
 
     exhibitor: Exhibitor
-    show_class: ShowClass | Section
+    show_class: ShowClass
     place: str  # one of ["1st", "2nd", "3rd", "1st="]
     points: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Link to collections in exhibitor and target"""
         self.exhibitor._add_result(self)
         self.show_class._add_result(self)
+        save_show_data()
 
-    def remove_result(self) -> None:
-        """Unlink this result from exhibitor and target"""
+    def _remove_result(self) -> None:
+        """Unlink this result from exhibitor.
+        Only called from show class"""
         self.exhibitor._remove_result(self)
 
 
 @dataclass
-class SectionWinner(Result):
+class SectionWinner:
     """Winning result for a Show Section (best in section)"""
-
-    pass
 
 
 def _load_data() -> ShowData:
@@ -290,13 +272,13 @@ def _load_data() -> ShowData:
     return data
 
 
-data: ShowData = _load_data()
+showdata: ShowData = _load_data()
 # All the show data in these two objects
-schedule: Schedule = data.schedule
-exhibitors: List[Exhibitor] = data.exhibitors
+schedule: Schedule = showdata.schedule
+exhibitors: List[Exhibitor] = showdata.exhibitors
 
 
 def save_show_data() -> None:
     """Back up schedule to disk"""
     with open(SAVEDDATA, "wb") as save_file:
-        pickle.dump(data, save_file)
+        pickle.dump(showdata, save_file)
