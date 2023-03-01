@@ -271,7 +271,7 @@ def _load_show_data() -> ShowData:
         save_show_data(data)
     else:
         with open(SAVEDDATA, "rb") as read_file:
-            data = ShowData._make(pickle.load(read_file))
+            data = ShowData(*pickle.load(read_file))
     return data
 
 
