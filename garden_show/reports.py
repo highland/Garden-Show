@@ -4,7 +4,7 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
-import Show
+from garden_show import Show
 
 
 def show_results_by_class():

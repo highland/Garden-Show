@@ -12,7 +12,7 @@ As the entries rely on a stable schedule,
 @author: Mark
 """
 from typing import Optional, List, Tuple, Literal
-import Show
+from garden_show import Show
 
 Exhibitor_name = str
 Entry_count = Literal["1", "2"]
@@ -22,26 +22,20 @@ Section_id = str  # r"\D"
 
 def exhibitor_check(
     name: Exhibitor_name,
-) -> Optional[Tuple[bool, List[Tuple[Class_id, str, Entry_count]]]]:
+) -> [Tuple[bool, List[Tuple[Class_id, str, Entry_count]]]]:
     """
     If the exhibitor exists, return their entries, else None.
     """
-    try:
-        first, *other, last = name.split()
-    except ValueError:  # invalid name - need at least first & last
-        return None, []
-    test_exhibitor = Show.Exhibitor(first, last, other)
-    if test_exhibitor in Show.exhibitors:
-        exhibitor = Show.get_actual_exhibitor(first, last, other)
-        return exhibitor.member, [
-            (
-                entry.show_class.class_id,
-                get_class_description(entry.show_class.class_id),
-                str(entry.count),
-            )
-            for entry in exhibitor.entries
-        ]
-    return None
+
+    exhibitor = Show.get_actual_exhibitor(name)
+    return exhibitor.member, [
+        (
+            entry.show_class.class_id,
+            get_class_description(entry.show_class.class_id),
+            str(entry.count),
+        )
+        for entry in exhibitor.entries
+    ]
 
 
 def get_class_description(show_class_id: Class_id) -> str:
@@ -77,8 +71,7 @@ def add_exhibitor_and_entries(
 ) -> None:
     """Add new exhibitor (removing previous entries if they exist)
     Create Entries."""
-    first, *other, last = name.split()
-    exhibitor = Show.get_actual_exhibitor(first, last, other)
+    exhibitor = Show.get_actual_exhibitor(name)
     exhibitor.member = is_member
     exhibitor.delete_entries()
     Show.exhibitors.append(exhibitor)

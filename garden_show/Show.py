@@ -13,13 +13,12 @@ from typing import Dict, List, Optional, Any
 from collections import namedtuple
 from dateutil.parser import parse
 
-from configuration import (
+from garden_show.configuration import (
     SCHEDULEFILE,
     SAVEDDATA,
 )
 
 Name = str
-ShowData = namedtuple("ShowData", "schedule, exhibitors")
 
 
 @dataclass
@@ -48,7 +47,7 @@ class Exhibitor:
 
     @property
     def full_name(self) -> Name:
-        """ Return names as a single full name """
+        """Return names as a single full name"""
         if self.other_names:
             middle = " " + "".join(self.other_names) + " "
         else:
@@ -63,7 +62,7 @@ class Exhibitor:
         Remove the entries for this exhibitor
         """
         self.entries = []  # none left
-        save_show_data()
+        save_show_data(showdata)
 
     def _add_entry(self, entry: Entry) -> None:
         """Add a single entry.
@@ -83,13 +82,12 @@ class Exhibitor:
         self.results.remove(result)
 
 
-def get_actual_exhibitor(
-    first_name: Name, last_name: Name, other_names: List[Name] = []
-) -> Exhibitor:
+def get_actual_exhibitor(name: Name) -> Exhibitor:
     """Return either a new Exhibitor object storing it in the lists
     of exhibitors or, if one already exists,
     the actual exhibitor stored by the Show
     """
+    first_name, *other_names, last_name = name.split()
     match = Exhibitor(first_name, last_name, other_names)
     if match in exhibitors:
         index = exhibitors.index(match)
@@ -156,8 +154,7 @@ class ShowClass:
         for index, name in enumerate(winners):
             if name == "None" or not name:
                 break
-            first, *other, last = name.split()
-            exhibitor = get_actual_exhibitor(first, last, other)
+            exhibitor = get_actual_exhibitor(name)
             if has_first_equal:
                 place = ("1st=", "1st=", "3rd")[index]
                 points = (3, 3, 1)[index]
@@ -171,7 +168,7 @@ class ShowClass:
         for winner in self.results:
             winner._remove_result()
         self.results = []
-        save_show_data()
+        save_show_data(showdata)
 
     def _add_result(self, result: Winner) -> None:
         """Add a single result.
@@ -179,9 +176,6 @@ class ShowClass:
         if not self.results:
             self.results = []
         self.results.append(result)
-
-    def __repr__(self) -> str:
-        return f"{self.class_id}\t{self.description}"
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ShowClass):
@@ -225,7 +219,7 @@ class Entry:
     def __post_init__(self) -> None:
         """Link to collections in exhibitor and show class"""
         self.exhibitor._add_entry(self)
-        save_show_data()
+        save_show_data(showdata)
 
     def __repr__(self) -> str:
         return f"Entry({self.exhibitor}, {self.show_class}, {self.count})"
@@ -247,7 +241,7 @@ class Winner:
         """Link to collections in exhibitor and target"""
         self.exhibitor._add_result(self)
         self.show_class._add_result(self)
-        save_show_data()
+        save_show_data(showdata)
 
     def _remove_result(self) -> None:
         """Unlink this result from exhibitor.
@@ -260,25 +254,28 @@ class SectionWinner:
     """Winning result for a Show Section (best in section)"""
 
 
-def _load_data() -> ShowData:
+ShowData = namedtuple("ShowData", "schedule, exhibitors")
+
+
+def save_show_data(showdata: ShowData) -> None:
+    """Back up schedule to disk"""
+    with open(SAVEDDATA, "wb") as save_file:
+        pickle.dump(showdata, save_file)
+
+
+def _load_show_data() -> ShowData:
     """Load schedule from disk"""
     if not os.path.exists(SAVEDDATA):  # not yet loaded from file
         new_schedule = _load_schedule_from_file()
         data = ShowData(new_schedule, [])
-        save_show_data()
+        save_show_data(data)
     else:
         with open(SAVEDDATA, "rb") as read_file:
             data = ShowData._make(pickle.load(read_file))
     return data
 
 
-showdata: ShowData = _load_data()
+showdata: ShowData = _load_show_data()
 # All the show data in these two objects
 schedule: Schedule = showdata.schedule
 exhibitors: List[Exhibitor] = showdata.exhibitors
-
-
-def save_show_data() -> None:
-    """Back up schedule to disk"""
-    with open(SAVEDDATA, "wb") as save_file:
-        pickle.dump(showdata, save_file)
