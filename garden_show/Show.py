@@ -121,10 +121,10 @@ class Section:
     sub_sections: Dict[str, ShowClass] = field(default_factory=dict)
     best: Optional[SectionWinner] = None
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         display = "\n".join(
             [
-                f"\t\t{sub_section}"
+                f"\t{sub_section}"
                 for sub_section in self.sub_sections.values()
             ]
         )
@@ -182,6 +182,11 @@ class ShowClass:
             return NotImplemented
         return self.class_id == other.class_id
 
+    def __str__(self) -> str:
+        firstline = f"{self.class_id}\t{self.description}"
+        resultlines = "/n".join([f"{result}" for result in self.results])
+        return firstline + resultlines
+
 
 def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
@@ -220,12 +225,6 @@ class Entry:
         """Link to collections in exhibitor and show class"""
         self.exhibitor._add_entry(self)
         save_show_data(showdata)
-
-    def __repr__(self) -> str:
-        return f"Entry({self.exhibitor}, {self.show_class}, {self.count})"
-
-    def __str__(self) -> str:
-        return f"{self.exhibitor}{repr(self.show_class)}\t{self.count}"
 
 
 @dataclass

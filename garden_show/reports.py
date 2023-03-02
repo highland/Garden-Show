@@ -52,29 +52,6 @@ def show_entries_by_exhibitor():
                 )
 
 
-def show_schedule():
-    print(
-        f"""
-        Show Schedule for {Show.schedule.year}
-        ======================
-        """
-    )
-    print(Show.schedule.date)
-    sections = sorted(
-        list(Show.schedule.sections.values()),
-        key=lambda section: section.section_id,
-    )
-    for section in sections:
-        classes = sorted(
-            list(section.sub_sections.values()),
-            key=lambda show_class: int(show_class.class_id[1:]),
-        )
-        print(f"Section {section.section_id}: {section.description}")
-        for show_class in classes:
-            print(f"{show_class.class_id}\t{show_class.description}")
-
-
 show_results_by_class()
 show_results_by_exhibitor()
 show_entries_by_exhibitor()
-show_schedule()

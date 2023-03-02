@@ -1,10 +1,14 @@
-#!/usr/bin/env python
-
 import unittest
 from garden_show import Show
 
 
 class TestWinner(unittest.TestCase):
+    """The Winner class is responsible for connecting itself to
+    the exhibitor and the show class on contruction.
+    This is done by a __post_init__ method.
+    In addition the Winner must ensute that it connects to the correct
+    exhibitor instance."""
+
     def setUp(self) -> None:
         self.testclass = Show.schedule.classes["A1"]
         self.winnername = "Mark Thomas"
@@ -19,12 +23,12 @@ class TestWinner(unittest.TestCase):
         self.testclass.remove_results()
 
     def test_post_init(self) -> None:
-        self.testexhibitor = Show.get_actual_exhibitor(self.winnername)
-        testwinner = Show.Winner(self.testexhibitor, self.testclass, "1st", 3)
+        testexhibitor = Show.get_actual_exhibitor(self.winnername)
+        testwinner = Show.Winner(testexhibitor, self.testclass, "1st", 3)
 
         self.assertIn(
             testwinner,
-            self.testexhibitor.results,
+            testexhibitor.results,
             "Link from Exhibitor to Winner not created",
         )
         self.assertIn(
