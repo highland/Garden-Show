@@ -69,7 +69,8 @@ def _load_award_structure_from_file(file: str = AWARDFILE) -> List[Award]:
         award_structure = tomli.load(structurefile)
         awards = []
         for awardtype, data in award_structure["trophies"].items():
-            if awardtype == AwardType.BEST:
+            # TODO rosettes and cards
+            if awardtype == AwardType.BEST:     # TODO points version
                 for award in data:
                     if groups := award.get("section"):
                         group_type = GroupType("section")
