@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from collections import namedtuple
 from dateutil.parser import parse
+from strenum import StrEnum
 
 from garden_show.configuration import (
     SCHEDULEFILE,
@@ -19,6 +20,13 @@ from garden_show.configuration import (
 )
 
 Name = str
+
+
+class Place(StrEnum):
+    FIRST = "1st in "
+    SECOND = "2nd in "
+    THIRD = "3rd in "
+    EQUAL = "1st= in "
 
 
 @dataclass
@@ -156,12 +164,12 @@ class ShowClass:
                 break
             exhibitor = get_actual_exhibitor(name)
             if has_first_equal:
-                place = ("1st=", "1st=", "3rd")[index]
+                place = Place.THIRD if index == 2 else Place.EQUAL
                 points = (3, 3, 1)[index]
             else:
-                place = ("1st", "2nd", "3rd")[index]
+                place = Place.__members__[index]
                 points = (3, 2, 1)[index]
-            Winner(exhibitor, self, place, points)
+            Winner(exhibitor, place, self, points)
 
     def remove_results(self) -> None:
         """Remove any existing results"""
@@ -232,8 +240,8 @@ class Winner:
     """Winning result for a Show_Class."""
 
     exhibitor: Exhibitor
+    place: Place
     show_class: ShowClass
-    place: str  # one of ["1st", "2nd", "3rd", "1st="]
     points: int
 
     def __post_init__(self) -> None:
