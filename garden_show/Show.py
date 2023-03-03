@@ -42,7 +42,10 @@ class Exhibitor:
 
     def __repr__(self) -> str:
         if self.other_names:
-            return f"Exhibitor({self.first_name}, {self.last_name}, {self.other_names})"
+            return (
+                f"Exhibitor({self.first_name}, {self.last_name}, "
+                f"{self.other_names})"
+            )
         return f"Exhibitor({self.first_name}, {self.last_name})"
 
     def __eq__(self, other: object) -> bool:
@@ -131,10 +134,7 @@ class Section:
 
     def __str__(self) -> str:
         display = "\n".join(
-            [
-                f"\t{sub_section}"
-                for sub_section in self.sub_sections.values()
-            ]
+            [f"\t{sub_section}" for sub_section in self.sub_sections.values()]
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
