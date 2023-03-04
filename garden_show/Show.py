@@ -138,11 +138,6 @@ class Section:
         )
         return f"SECTION {self.section_id}\t{self.description}\n" f"{display}"
 
-    def _add_result(self, result: SectionWinner) -> None:
-        """Add a single result.
-        Only called by result object"""
-        self.best = result
-
 
 @dataclass
 class ShowClass:
