@@ -5,15 +5,15 @@ Module to hold data about awards made for show entries.
 @author: Mark
 """
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from garden_show.Show import Section, ShowClass
+from garden_show.Show import Section, ShowClass, Exhibitor
 from garden_show.configuration import AWARDFILE, AWARDDATA
 import pickle
 import os
 import tomli
 
-from typing import List
+from typing import List, Optional, Callable
 from strenum import StrEnum
 
 
@@ -34,6 +34,8 @@ class Award(ABC):
 
     type: AwardType
     in_group: Group
+    winner: Optional[Exhibitor] = None
+    _determine_winner = Optional[Callable] = None
 
 
 @dataclass
@@ -41,6 +43,7 @@ class Trophy(Award):
     """class for a trophy award"""
 
     title: str
+
 
 
 @dataclass
@@ -61,6 +64,11 @@ class Group:
     with_members: List[Section | ShowClass]
     group_type: GroupType
     description: str = ""
+
+
+def determine_award_winners() -> None:
+    for award in awards:
+        award._dertermine_winner()
 
 
 def _load_award_structure_from_file(file: str = AWARDFILE) -> List[Award]:
