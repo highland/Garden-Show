@@ -19,13 +19,14 @@ from flet import (
     app,
     ControlEvent,
 )
+
+import model
 from gui_support import (
     Show_class_results,
     NameChooser,
     name_hints,
     capture_input,
 )
-import model
 
 
 def get_section_description(event: ControlEvent) -> None:

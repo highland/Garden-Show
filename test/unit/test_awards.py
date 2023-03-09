@@ -1,5 +1,4 @@
 import unittest
-import garden_show.awards
 
 
 class MyTestCase(unittest.TestCase):

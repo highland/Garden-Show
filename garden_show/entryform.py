@@ -25,6 +25,7 @@ from flet import (
     TextCapitalization,
     Switch,
 )
+
 import model
 from gui_support import name_hints, NameChooser, capture_input
 

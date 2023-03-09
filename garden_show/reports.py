@@ -4,6 +4,8 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
+from pprint import pprint
+
 from garden_show import Show
 
 
@@ -18,7 +20,21 @@ def show_results_by_class():
         if show_class.results:
             print(f"class {show_class}")
             for result in show_class.results:
-                print(result)
+                pprint(result)
+
+
+def show_results_for_section(section_id):
+    print(
+        f"""
+        Results for section {section_id}
+        =====================
+        """
+    )
+    for show_class in Show.schedule.sections[section_id].sub_sections.values():
+        if show_class.results:
+            print(f"class {show_class}\n")
+            for result in show_class.results:
+                pprint(result)
 
 
 def show_results_by_exhibitor():
@@ -32,7 +48,7 @@ def show_results_by_exhibitor():
         if exhibitor.results:
             print(f"Exhibitor {exhibitor}")
             for result in exhibitor.results:
-                print(result)
+                pprint(result)
 
 
 def show_entries_by_exhibitor():

@@ -6,9 +6,11 @@ Gui support with flet extensions
 """
 
 from typing import Set, Tuple, List
+
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
-from configuration import NAMESFILE
+
 import model
+from configuration import NAMESFILE
 
 Class_id = str  # r"\D\d*"
 

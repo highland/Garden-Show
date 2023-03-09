@@ -5,12 +5,14 @@ Module to load and hold all show data
 @author: Mark
 """
 from __future__ import annotations
+
+import datetime
 import os
 import pickle
-import datetime
+from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
-from collections import namedtuple
+
 from dateutil.parser import parse
 from strenum import StrEnum
 
@@ -162,7 +164,7 @@ class ShowClass:
                 place = Place.THIRD if index == 2 else Place.EQUAL
                 points = (3, 3, 1)[index]
             else:
-                place = Place.__members__[index]
+                place = list(Place.__members__)[index]
                 points = (3, 2, 1)[index]
             Winner(exhibitor, place, self, points)
 
