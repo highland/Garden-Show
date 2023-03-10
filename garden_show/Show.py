@@ -31,6 +31,9 @@ class Place(StrEnum):
     EQUAL = "1st= in "
 
 
+places = Place.FIRST, Place.SECOND, Place.THIRD
+
+
 @dataclass
 class Exhibitor:
     """Exhibitor in the Garden Show"""
@@ -164,7 +167,7 @@ class ShowClass:
                 place = Place.THIRD if index == 2 else Place.EQUAL
                 points = (3, 3, 1)[index]
             else:
-                place = list(Place.__members__)[index]
+                place = places[index]
                 points = (3, 2, 1)[index]
             Winner(exhibitor, place, self, points)
 
@@ -251,6 +254,12 @@ class Winner:
         """Unlink this result from exhibitor.
         Only called from show class"""
         self.exhibitor._remove_result(self)
+
+    def __str__(self) -> str:
+        return (
+            f"{self.exhibitor.full_name} {self.place.value}"
+            f" in {self.show_class.class_id}"
+        )
 
 
 @dataclass

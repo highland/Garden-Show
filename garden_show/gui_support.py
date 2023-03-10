@@ -5,37 +5,52 @@ Gui support with flet extensions
 @author: Mark
 """
 
-from typing import Set, Tuple, List
+from typing import Set, Tuple, List, Dict
 
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 
-import model
-from configuration import NAMESFILE
+from garden_show.model import get_class_description
+from garden_show.configuration import NAMESFILE
 
 Class_id = str  # r"\D\d*"
+Name = str
+Initials = str  # r"\D*2"
 
 
 class NameChooser(TextField):
     """Allow fast entry of names by providing suggestions from a given set."""
 
-    def __init__(self, candidates: Set[str], **rest) -> None:
+    def __init__(self, candidates: Set[Name], **rest) -> None:
         super().__init__(**rest)
         self.candidates = candidates
+        self.initials = self._get_initials()
         self.on_change = self.offer_candidate
+
+    def _get_initials(self) -> Dict[Initials, Name]:
+        initials = dict()
+        for name in self.candidates:
+            first, *_, last = name.split()
+            initials[f"{first[0]}{last[0]}".upper()] = name
+        return initials
 
     def offer_candidate(self, _: ControlEvent) -> None:
         """Capture input as it is entered and supply completion suggestions."""
-        input_so_far = self.value.upper()
+        matches = []
+        input_so_far = self.value.strip().upper()
         if input_so_far == "=":  # special value
             self.value = ""
             self.on_special(input_so_far)
             return None
-        matches = [
+        if len(input_so_far) == 2:
+            name = self.initials.get(input_so_far.upper())
+            if name:
+                matches.append(name)
+        matches = matches + [
             name
             for name in self.candidates
             if name.upper().startswith(input_so_far)
         ]
-        if len(matches) == 1:
+        if matches:
             self.helper_text = matches[0]
         else:
             self.helper_text = ""
@@ -45,7 +60,7 @@ class NameChooser(TextField):
         raise NotImplementedError()
 
     def save_names(self) -> None:
-        name_list = list(self.candidates)
+        name_list = list(self.candidates + name_hints)
         name_list.sort()
         names_string = "\n".join(name_list)
         with open(NAMESFILE, "w", encoding="UTF-8") as name_output:
@@ -56,28 +71,42 @@ def capture_input(event: ControlEvent) -> None:
     """To be called first on on_blur, or on_submit
     in order to pick up value from hints"""
 
+    def _matches(offer: str, value: str) -> bool:
+        """inner function to determine if we have a match."""
+        if not offer:
+            return False
+        if offer.upper().startswith(target.value.strip().upper()):
+            return True
+        first, *_, last = value
+        if f"{first[0]}{last[0]}".upper() in target.initials:
+            return True
+
     target = event.control
     if not target.value:  # nothing to capture
         return None
     offer = target.helper_text
     target.helper_text = ""
-    if offer and offer.upper().startswith(target.value.upper()):
+    if _matches(offer, target.value):
         target.value = offer
-    target.candidates.add(target.value)
-    target.save_names()
+    if target.value not in target.candidates:
+        target.candidates.add(target.value)
+        target.initials = target._get_initials()
+        target.save_names()
     target.update()
 
 
 class Show_class_results(UserControl):
     """Allow entry of winners for a show class"""
 
-    def __init__(self, class_id: Class_id, names: List[str] = []) -> None:
+    def __init__(
+        self, class_id: Class_id, hints: Set[Name], names: List[str] = []
+    ) -> None:
         super().__init__()
         self.class_id = class_id
         self.winners = (
-            NameChooser(name_hints),
-            NameChooser(name_hints),
-            NameChooser(name_hints),
+            NameChooser(hints),
+            NameChooser(hints),
+            NameChooser(hints),
         )
         if names:  # previous entry
             for winner, name in zip(self.winners, names):
@@ -97,8 +126,9 @@ class Show_class_results(UserControl):
                 Row(
                     [
                         Text(
-                            f"{self.class_id}\t{model.get_class_description(self.class_id)}",
-                            size=16, width=250,
+                            f"{self.class_id}\t{get_class_description(self.class_id)}",
+                            size=16,
+                            width=250,
                         ),
                         *self.winners,
                     ]
@@ -127,13 +157,13 @@ class Show_class_results(UserControl):
             winners.update()
 
 
-def _get_names() -> Set[str]:
-    names: Set[str] = set()
+def _get_names() -> Set[Name]:
+    names = set()
     with open(NAMESFILE, encoding="UTF-8") as name_input:
         for name in name_input:
-            names.add(name.rstrip())
+            names.add(name.strip())
     return names
 
 
 # Used for hints in name input
-name_hints: Set[str] = _get_names()
+name_hints: Set[Name] = _get_names()

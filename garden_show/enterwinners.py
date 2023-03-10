@@ -20,13 +20,24 @@ from flet import (
     ControlEvent,
 )
 
-import model
-from gui_support import (
+import garden_show.model
+from garden_show.gui_support import (
     Show_class_results,
     NameChooser,
     name_hints,
     capture_input,
 )
+
+from typing import Set
+
+Section_id = str  # r"\D"
+Name = str
+hints = Set[Name]
+
+
+def get_section_hints(section_id: Section_id) -> None:
+    global hints
+    hints = garden_show.model.get_section_entries(section_id)
 
 
 def get_section_description(event: ControlEvent) -> None:
@@ -36,7 +47,9 @@ def get_section_description(event: ControlEvent) -> None:
         return None
     new_section()
     section.value = section_entered = section.value[-1].upper()
-    description.value = model.get_section_description(section_entered)
+    description.value = garden_show.model.get_section_description(
+        section_entered
+    )
     if description.value.startswith("No such"):
         section.value = ""
         section.focus()
@@ -54,17 +67,24 @@ def capture_input_and_populate_page(event: ControlEvent) -> None:
 def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
-    if previous_results := model.get_previous_winners(
+    global hints
+    if previous_results := garden_show.model.get_previous_winners(
         section.value
     ):  # editing previous results
         best, class_bests = previous_results
         section_winner.value = best
         for class_id, names in class_bests:
-            get_names.controls.append(Show_class_results(class_id, names))
+            get_names.controls.append(
+                Show_class_results(class_id, hints, names)
+            )
     else:
         if not get_names.controls:  # empty so far
-            for show_class in model.get_section_classes(section.value):
-                get_names.controls.append(Show_class_results(show_class))
+            for show_class in garden_show.model.get_section_classes(
+                section.value
+            ):
+                get_names.controls.append(
+                    Show_class_results(show_class, hints)
+                )
             section_winner.read_only = True
     event.page.update()
 
@@ -73,7 +93,9 @@ def post_to_model(event: ControlEvent) -> None:
     if not section.value or not get_names.controls:
         return None
     if section_winner.value:
-        model.add_section_winner(section.value, section_winner.value)
+        garden_show.model.add_section_winner(
+            section.value, section_winner.value
+        )
     winner_list = [
         (
             result.class_id,
@@ -82,10 +104,8 @@ def post_to_model(event: ControlEvent) -> None:
         )
         for result in get_names.controls
         if result.winners[0].value != "None"
-        and result.winners[1].value
-        and result.winners[2].value
     ]
-    model.add_class_winners(winner_list)
+    garden_show.model.add_class_winners(winner_list)
     clear_all(event)
 
 

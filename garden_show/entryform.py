@@ -26,8 +26,8 @@ from flet import (
     Switch,
 )
 
-import model
-from gui_support import name_hints, NameChooser, capture_input
+import garden_show.model
+import garden_show.gui_support
 
 
 class Entry(UserControl):
@@ -80,9 +80,9 @@ class Entry(UserControl):
 
 
 def check_existing_exhibitor(event: ControlEvent) -> None:
-    capture_input(event)
+    garden_show.gui_support.capture_input(event)
     name = exhibitor_name.value
-    is_member, values = model.exhibitor_check(name)
+    is_member, values = garden_show.model.exhibitor_check(name)
     if values:  # already entered
         member.value = is_member
         entries.controls = [Entry(*value) for value in values]
@@ -143,7 +143,7 @@ def post_to_model(event: ControlEvent) -> None:
     if not exhibitor_name.value or not entries.controls:
         return None
     entry_list = [(entry.entry, entry.how_many) for entry in entries.controls]
-    model.add_exhibitor_and_entries(
+    garden_show.model.add_exhibitor_and_entries(
         exhibitor_name.value, member.value, entry_list
     )
     clear_all(event)
@@ -151,7 +151,7 @@ def post_to_model(event: ControlEvent) -> None:
 
 def set_description(event: ControlEvent) -> None:
     class_entered = display_class.value
-    description.value = model.get_class_description(class_entered)
+    description.value = garden_show.model.get_class_description(class_entered)
     if description.value.startswith("No such"):
         display_class.value = ""
     event.page.update()
@@ -159,7 +159,9 @@ def set_description(event: ControlEvent) -> None:
 
 title = Text("Entry Form", style=TextThemeStyle.HEADLINE_SMALL)
 # first line
-exhibitor_name = NameChooser(name_hints)
+exhibitor_name = garden_show.gui_support.NameChooser(
+    garden_show.gui_support.name_hints
+)
 exhibitor_name.label = "Name"
 exhibitor_name.autofocus = True
 exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exhibitor

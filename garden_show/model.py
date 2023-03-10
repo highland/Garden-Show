@@ -11,12 +11,12 @@ As the entries rely on a stable schedule,
 
 @author: Mark
 """
-from typing import Optional, List, Tuple, Literal
+from typing import Optional, List, Tuple, Set
 
 from garden_show import Show
 
 Exhibitor_name = str
-Entry_count = Literal["1", "2"]
+Entry_count = str  # "1" or "2"
 Class_id = str  # r'\D\d*'
 Section_id = str  # r"\D"
 
@@ -65,6 +65,15 @@ def get_section_classes(section_id: Section_id) -> List[Class_id]:
     ]
 
 
+def get_section_entries(section_id: Section_id) -> Set[Exhibitor_name]:
+    members = set()
+    section = Show.schedule.sections[section_id]
+    for show_class in section.sub_sections.values():
+        for entry in show_class:
+            members.add(entry.member.full_name)
+    return members
+
+
 def add_exhibitor_and_entries(
     name: Exhibitor_name,
     is_member: bool,
@@ -83,7 +92,7 @@ def add_exhibitor_and_entries(
 def get_previous_winners(
     section_id: Section_id,
 ) -> Optional[
-    Tuple[Exhibitor_name, List[Tuple[Class_id, Tuple[Exhibitor_name]]]]
+    Tuple[Exhibitor_name, List[Tuple[Class_id, List[Exhibitor_name]]]]
 ]:
     """
     If the section has winners, return the section winner
@@ -101,7 +110,7 @@ def get_previous_winners(
         section_results.append(
             (
                 show_class.class_id,
-                (winner.exhibitor.full_name for winner in show_class.results),
+                [winner.exhibitor.full_name for winner in show_class.results],
             )
         )
     return winner_name, section_results
