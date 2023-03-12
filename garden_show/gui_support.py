@@ -20,11 +20,20 @@ Initials = str  # r"\D*2"
 class NameChooser(TextField):
     """Allow fast entry of names by providing suggestions from a given set."""
 
-    def __init__(self, candidates: Set[Name], **rest) -> None:
+    def __init__(self, **rest) -> None:
         super().__init__(**rest)
-        self.candidates = candidates
+        self.candidates = self._get_names()
+        print(self.candidates)
         self.initials = self._get_initials()
         self.on_change = self.offer_candidate
+
+    def _get_names(self) -> Set[Name]:
+        names = set()
+        with open(NAMESFILE, encoding="UTF-8") as name_input:
+            for name in name_input:
+                if name:
+                    names.add(name.strip())
+        return names
 
     def _get_initials(self) -> Dict[Initials, Name]:
         initials = dict()
@@ -60,7 +69,7 @@ class NameChooser(TextField):
         raise NotImplementedError()
 
     def save_names(self) -> None:
-        name_list = list(self.candidates + name_hints)
+        name_list = list(self.candidates)
         name_list.sort()
         names_string = "\n".join(name_list)
         with open(NAMESFILE, "w", encoding="UTF-8") as name_output:
@@ -98,15 +107,13 @@ def capture_input(event: ControlEvent) -> None:
 class Show_class_results(UserControl):
     """Allow entry of winners for a show class"""
 
-    def __init__(
-        self, class_id: Class_id, hints: Set[Name], names: List[str] = []
-    ) -> None:
+    def __init__(self, class_id: Class_id, names: List[str] = []) -> None:
         super().__init__()
         self.class_id = class_id
         self.winners = (
-            NameChooser(hints),
-            NameChooser(hints),
-            NameChooser(hints),
+            NameChooser(),
+            NameChooser(),
+            NameChooser(),
         )
         if names:  # previous entry
             for winner, name in zip(self.winners, names):
@@ -155,15 +162,3 @@ class Show_class_results(UserControl):
             else:
                 winners[2].value = winners[1].value  # copy second entry
             winners.update()
-
-
-def _get_names() -> Set[Name]:
-    names = set()
-    with open(NAMESFILE, encoding="UTF-8") as name_input:
-        for name in name_input:
-            names.add(name.strip())
-    return names
-
-
-# Used for hints in name input
-name_hints: Set[Name] = _get_names()

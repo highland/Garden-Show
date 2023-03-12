@@ -23,16 +23,8 @@ from flet import (
 import garden_show.model as model
 import garden_show.gui_support as gui_support
 
-from typing import Set
-
 Section_id = str  # r"\D"
 Name = str
-hints = Set[Name]
-
-
-def get_section_hints(section_id: Section_id) -> None:
-    global hints
-    hints = model.get_section_entries(section_id)
 
 
 def get_section_description(event: ControlEvent) -> None:
@@ -46,30 +38,24 @@ def get_section_description(event: ControlEvent) -> None:
     if description.value.startswith("No such"):
         section.value = ""
         section.focus()
-    event.page.update()
-
-
-def capture_input_and_populate_page(event: ControlEvent) -> None:
-    """Combining callbacks"""
-    gui_support.capture_input(event)
-    populate_page(event)
+    else:
+        populate_page(event)
 
 
 def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
-    global hints
     if previous_results := model.get_previous_winners(section.value):
         # editing previous results
         for class_id, names in previous_results:
             get_names.controls.append(
-                gui_support.Show_class_results(class_id, hints, names)
+                gui_support.Show_class_results(class_id, names)
             )
     else:
         if not get_names.controls:  # empty so far
             for show_class in model.get_section_classes(section.value):
                 get_names.controls.append(
-                    gui_support.Show_class_results(show_class, hints)
+                    gui_support.Show_class_results(show_class)
                 )
     event.page.update()
 

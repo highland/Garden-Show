@@ -159,9 +159,7 @@ def set_description(event: ControlEvent) -> None:
 
 title = Text("Entry Form", style=TextThemeStyle.HEADLINE_SMALL)
 # first line
-exhibitor_name = garden_show.gui_support.NameChooser(
-    garden_show.gui_support.name_hints
-)
+exhibitor_name = garden_show.gui_support.NameChooser()
 exhibitor_name.label = "Name"
 exhibitor_name.autofocus = True
 exhibitor_name.on_submit = exhibitor_name.on_blur = check_existing_exhibitor
