@@ -53,6 +53,9 @@ class Exhibitor:
             )
         return f"Exhibitor({self.first_name}, {self.last_name})"
 
+    def __str__(self) -> str:
+        return self.full_name
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Exhibitor):
             return NotImplemented

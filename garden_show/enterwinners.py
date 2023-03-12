@@ -20,13 +20,8 @@ from flet import (
     ControlEvent,
 )
 
-import garden_show.model
-from garden_show.gui_support import (
-    Show_class_results,
-    NameChooser,
-    name_hints,
-    capture_input,
-)
+import garden_show.model as model
+import garden_show.gui_support as gui_support
 
 from typing import Set
 
@@ -37,7 +32,7 @@ hints = Set[Name]
 
 def get_section_hints(section_id: Section_id) -> None:
     global hints
-    hints = garden_show.model.get_section_entries(section_id)
+    hints = model.get_section_entries(section_id)
 
 
 def get_section_description(event: ControlEvent) -> None:
@@ -47,20 +42,16 @@ def get_section_description(event: ControlEvent) -> None:
         return None
     new_section()
     section.value = section_entered = section.value[-1].upper()
-    description.value = garden_show.model.get_section_description(
-        section_entered
-    )
+    description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
         section.value = ""
         section.focus()
-    else:
-        section_winner.focus()
     event.page.update()
 
 
 def capture_input_and_populate_page(event: ControlEvent) -> None:
     """Combining callbacks"""
-    capture_input(event)
+    gui_support.capture_input(event)
     populate_page(event)
 
 
@@ -68,34 +59,24 @@ def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
     global hints
-    if previous_results := garden_show.model.get_previous_winners(
-        section.value
-    ):  # editing previous results
-        best, class_bests = previous_results
-        section_winner.value = best
-        for class_id, names in class_bests:
+    if previous_results := model.get_previous_winners(section.value):
+        # editing previous results
+        for class_id, names in previous_results:
             get_names.controls.append(
-                Show_class_results(class_id, hints, names)
+                gui_support.Show_class_results(class_id, hints, names)
             )
     else:
         if not get_names.controls:  # empty so far
-            for show_class in garden_show.model.get_section_classes(
-                section.value
-            ):
+            for show_class in model.get_section_classes(section.value):
                 get_names.controls.append(
-                    Show_class_results(show_class, hints)
+                    gui_support.Show_class_results(show_class, hints)
                 )
-            section_winner.read_only = True
     event.page.update()
 
 
 def post_to_model(event: ControlEvent) -> None:
-    if not section.value or not get_names.controls:
+    if not get_names.controls:
         return None
-    if section_winner.value:
-        garden_show.model.add_section_winner(
-            section.value, section_winner.value
-        )
     winner_list = [
         (
             result.class_id,
@@ -105,7 +86,7 @@ def post_to_model(event: ControlEvent) -> None:
         for result in get_names.controls
         if result.winners[0].value != "None"
     ]
-    garden_show.model.add_class_winners(winner_list)
+    model.add_class_winners(winner_list)
     clear_all(event)
 
 
@@ -118,9 +99,7 @@ def clear_all(event: ControlEvent) -> None:
 
 def new_section() -> None:
     description.value = ""
-    section_winner.value = ""
     get_names.controls = []
-    section_winner.read_only = False
 
 
 title = Text("Enter Section Winners", style=TextThemeStyle.HEADLINE_SMALL)
@@ -132,19 +111,12 @@ section = TextField(
     on_blur=get_section_description,
     on_submit=get_section_description,
 )
+
 description = Text(width=800, size=16)
-section_winner = NameChooser(name_hints)
-section_winner.label = "Best in Section"
-section_winner.height = 50
-section_winner.on_blur = (
-    section_winner.on_submit
-) = capture_input_and_populate_page
 
 get_names = Column()
 entry_box = ListView(
-    controls=[
-        get_names,
-    ],
+    controls=[get_names],
     height=500,
     auto_scroll=True,
 )
@@ -167,9 +139,7 @@ def main(page: Page) -> None:
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
     page.add(title)
-    #    page.add(Show_class_results("A1"))
-
-    page.add(Row([section, description, section_winner]))
+    page.add(Row([section, description]))
     page.add(entry_box)
     page.add(Row([cancel, save]))
     page.update()

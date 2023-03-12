@@ -16,6 +16,8 @@ from typing import Optional, List, Tuple, Set
 from garden_show import Show
 
 Exhibitor_name = str
+Section_winner = Exhibitor_name
+Class_winner = Exhibitor_name
 Entry_count = str  # "1" or "2"
 Class_id = str  # r'\D\d*'
 Section_id = str  # r"\D"
@@ -66,6 +68,7 @@ def get_section_classes(section_id: Section_id) -> List[Class_id]:
 
 
 def get_section_entries(section_id: Section_id) -> Set[Exhibitor_name]:
+    """Return all exhibitors who have entries in the given section"""
     members = set()
     section = Show.schedule.sections[section_id]
     for show_class in section.sub_sections.values():
@@ -91,29 +94,20 @@ def add_exhibitor_and_entries(
 
 def get_previous_winners(
     section_id: Section_id,
-) -> Optional[
-    Tuple[Exhibitor_name, List[Tuple[Class_id, List[Exhibitor_name]]]]
-]:
+) -> Optional[List[Tuple[Class_id, List[Class_winner]]]]:
     """
     If the section has winners, return the section winner
     and all the winners for classes in that section.
     """
     section = Show.schedule.sections[section_id]
-    section_winner = section.best
-    winner_name = (
-        section_winner.best.exhibitor.full_name if section_winner else None
-    )
-    section_results = []
-    for show_class in section.sub_sections.values():
-        if not show_class.results:
-            return None
-        section_results.append(
-            (
-                show_class.class_id,
-                [winner.exhibitor.full_name for winner in show_class.results],
-            )
+    return [
+        (
+            show_class.class_id,
+            [winner.exhibitor.full_name for winner in show_class.results],
         )
-    return winner_name, section_results
+        for show_class in section.sub_sections.values()
+        if show_class.results
+    ]
 
 
 def add_class_winners(
@@ -124,10 +118,3 @@ def add_class_winners(
         class_id, winners, has_first_equal = class_winners
         show_class = Show.schedule.classes[class_id]
         show_class.add_winners(winners, has_first_equal)
-
-
-def add_section_winner(section_id: Section_id, name: Exhibitor_name) -> None:
-    """Add winner (removing previous winner if they exist)
-    Create Winner and connect to both Exhibitor and Section."""
-    section = Show.schedule.sections[section_id]
-    section.add_winner(name)
