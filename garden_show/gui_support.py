@@ -5,7 +5,7 @@ Gui support with flet extensions
 @author: Mark
 """
 
-from typing import Set, Tuple, List, Dict
+from typing import Set, List, Dict
 
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 
@@ -23,7 +23,6 @@ class NameChooser(TextField):
     def __init__(self, **rest) -> None:
         super().__init__(**rest)
         self.candidates = self._get_names()
-        print(self.candidates)
         self.initials = self._get_initials()
         self.on_change = self.offer_candidate
 
@@ -42,13 +41,13 @@ class NameChooser(TextField):
             initials[f"{first[0]}{last[0]}".upper()] = name
         return initials
 
-    def offer_candidate(self, _: ControlEvent) -> None:
+    def offer_candidate(self, event: ControlEvent) -> None:
         """Capture input as it is entered and supply completion suggestions."""
         matches = []
         input_so_far = self.value.strip().upper()
         if input_so_far == "=":  # special value
             self.value = ""
-            self.on_special(input_so_far)
+            self.on_special(event, input_so_far)
             return None
         if len(input_so_far) == 2:
             name = self.initials.get(input_so_far.upper())
@@ -65,7 +64,7 @@ class NameChooser(TextField):
             self.helper_text = ""
         self.update()
 
-    def on_special(self, keys: str) -> None:
+    def on_special(self, event: ControlEvent, keys: str) -> None:
         raise NotImplementedError()
 
     def save_names(self) -> None:
@@ -110,11 +109,11 @@ class Show_class_results(UserControl):
     def __init__(self, class_id: Class_id, names: List[str] = []) -> None:
         super().__init__()
         self.class_id = class_id
-        self.winners = (
+        self.winners = [
             NameChooser(),
             NameChooser(),
             NameChooser(),
-        )
+        ]
         if names:  # previous entry
             for winner, name in zip(self.winners, names):
                 winner.value = name
@@ -122,9 +121,7 @@ class Show_class_results(UserControl):
     def build(self) -> Column:
         labels = ("First", "Second", "Third")
         for winner, label in zip(self.winners, labels):
-            winner.on_special = lambda target, keys: self.handle_ties(
-                target, keys, self.winners, labels
-            )
+            winner.on_special = self.handle_ties
             winner.on_blur = winner.on_submit = capture_input
             winner.height = 50
             winner.label = label
@@ -143,22 +140,18 @@ class Show_class_results(UserControl):
             ]
         )
 
-    def handle_ties(
-        self,
-        target: NameChooser,
-        keys: str,
-        winners: Tuple[NameChooser],
-        labels: Tuple[str],
-    ) -> None:
-        """Change the labels on input fields if there are ties for first
-        or second"""
-        if keys == "=":
-            if target is winners[0]:
-                labels = ("First equals", "First equals", "Third")
-                for winner, label in zip(winners, labels):
-                    winner.label = label
-            elif target is winners[1]:
-                winners[1].value = winners[0].value  # copy first entry
-            else:
-                winners[2].value = winners[1].value  # copy second entry
-            winners.update()
+    def handle_ties(self, event: ControlEvent, _: str) -> None:
+        """Change the labels on input fields if there are ties for first"""
+        source = event.control
+        index = self.winners.index(source)
+        if index == 0:
+            labels = ("First equals", "First equals", "Third")
+            for winner, label in zip(self.winners, labels):
+                winner.label = label
+                winner.update()
+        elif index == 1:
+            self.winners[1].value = self.winners[0].value  # copy first entry
+            self.winners[1].update()
+        else:
+            self.winners[2].value = self.winners[1].value  # copy second entry
+            self.winners[2].update()
