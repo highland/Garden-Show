@@ -28,6 +28,7 @@ from flet import (
 
 import garden_show.model
 import garden_show.gui_support
+from garden_show.configuration import TITLE
 
 
 class Entry(UserControl):
@@ -206,7 +207,7 @@ def main(page: Page) -> None:
         None.
     """
 
-    page.title = "Badenoch Gardening Club"
+    page.title = TITLE
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
     page.add(title)

@@ -7,6 +7,8 @@ Locations of data files and Constants
 
 Date = str
 
+TITLE: str = "Badenoch Gardening Club"
+
 _ROOT: str = "D:/BGC Show/Garden-Show/Data"
 
 SCHEDULEFILE: str = _ROOT + "/schedule.txt"
