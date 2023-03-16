@@ -10,6 +10,7 @@ import pickle
 from abc import ABC
 from dataclasses import dataclass
 from typing import List, Optional, Callable, Tuple
+from pathlib import Path
 
 import tomli
 from strenum import StrEnum
@@ -22,7 +23,10 @@ Description = str
 Class_or_Section_id = str
 Trophy_name = str
 
-Bests = List[Tuple[Description, List[Class_or_Section_id], Trophy_name]]
+ClassId = str  # r'\D\d*'
+SectionId = str  # r"\D"
+ExhibitorName = str
+Bests = List[Tuple[Description, List[ClassId | SectionId], Trophy_name]]
 
 
 class AwardType(StrEnum):
@@ -41,7 +45,9 @@ class Award(ABC):
     (trophies, rosettes, etc.)."""
 
     type: AwardType
-    in_group: Group
+    with_members: List[Section | ShowClass]
+    group_type: GroupType
+    description: str = ""
     winner: Optional[Exhibitor] = None
     _determine_winner: Optional[Callable] = None
 
@@ -56,11 +62,6 @@ class Trophy(Award):
 @dataclass
 class Rosette(Award):
     """class for a rosette award"""
-
-
-@dataclass
-class Card(Award):
-    """class for a card award"""
 
 
 @dataclass
@@ -79,10 +80,10 @@ def determine_award_winners() -> None:
         award._determine_winner()
 
 
-def _load_award_structure_from_file(file: str = AWARDFILE) -> List[Award]:
+def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
     """Initial load of award structure from
     TOML file"""
-    with open(file, "rb") as structure_file:
+    with file.open("rb") as structure_file:
         award_structure = tomli.load(structure_file)
         award_list = []
         for award_type, data in award_structure["trophies"].items():
@@ -91,13 +92,9 @@ def _load_award_structure_from_file(file: str = AWARDFILE) -> List[Award]:
                     group_type = GroupType("section")
                 elif groups := award.get("show_class"):
                     group_type = GroupType("show_class")
-                group = Group(
-                    groups, group_type, award.get("description", "")
-                )
+                group = Group(groups, group_type, award.get("description", ""))
                 award_type = AwardType(award_type)
-                award_list.append(
-                    Trophy(award_type, group, award.get("name"))
-                )
+                award_list.append(Trophy(award_type, group, award.get("name")))
 
     return award_list
 
@@ -105,13 +102,13 @@ def _load_award_structure_from_file(file: str = AWARDFILE) -> List[Award]:
 def save_awards() -> None:
     """Back up awards to disk"""
     global awards
-    with open(AWARDDATA, "wb") as save_file:
+    with AWARDDATA.open("wb") as save_file:
         pickle.dump(awards, save_file)
 
 
 def _load_awards() -> List[Award]:
     """Load awards from disk"""
-    #    if not os.path.exists(AWARDDATA):  # not yet loaded from file
+    #    if not AWARDDATA.exists():  # not yet loaded from file
     return _load_award_structure_from_file()
 
 
