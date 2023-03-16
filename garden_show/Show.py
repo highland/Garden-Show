@@ -7,21 +7,24 @@ Module to load and hold all show data
 from __future__ import annotations
 
 import datetime
-import os
 import pickle
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 
 from dateutil.parser import parse
 from strenum import StrEnum
+from pathlib import Path
 
 from garden_show.configuration import (
     SCHEDULEFILE,
     SAVEDDATA,
 )
+from garden_show.awards import Award
 
 Name = str
+ClassId = str  # r'\D\d*'
+SectionId = str  # r"\D"
 
 
 class Place(StrEnum):
@@ -121,8 +124,8 @@ class Schedule:
 
     year: int
     date: datetime.date
-    sections: Dict[str, Section] = field(default_factory=dict)
-    classes: Dict[str, ShowClass] = field(default_factory=dict)
+    sections: Dict[SectionId, Section] = field(default_factory=dict)
+    classes: Dict[ClassId, ShowClass] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         display = "\n".join(
@@ -135,10 +138,10 @@ class Schedule:
 class Section:
     """One of the major categories of entries"""
 
-    section_id: str  # r"\D"
+    section_id: SectionId
     description: str
-    sub_sections: Dict[str, ShowClass] = field(default_factory=dict)
-    best: Optional[SectionWinner] = None
+    sub_sections: Dict[ClassId, ShowClass] = field(default_factory=dict)
+    tropies: list[Award] = field(default_factory=list)
 
     def __str__(self) -> str:
         display = "\n".join(
@@ -151,7 +154,7 @@ class Section:
 class ShowClass:
     """One of the minor categories of entries"""
 
-    class_id: str
+    class_id: ClassId
     description: str
     results: List[Winner] = field(default_factory=list)
 
@@ -199,9 +202,9 @@ class ShowClass:
         return firstline + resultlines
 
 
-def _load_schedule_from_file(file: str = SCHEDULEFILE) -> Schedule:
+def _load_schedule_from_file(file: Path = SCHEDULEFILE) -> Schedule:
     """Initial load of schedule from file"""
-    with open(file, encoding="UTF-8") as datafile:
+    with file.open(encoding="UTF-8") as datafile:
         date_line = parse(datafile.readline().rstrip())
         date = date_line.date()
         new_schedule = Schedule(date.year, date)
@@ -265,28 +268,23 @@ class Winner:
         )
 
 
-@dataclass
-class SectionWinner:
-    """Winning result for a Show Section (best in section)"""
-
-
 ShowData = namedtuple("ShowData", "schedule, exhibitors")
 
 
 def save_show_data(showdata: ShowData) -> None:
     """Back up schedule to disk"""
-    with open(SAVEDDATA, "wb") as save_file:
+    with SAVEDDATA.open("wb") as save_file:
         pickle.dump(showdata, save_file)
 
 
 def _load_show_data() -> ShowData:
     """Load schedule from disk"""
-    if not os.path.exists(SAVEDDATA):  # not yet loaded from file
+    if not SAVEDDATA.exists():  # not yet loaded from file
         new_schedule = _load_schedule_from_file()
         data = ShowData(new_schedule, [])
         save_show_data(data)
     else:
-        with open(SAVEDDATA, "rb") as read_file:
+        with SAVEDDATA.open("rb") as read_file:
             data = ShowData(*pickle.load(read_file))
     return data
 

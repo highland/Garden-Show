@@ -4,15 +4,17 @@ Locations of data files and Constants
 
 @author: Mark
 """
+from pathlib import Path
 
 Date = str
 
 TITLE: str = "Badenoch Gardening Club"
 
-_ROOT: str = "D:/BGC Show/Garden-Show/Data"
+_ROOT: Path = Path("D:/BGC Show/Garden-Show/Data")
+assert _ROOT.exists()
 
-SCHEDULEFILE: str = _ROOT + "/schedule.txt"
-NAMESFILE: str = _ROOT + "/names.txt"
-SAVEDDATA: str = _ROOT + "/data.pkl"
-AWARDFILE: str = _ROOT + "/awards.toml"
-AWARDDATA: str = _ROOT + "/awards.pkl"
+SCHEDULEFILE: Path = _ROOT / "schedule.txt"
+NAMESFILE: Path = _ROOT / "names.txt"
+SAVEDDATA: Path = _ROOT / "data.pkl"
+AWARDFILE: Path = _ROOT / "awards.toml"
+AWARDDATA: Path = _ROOT / "awards.pkl"
