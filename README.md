@@ -7,7 +7,8 @@
  The replacement project will be written in python with a simple frontend.
  Uses flet for GUI, dill for data persistence*,
  fpdf for report generation as Pdfs,
- and batch input of the schedule from a text file.
+ and batch input of the schedule from a text file. The awards to be presented
+ in the show are defined in a .toml file.
 
  Intended for use by Badenoch Gardening Club, it should however be suitable
  for any Gardening Club that runs a traditional Garden Show
