@@ -53,11 +53,18 @@ def populate_page(event: ControlEvent) -> None:
                 gui_support.Show_class_results(class_id, names)
             )
     else:
-        if not get_names.controls:  # empty so far
-            for show_class in model.get_section_classes(section.value):
-                get_names.controls.append(
-                    gui_support.Show_class_results(show_class)
-                )
+        for show_class in model.get_section_classes(section.value):
+            get_names.controls.append(
+                gui_support.Show_class_results(show_class)
+            )
+    for desc, name in model.get_judges_best_in_fields(section.value):
+        control = gui_support.NameChooser()
+        control.value = name
+        control.label = desc
+        control.height = 50
+        control.on_blur = control.on_submit = gui_support.capture_input
+        get_best.controls.append(control)
+
     event.page.update()
 
 
@@ -74,6 +81,8 @@ def post_to_model(event: ControlEvent) -> None:
         if result.winners[0].value != "None"
     ]
     model.add_class_winners(winner_list)
+    best_list = [best.value for best in get_best.controls]
+    model.add_best_in_results(section.value, best_list)
     clear_all(event)
 
 
@@ -87,6 +96,7 @@ def clear_all(event: ControlEvent) -> None:
 def new_section() -> None:
     description.value = ""
     get_names.controls = []
+    get_best.controls = []
 
 
 title = Text("Enter Section Winners", style=TextThemeStyle.HEADLINE_SMALL)
@@ -99,7 +109,9 @@ section = TextField(
     on_submit=get_section_description,
 )
 
-description = Text(width=800, size=16)
+description = Text(width=190, size=16)
+
+get_best = Row()
 
 get_names = Column()
 entry_box = ListView(
@@ -107,6 +119,7 @@ entry_box = ListView(
     height=500,
     auto_scroll=True,
 )
+
 # page footer
 
 cancel = ElevatedButton("Cancel", icon=icons.CANCEL, on_click=clear_all)
@@ -126,7 +139,7 @@ def main(page: Page) -> None:
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
     page.add(title)
-    page.add(Row([section, description]))
+    page.add(Row([section, description, get_best]))
     page.add(entry_box)
     page.add(Row([cancel, save]))
     page.update()

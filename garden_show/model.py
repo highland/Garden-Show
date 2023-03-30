@@ -14,6 +14,7 @@ As the entries rely on a stable schedule,
 from typing import Optional, List, Tuple, Set
 
 from garden_show import Show
+from garden_show.awards import bests_for_section
 
 Exhibitor_name = str
 Section_winner = Exhibitor_name
@@ -118,3 +119,25 @@ def add_class_winners(
         class_id, winners, has_first_equal = class_winners
         show_class = Show.schedule.classes[class_id]
         show_class.add_winners(winners, has_first_equal)
+
+
+def get_judges_best_in_fields(
+    section_id: Section_id,
+) -> Tuple[Tuple[str, Exhibitor_name]]:
+    """Supply field description and current winner (if any)
+    to enable contruction of entry fields"""
+    return (
+        (award.description, award.winner)
+        for award in bests_for_section(section_id)
+    )
+
+
+def add_best_in_results(
+    section_id: Section_id, winners: List[Exhibitor_name]
+) -> None:
+    """Add winners to a Section"""
+    section = Show.schedule.sections[section_id]
+    section.trophies = []
+    for winner, award in zip(winners, bests_for_section(section_id)):
+        award.winner = winner
+        section.trophies.append(award)

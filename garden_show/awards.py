@@ -7,8 +7,8 @@ Module to hold data about awards made for show entries.
 from __future__ import annotations
 
 import pickle
-from dataclasses import dataclass, field
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import List
 from pathlib import Path
 
 import tomli
@@ -24,7 +24,6 @@ TrophyName = str
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
-Bests = List[Tuple[Description, List[ClassId | SectionId], TrophyName]]
 
 
 class AwardType(StrEnum):
@@ -59,7 +58,7 @@ class Award:
     group_type: GroupType
     name: str
     description: str = ""
-    winner: List[ExhibitorName] = field(default_factory=list)
+    winner: ExhibitorName = ""
 
 
 @dataclass
@@ -81,30 +80,28 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
         award_structure = tomli.load(structure_file)
         award_list = []
         for award_type, data in award_structure["trophies"].items():
-            wins = WinsType.TROPHY
-            for award in data:
+            for award_def in data:
                 group_type = (
                     GroupType.SECTIONS
-                    if award.get("section")
+                    if award_def.get("section")
                     else GroupType.CLASSES
-                    if award.get("show_class")
+                    if award_def.get("show_class")
                     else None
                 )
-                award_type = AwardType(award_type)
                 with_members = (
-                    award.get("section")
+                    award_def.get("section")
                     if group_type == GroupType.SECTIONS
-                    else award.get("show_class")
+                    else award_def.get("show_class")
                     if group_type == GroupType.CLASSES
                     else None
                 )
                 award = Award(
-                    wins,
-                    award_type,
+                    WinsType.TROPHY,
+                    AwardType(award_type),
                     with_members,
                     group_type,
-                    award.get("name"),
-                    award.get("description"),
+                    award_def.get("name"),
+                    award_def.get("description", "Best in section"),
                 )
                 award_list.append(award)
     return award_list
@@ -125,17 +122,11 @@ def _load_awards() -> List[Award]:
 awards: List[Award] = _load_awards()
 
 
-def bests_for_section(section_id: str) -> Bests:
+def bests_for_section(section_id: str) -> List[Award]:
     """Used to construct the 'best in ...' input fields for a section"""
     return [
-        (
-            award.in_group.description
-            if award.in_group.group_type is GroupType.CLASSES
-            else "Best in section",
-            award.in_group.with_members,
-            award.winner,
-        )
+        award
         for award in awards
         if award.type is AwardType.BEST
-        and award.in_group.with_members[0].startswith(section_id)
+        and award.with_members[0].startswith(section_id)
     ]
