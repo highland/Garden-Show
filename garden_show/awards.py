@@ -7,49 +7,59 @@ Module to hold data about awards made for show entries.
 from __future__ import annotations
 
 import pickle
-from abc import ABC
-from dataclasses import dataclass
-from typing import List, Optional, Callable, Tuple
+from dataclasses import dataclass, field
+from typing import List, Tuple
 from pathlib import Path
 
 import tomli
 from strenum import StrEnum
 
-from garden_show.Show import Section, ShowClass, Exhibitor
+# from garden_show.Show import schedule
 from garden_show.configuration import AWARDFILE, AWARDDATA
 
 
 Description = str
-Class_or_Section_id = str
-Trophy_name = str
+TrophyName = str
 
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
-Bests = List[Tuple[Description, List[ClassId | SectionId], Trophy_name]]
+Bests = List[Tuple[Description, List[ClassId | SectionId], TrophyName]]
 
 
 class AwardType(StrEnum):
+    """An enumeration of the types of Award"""
+
     BEST = "best"
     POINTS = "points"
 
 
 class GroupType(StrEnum):
+    """An enumeration of the targets of an Award"""
+
     SECTIONS = "section"
     CLASSES = "show_class"
 
 
+class WinsType(StrEnum):
+    """An enumeration of what the Award wins"""
+
+    TROPHY = "trophy"
+    ROSETTE = "rosette"
+
+
 @dataclass
-class Award(ABC):
-    """Abstract superclass for different types of awards
+class Award:
+    """Class for all the different types of awards
     (trophies, rosettes, etc.)."""
 
+    wins: WinsType
     type: AwardType
-    with_members: List[Section | ShowClass]
+    with_members: List[ClassId | SectionId]
     group_type: GroupType
+    name: str
     description: str = ""
-    winner: Optional[Exhibitor] = None
-    _determine_winner: Optional[Callable] = None
+    winner: List[ExhibitorName] = field(default_factory=list)
 
 
 @dataclass
@@ -64,22 +74,6 @@ class Rosette(Award):
     """class for a rosette award"""
 
 
-@dataclass
-class Group:
-    """The group of sections or show classes
-    for which a particular award is made."""
-
-    with_members: List[Section | ShowClass]
-    group_type: GroupType
-    description: str = ""
-
-
-def determine_award_winners() -> None:
-    global awards
-    for award in awards:
-        award._determine_winner()
-
-
 def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
     """Initial load of award structure from
     TOML file"""
@@ -87,21 +81,37 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
         award_structure = tomli.load(structure_file)
         award_list = []
         for award_type, data in award_structure["trophies"].items():
+            wins = WinsType.TROPHY
             for award in data:
-                if groups := award.get("section"):
-                    group_type = GroupType("section")
-                elif groups := award.get("show_class"):
-                    group_type = GroupType("show_class")
-                group = Group(groups, group_type, award.get("description", ""))
+                group_type = (
+                    GroupType.SECTIONS
+                    if award.get("section")
+                    else GroupType.CLASSES
+                    if award.get("show_class")
+                    else None
+                )
                 award_type = AwardType(award_type)
-                award_list.append(Trophy(award_type, group, award.get("name")))
-
+                with_members = (
+                    award.get("section")
+                    if group_type == GroupType.SECTIONS
+                    else award.get("show_class")
+                    if group_type == GroupType.CLASSES
+                    else None
+                )
+                award = Award(
+                    wins,
+                    award_type,
+                    with_members,
+                    group_type,
+                    award.get("name"),
+                    award.get("description"),
+                )
+                award_list.append(award)
     return award_list
 
 
 def save_awards() -> None:
     """Back up awards to disk"""
-    global awards
     with AWARDDATA.open("wb") as save_file:
         pickle.dump(awards, save_file)
 
@@ -116,6 +126,7 @@ awards: List[Award] = _load_awards()
 
 
 def bests_for_section(section_id: str) -> Bests:
+    """Used to construct the 'best in ...' input fields for a section"""
     return [
         (
             award.in_group.description

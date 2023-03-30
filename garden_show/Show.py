@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import datetime
 import pickle
-from collections import namedtuple
+from collections import namedtuple, Counter
 from dataclasses import dataclass, field
 from typing import Dict, List, Any
 
@@ -20,11 +20,12 @@ from garden_show.configuration import (
     SCHEDULEFILE,
     SAVEDDATA,
 )
-from garden_show.awards import Award
+from garden_show.awards import Award, awards, GroupType
 
 Name = str
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
+ExhibitorName = str
 
 
 class Place(StrEnum):
@@ -141,7 +142,7 @@ class Section:
     section_id: SectionId
     description: str
     sub_sections: Dict[ClassId, ShowClass] = field(default_factory=dict)
-    tropies: list[Award] = field(default_factory=list)
+    trophies: list[Award] = field(default_factory=list)
 
     def __str__(self) -> str:
         display = "\n".join(
@@ -266,6 +267,39 @@ class Winner:
             f"{self.exhibitor.full_name} {self.place.value}"
             f" in {self.show_class.class_id}"
         )
+
+
+def calculate_points_winners() -> None:
+    """determine the winners in 'most points in ...' type awards"""
+
+    for award in awards:
+        award.winner = []
+        results: Dict[ExhibitorName, int] = Counter()
+
+        def totals_for_class(class_id: ClassId) -> None:
+            show_class = schedule.classes[class_id]
+            for winner in show_class.results:
+                results[winner.exhibitor.full_name] += winner.points
+
+        match award.group_type:
+            case GroupType.CLASSES:
+                for class_id in award.with_members:
+                    totals_for_class(class_id)
+            case GroupType.SECTIONS:
+                for section_id in award.with_members:
+                    section = schedule.sections[section_id]
+                    for class_id in section.sub_sections:
+                        totals_for_class(class_id)
+
+        winners = results.most_common()
+        first, first_points = winners[0]
+        award.winner.append(first)
+
+        # check for ties
+        for other, points in winners[1:]:
+            if not points == first_points:
+                break
+            award.winner.append(other)
 
 
 ShowData = namedtuple("ShowData", "schedule, exhibitors")

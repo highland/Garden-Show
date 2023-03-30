@@ -6,8 +6,6 @@ Locations of data files and Constants
 """
 from pathlib import Path
 
-Date = str
-
 TITLE: str = "Badenoch Gardening Club"
 
 _ROOT: Path = Path("D:/BGC Show/Garden-Show/Data")
