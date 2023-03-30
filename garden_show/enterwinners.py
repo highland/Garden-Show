@@ -20,21 +20,18 @@ from flet import (
     ControlEvent,
 )
 
-import garden_show.model as model
-import garden_show.gui_support as gui_support
+from garden_show import model
+from garden_show import gui_support
 from garden_show.configuration import TITLE
-
-Section_id = str  # r"\D"
-Name = str
 
 
 def get_section_description(event: ControlEvent) -> None:
     """On choosing the section to be entered,
     fill in the description for that section."""
     if not section.value:
-        return None
-    new_section()
-    section.value = section_entered = section.value[-1].upper()
+        return
+    section_entered = section.value[-1].upper()
+    section.value = section_entered
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
         section.value = ""
@@ -46,17 +43,10 @@ def get_section_description(event: ControlEvent) -> None:
 def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
-    if previous_results := model.get_previous_winners(section.value):
-        # editing previous results
-        for class_id, names in previous_results:
-            get_names.controls.append(
-                gui_support.Show_class_results(class_id, names)
-            )
-    else:
-        for show_class in model.get_section_classes(section.value):
-            get_names.controls.append(
-                gui_support.Show_class_results(show_class)
-            )
+
+    get_best.controls = []
+    get_names.controls = []
+
     for desc, name in model.get_judges_best_in_fields(section.value):
         control = gui_support.NameChooser()
         control.value = name
@@ -65,12 +55,24 @@ def populate_page(event: ControlEvent) -> None:
         control.on_blur = control.on_submit = gui_support.capture_input
         get_best.controls.append(control)
 
+    if previous_results := model.get_previous_winners(section.value):
+        # editing previous results
+        for class_id, names in previous_results:
+            get_names.controls.append(
+                gui_support.Show_class_results(class_id, names)
+            )
+    else:
+        for class_id in model.get_section_classes(section.value):
+            get_names.controls.append(gui_support.Show_class_results(class_id))
+
     event.page.update()
 
 
 def post_to_model(event: ControlEvent) -> None:
+    """Post all entered data to the model"""
+
     if not get_names.controls:
-        return None
+        return
     winner_list = [
         (
             result.class_id,
@@ -87,19 +89,17 @@ def post_to_model(event: ControlEvent) -> None:
 
 
 def clear_all(event: ControlEvent) -> None:
+    """Clear the screen for a new section"""
     section.value = ""
-    new_section()
+    description.value = ""
+    get_best.controls = []
+    get_names.controls = []
     section.focus()
     event.page.update()
 
 
-def new_section() -> None:
-    description.value = ""
-    get_names.controls = []
-    get_best.controls = []
-
-
 title = Text("Enter Section Winners", style=TextThemeStyle.HEADLINE_SMALL)
+
 # second line
 section = TextField(
     value="",
@@ -113,6 +113,7 @@ description = Text(width=190, size=16)
 
 get_best = Row()
 
+# class results
 get_names = Column()
 entry_box = ListView(
     controls=[get_names],
