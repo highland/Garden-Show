@@ -11,22 +11,20 @@ As the entries rely on a stable schedule,
 
 @author: Mark
 """
-from typing import Optional, List, Tuple, Set
+from typing import List, Tuple, Set
 
 from garden_show import Show
-from garden_show.awards import bests_for_section
+from garden_show import awards
 
-Exhibitor_name = str
-Section_winner = Exhibitor_name
-Class_winner = Exhibitor_name
-Entry_count = str  # "1" or "2"
-Class_id = str  # r'\D\d*'
-Section_id = str  # r"\D"
+ExhibitorName = str
+EntryCount = str  # "1" or "2"
+ClassId = str  # r'\D\d*'
+SectionId = str  # r"\D"
 
 
 def exhibitor_check(
-    name: Exhibitor_name,
-) -> [Tuple[bool, List[Tuple[Class_id, str, Entry_count]]]]:
+    name: ExhibitorName,
+) -> [Tuple[bool, List[Tuple[ClassId, str, EntryCount]]]]:
     """
     If the exhibitor exists, return their entries, else None.
     """
@@ -42,7 +40,7 @@ def exhibitor_check(
     ]
 
 
-def get_class_description(show_class_id: Class_id) -> str:
+def get_class_description(show_class_id: ClassId) -> str:
     """Get the description for a given show class"""
     try:
         return Show.schedule.classes[show_class_id].description
@@ -50,7 +48,7 @@ def get_class_description(show_class_id: Class_id) -> str:
         return "No such class in schedule"
 
 
-def get_section_description(section_id: Section_id) -> str:
+def get_section_description(section_id: SectionId) -> str:
     """Get the description for a given section"""
     try:
         return Show.schedule.sections[section_id].description
@@ -58,7 +56,7 @@ def get_section_description(section_id: Section_id) -> str:
         return "No such section in schedule"
 
 
-def get_section_classes(section_id: Section_id) -> List[Class_id]:
+def get_section_classes(section_id: SectionId) -> List[ClassId]:
     """Return all the show class ids for a given section"""
     return [
         show_class.class_id
@@ -68,7 +66,7 @@ def get_section_classes(section_id: Section_id) -> List[Class_id]:
     ]
 
 
-def get_section_entries(section_id: Section_id) -> Set[Exhibitor_name]:
+def get_section_entries(section_id: SectionId) -> Set[ExhibitorName]:
     """Return all exhibitors who have entries in the given section"""
     members = set()
     section = Show.schedule.sections[section_id]
@@ -79,9 +77,9 @@ def get_section_entries(section_id: Section_id) -> Set[Exhibitor_name]:
 
 
 def add_exhibitor_and_entries(
-    name: Exhibitor_name,
+    name: ExhibitorName,
     is_member: bool,
-    entries: List[Tuple[Class_id, Entry_count]],
+    entries: List[Tuple[ClassId, EntryCount]],
 ) -> None:
     """Add new exhibitor (removing previous entries if they exist)
     Create Entries."""
@@ -94,11 +92,10 @@ def add_exhibitor_and_entries(
 
 
 def get_previous_winners(
-    section_id: Section_id,
-) -> Optional[List[Tuple[Class_id, List[Class_winner]]]]:
+    section_id: SectionId,
+) -> List[Tuple[ClassId, List[ExhibitorName]]]:
     """
-    If the section has winners, return the section winner
-    and all the winners for classes in that section.
+    If the section has winners, return the winners for classes in that section.
     """
     section = Show.schedule.sections[section_id]
     return [
@@ -112,7 +109,7 @@ def get_previous_winners(
 
 
 def add_class_winners(
-    winner_list: List[Tuple[Class_id, List[Exhibitor_name], bool]]
+    winner_list: List[Tuple[ClassId, List[ExhibitorName], bool]]
 ) -> None:
     """Add winners to a Show_class"""
     for class_winners in winner_list:  # each show class in current section
@@ -122,22 +119,22 @@ def add_class_winners(
 
 
 def get_judges_best_in_fields(
-    section_id: Section_id,
-) -> Tuple[Tuple[str, Exhibitor_name]]:
+    section_id: SectionId,
+) -> Tuple[Tuple[str, ExhibitorName]]:
     """Supply field description and current winner (if any)
     to enable contruction of entry fields"""
     return (
         (award.description, award.winner)
-        for award in bests_for_section(section_id)
+        for award in awards.bests_for_section(section_id)
     )
 
 
 def add_best_in_results(
-    section_id: Section_id, winners: List[Exhibitor_name]
+    section_id: SectionId, winners: List[ExhibitorName]
 ) -> None:
     """Add winners to a Section"""
     section = Show.schedule.sections[section_id]
     section.trophies = []
-    for winner, award in zip(winners, bests_for_section(section_id)):
+    for winner, award in zip(winners, awards.bests_for_section(section_id)):
         award.winner = winner
         section.trophies.append(award)

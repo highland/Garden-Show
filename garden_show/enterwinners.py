@@ -49,7 +49,7 @@ def populate_page(event: ControlEvent) -> None:
 
     for desc, name in model.get_judges_best_in_fields(section.value):
         control = gui_support.NameChooser()
-        control.value = name
+        control.value = name    # may be blank if no winner entered yet
         control.label = desc
         control.height = 50
         control.on_blur = control.on_submit = gui_support.capture_input

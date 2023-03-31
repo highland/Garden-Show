@@ -115,8 +115,11 @@ def save_awards() -> None:
 
 def _load_awards() -> List[Award]:
     """Load awards from disk"""
-    #    if not AWARDDATA.exists():  # not yet loaded from file
-    return _load_award_structure_from_file()
+    if not AWARDDATA.exists():  # not yet loaded from file
+        return _load_award_structure_from_file()
+
+    with AWARDDATA.open("rb") as data_file:
+        return pickle.load(data_file)
 
 
 awards: List[Award] = _load_awards()

@@ -12,15 +12,15 @@ from collections import namedtuple, Counter
 from dataclasses import dataclass, field
 from typing import Dict, List, Any
 
+from pathlib import Path
 from dateutil.parser import parse
 from strenum import StrEnum
-from pathlib import Path
 
 from garden_show.configuration import (
     SCHEDULEFILE,
     SAVEDDATA,
 )
-from garden_show.awards import Award, awards, GroupType
+from garden_show import awards
 
 Name = str
 ClassId = str  # r'\D\d*'
@@ -29,6 +29,7 @@ ExhibitorName = str
 
 
 class Place(StrEnum):
+    """The four possible placings in a Show Class"""
     FIRST = "1st in "
     SECOND = "2nd in "
     THIRD = "3rd in "
@@ -142,7 +143,7 @@ class Section:
     section_id: SectionId
     description: str
     sub_sections: Dict[ClassId, ShowClass] = field(default_factory=dict)
-    trophies: list[Award] = field(default_factory=list)
+    trophies: list[awards.Award] = field(default_factory=list)
 
     def __str__(self) -> str:
         display = "\n".join(
@@ -177,6 +178,7 @@ class ShowClass:
                 place = places[index]
                 points = (3, 2, 1)[index]
             Winner(exhibitor, place, self, points)
+        save_show_data(showdata)
 
     def remove_results(self) -> None:
         """Remove any existing results"""
@@ -272,7 +274,7 @@ class Winner:
 def calculate_points_winners() -> None:
     """determine the winners in 'most points in ...' type awards"""
 
-    for award in awards:
+    for award in awards.awards:
         award.winner = []
         results: Dict[ExhibitorName, int] = Counter()
 
@@ -282,10 +284,10 @@ def calculate_points_winners() -> None:
                 results[winner.exhibitor.full_name] += winner.points
 
         match award.group_type:
-            case GroupType.CLASSES:
+            case awards.GroupType.CLASSES:
                 for class_id in award.with_members:
                     totals_for_class(class_id)
-            case GroupType.SECTIONS:
+            case awards.GroupType.SECTIONS:
                 for section_id in award.with_members:
                     section = schedule.sections[section_id]
                     for class_id in section.sub_sections:
@@ -300,15 +302,16 @@ def calculate_points_winners() -> None:
             if not points == first_points:
                 break
             award.winner.append(other)
+    awards.save_awards()
 
 
 ShowData = namedtuple("ShowData", "schedule, exhibitors")
 
 
-def save_show_data(showdata: ShowData) -> None:
+def save_show_data(data: ShowData) -> None:
     """Back up schedule to disk"""
     with SAVEDDATA.open("wb") as save_file:
-        pickle.dump(showdata, save_file)
+        pickle.dump(data, save_file)
 
 
 def _load_show_data() -> ShowData:
