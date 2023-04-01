@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Class representing a Façade for the GUI to access data
+Class representing a Façade for the GUI to access data.
 
 Loads and holds all the application data.
 Functions for the GUI all take and return only strings.

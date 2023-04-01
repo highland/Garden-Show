@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Module to load and hold all show data
+Module to define the data schema and to load and hold all show data
 
 @author: Mark
 """
@@ -327,6 +327,6 @@ def _load_show_data() -> ShowData:
 
 
 showdata: ShowData = _load_show_data()
-# All the show data in these two objects
+# All the show data (except for calculated awards) are in these two objects
 schedule: Schedule = showdata.schedule
 exhibitors: List[Exhibitor] = showdata.exhibitors

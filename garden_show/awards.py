@@ -14,12 +14,8 @@ from pathlib import Path
 import tomli
 from strenum import StrEnum
 
-# from garden_show.Show import schedule
 from garden_show.configuration import AWARDFILE, AWARDDATA
 
-
-Description = str
-TrophyName = str
 
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
@@ -59,18 +55,6 @@ class Award:
     name: str
     description: str = ""
     winner: ExhibitorName = ""
-
-
-@dataclass
-class Trophy(Award):
-    """class for a trophy award"""
-
-    title: str = ""
-
-
-@dataclass
-class Rosette(Award):
-    """class for a rosette award"""
 
 
 def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
