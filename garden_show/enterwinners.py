@@ -34,8 +34,10 @@ def get_section_description(event: ControlEvent) -> None:
     section.value = section_entered
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
-        section.value = ""
-        section.focus()
+        keep_desc = description.value
+        clear_all(event)
+        description.value = keep_desc
+        event.page.update()
     else:
         populate_page(event)
 
@@ -64,7 +66,6 @@ def populate_page(event: ControlEvent) -> None:
     else:
         for class_id in model.get_section_classes(section.value):
             get_names.controls.append(gui_support.Show_class_results(class_id))
-
     event.page.update()
 
 

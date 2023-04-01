@@ -109,7 +109,7 @@ def _load_awards() -> List[Award]:
 awards: List[Award] = _load_awards()
 
 
-def bests_for_section(section_id: str) -> List[Award]:
+def bests_for_section(section_id: SectionId) -> List[Award]:
     """Used to construct the 'best in ...' input fields for a section"""
     return [
         award

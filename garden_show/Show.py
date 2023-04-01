@@ -272,7 +272,7 @@ class Winner:
 
 
 def calculate_points_winners() -> None:
-    """determine the winners in 'most points in ...' type awards"""
+    """Determine the winners in 'most points in ...' type awards"""
 
     for award in awards.awards:
         award.winner = []
