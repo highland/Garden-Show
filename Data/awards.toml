@@ -2,7 +2,6 @@
 [[trophies.best]]
 name = "Evelyn Littlejohn Trophy"
 section = [ "A",]
-description = "Best vegetable"
 
 [[trophies.best]]
 name = "Enid Furness Trophy"
@@ -17,12 +16,10 @@ description = "Best rose"
 [[trophies.best]]
 name = "Badenoch Gardening Club Trophy"
 show_class = [ "B1", "B2", "B3", "B4", "B5", "B6", "B13", "B14",]
-description = "Best cut flower, not sweet pea or rose"
 
 [[trophies.best]]
 name = "Badenoch Gardening Club Trophy"
 section = [ "C",]
-description = "Best cactus or succulent"
 
 [[trophies.best]]
 name = "Jean Burnard Trophy"
@@ -42,7 +39,6 @@ description = "Best club plant"
 [[trophies.best]]
 name = "Sutherland Cup"
 section = [ "E",]
-description = "Best sweet pea"
 
 [[trophies.best]]
 name = "Archie Peebles Trophy"
@@ -90,10 +86,3 @@ section = [ "A", "B", "K", "L", "M",]
 
 [[rosettes.position]]
 section = [ "Q", "R", "S",]
-
-[cards]
-[[cards.best]]
-section = [ "A", "B", "C", "E", "F", "G", "K", "L", "M", "Q", "R", "S",]
-
-[[cards.position]]
-section = [ "A", "B", "C", "D", "E", "F", "G", "K", "L", "M", "Q", "R", "S",]

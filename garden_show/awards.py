@@ -20,6 +20,7 @@ from garden_show.configuration import AWARDFILE, AWARDDATA
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
+awards = []
 
 
 class AwardType(StrEnum):
@@ -27,6 +28,7 @@ class AwardType(StrEnum):
 
     BEST = "best"
     POINTS = "points"
+    POSITION = "position"
 
 
 class GroupType(StrEnum):
@@ -57,12 +59,32 @@ class Award:
     winner: ExhibitorName = ""
 
 
+def bests_for_section(section_id: SectionId) -> List[Award]:
+    """Used to construct the 'best in ...' input fields for a section
+    Note that if both Rosette and Trophy awards are included.
+    only one field is required for both.
+    """
+    global awards
+    if not awards:
+        awards = get_all_awards()
+    return [
+        award
+        for award in awards
+        if award.type is AwardType.BEST
+        and (
+            section_id in award.with_members
+            or award.with_members[0].startswith(section_id)
+        )
+    ]
+
+
 def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
     """Initial load of award structure from
     TOML file"""
     with file.open("rb") as structure_file:
         award_structure = tomli.load(structure_file)
         award_list = []
+
         for award_type, data in award_structure["trophies"].items():
             for award_def in data:
                 group_type = (
@@ -88,6 +110,21 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
                     award_def.get("description", "Best in section"),
                 )
                 award_list.append(award)
+
+        for award_type, data in award_structure["rosettes"].items():
+            for award_def in data:
+                group_type = GroupType.SECTIONS
+                with_members = award_def.get("section")
+                award = Award(
+                    WinsType.ROSETTE,
+                    AwardType(award_type),
+                    with_members,
+                    group_type=GroupType.SECTIONS,
+                    name="",
+                    description="Best in section",
+                )
+                award_list.append(award)
+
     return award_list
 
 
@@ -99,6 +136,7 @@ def save_awards() -> None:
 
 def _load_awards() -> List[Award]:
     """Load awards from disk"""
+
     if not AWARDDATA.exists():  # not yet loaded from file
         return _load_award_structure_from_file()
 
@@ -106,14 +144,14 @@ def _load_awards() -> List[Award]:
         return pickle.load(data_file)
 
 
-awards: List[Award] = _load_awards()
+def get_all_awards() -> List[Award]:
+    """Allow other modules to access the awards data"""
+    global awards
+    if not awards:
+        awards = _load_awards()
+        save_awards()
+    return awards
 
 
-def bests_for_section(section_id: SectionId) -> List[Award]:
-    """Used to construct the 'best in ...' input fields for a section"""
-    return [
-        award
-        for award in awards
-        if award.type is AwardType.BEST
-        and award.with_members[0].startswith(section_id)
-    ]
+if __name__ == "__main__":
+    awards = get_all_awards()

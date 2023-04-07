@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import datetime
 import pickle
-from collections import namedtuple, Counter
+from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
 from pathlib import Path
 from dateutil.parser import parse
@@ -26,10 +26,12 @@ Name = str
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
+ShowData = Tuple["Schedule", List["Exhibitor"]]
 
 
 class Place(StrEnum):
     """The four possible placings in a Show Class"""
+
     FIRST = "1st in "
     SECOND = "2nd in "
     THIRD = "3rd in "
@@ -113,10 +115,10 @@ def get_actual_exhibitor(name: Name) -> Exhibitor:
     """
     first_name, *other_names, last_name = name.split()
     match = Exhibitor(first_name, last_name, other_names)
-    if match in exhibitors:
-        index = exhibitors.index(match)
-        return exhibitors[index]
-    exhibitors.append(match)
+    if match in showdata.exhibitors:
+        index = showdata.exhibitors.index(match)
+        return showdata.exhibitors[index]
+    showdata.exhibitors.append(match)
     return match
 
 
@@ -274,12 +276,12 @@ class Winner:
 def calculate_points_winners() -> None:
     """Determine the winners in 'most points in ...' type awards"""
 
-    for award in awards.awards:
+    for award in awards.get_all_awards():
         award.winner = []
         results: Dict[ExhibitorName, int] = Counter()
 
         def totals_for_class(class_id: ClassId) -> None:
-            show_class = schedule.classes[class_id]
+            show_class = showdata.schedule.classes[class_id]
             for winner in show_class.results:
                 results[winner.exhibitor.full_name] += winner.points
 
@@ -289,7 +291,7 @@ def calculate_points_winners() -> None:
                     totals_for_class(class_id)
             case awards.GroupType.SECTIONS:
                 for section_id in award.with_members:
-                    section = schedule.sections[section_id]
+                    section = showdata.schedule.sections[section_id]
                     for class_id in section.sub_sections:
                         totals_for_class(class_id)
 
@@ -305,28 +307,24 @@ def calculate_points_winners() -> None:
     awards.save_awards()
 
 
-ShowData = namedtuple("ShowData", "schedule, exhibitors")
-
-
 def save_show_data(data: ShowData) -> None:
-    """Back up schedule to disk"""
+    """Back up schedule and exhibitors to disk"""
     with SAVEDDATA.open("wb") as save_file:
         pickle.dump(data, save_file)
 
 
 def _load_show_data() -> ShowData:
-    """Load schedule from disk"""
+    """Load schedule and exhibitors from disk"""
     if not SAVEDDATA.exists():  # not yet loaded from file
         new_schedule = _load_schedule_from_file()
-        data = ShowData(new_schedule, [])
+        data = (new_schedule, [])
         save_show_data(data)
     else:
         with SAVEDDATA.open("rb") as read_file:
-            data = ShowData(*pickle.load(read_file))
+            data = pickle.load(read_file)
     return data
 
 
 showdata: ShowData = _load_show_data()
 # All the show data (except for calculated awards) are in these two objects
-schedule: Schedule = showdata.schedule
-exhibitors: List[Exhibitor] = showdata.exhibitors
+schedule, exhibitors = showdata

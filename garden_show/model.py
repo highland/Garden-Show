@@ -120,13 +120,13 @@ def add_class_winners(
 
 def get_judges_best_in_fields(
     section_id: SectionId,
-) -> Tuple[Tuple[str, ExhibitorName]]:
+) -> Set[Tuple[str, ExhibitorName]]:
     """Supply field description and current winner (if any)
     to enable contruction of entry fields"""
-    return (
+    return {  # using a set to avoid trophy/rosette duplicates
         (award.description, award.winner)
         for award in awards.bests_for_section(section_id)
-    )
+    }
 
 
 def add_best_in_results(
@@ -134,7 +134,24 @@ def add_best_in_results(
 ) -> None:
     """Add winners to a Section"""
     section = Show.schedule.sections[section_id]
+    bests = awards.bests_for_section(section_id)
+    trophy_wins = [
+        award for award in bests if award.wins is awards.WinsType.TROPHY
+    ]
+    rosettte_wins = [
+        award for award in bests if award.wins is awards.WinsType.ROSETTE
+    ]
     section.trophies = []
-    for winner, award in zip(winners, awards.bests_for_section(section_id)):
-        award.winner = winner
-        section.trophies.append(award)
+    if trophy_wins and rosettte_wins:  # add both
+        for winner, trophy, rosette in zip(
+            winners, trophy_wins, rosettte_wins
+        ):
+            trophy.winner = winner
+            rosette.winner = winner
+            section.trophies.append(trophy)
+            section.trophies.append(rosette)
+    else:  # add either trophy or rosette
+        wins = trophy_wins if trophy_wins else rosettte_wins
+        for winner, award in zip(winners, wins):
+            award.winner = winner
+            section.trophies.append(award)
