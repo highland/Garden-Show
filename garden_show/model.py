@@ -93,7 +93,7 @@ def add_exhibitor_and_entries(
 
 def get_previous_winners(
     section_id: SectionId,
-) -> List[Tuple[ClassId, List[ExhibitorName]]]:
+) -> List[Tuple[ClassId, List[ExhibitorName], int]]:
     """
     If the section has winners, return the winners for classes in that section.
     """
@@ -102,6 +102,7 @@ def get_previous_winners(
         (
             show_class.class_id,
             [winner.exhibitor.full_name for winner in show_class.results],
+            show_class.no_of_entries
         )
         for show_class in section.sub_sections.values()
         if show_class.results
@@ -109,13 +110,14 @@ def get_previous_winners(
 
 
 def add_class_winners(
-    winner_list: List[Tuple[ClassId, List[ExhibitorName], bool]]
+    winner_list: List[Tuple[ClassId, List[ExhibitorName], bool, int]]
 ) -> None:
     """Add winners to a Show_class"""
     for class_winners in winner_list:  # each show class in current section
-        class_id, winners, has_first_equal = class_winners
+        class_id, winners, has_first_equal, num_entries = class_winners
         show_class = Show.schedule.classes[class_id]
         show_class.add_winners(winners, has_first_equal)
+        show_class.no_of_entries = num_entries
 
 
 def get_judges_best_in_fields(

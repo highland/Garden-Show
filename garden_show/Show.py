@@ -161,6 +161,7 @@ class ShowClass:
     class_id: ClassId
     description: str
     results: List[Winner] = field(default_factory=list)
+    no_of_entries: int = 0
 
     def add_winners(
         self, winners: List[Name], has_first_equal: bool = False
@@ -187,6 +188,7 @@ class ShowClass:
         for winner in self.results:
             winner._remove_result()
         self.results = []
+        self.no_of_entries = 0
         save_show_data(showdata)
 
     def _add_result(self, result: Winner) -> None:

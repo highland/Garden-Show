@@ -18,6 +18,7 @@ from flet import (
     icons,
     app,
     ControlEvent,
+    MainAxisAlignment,
 )
 
 from garden_show import model
@@ -30,7 +31,7 @@ def get_section_description(event: ControlEvent) -> None:
     fill in the description for that section."""
     if not section.value:
         return
-    section_entered = section.value[-1].upper()
+    section_entered = section.value[-1].upper()  # take the last char typed
     section.value = section_entered
     description.value = model.get_section_description(section_entered)
     if description.value.startswith("No such"):
@@ -46,12 +47,12 @@ def populate_page(event: ControlEvent) -> None:
     """On choosing the section to be entered, lay out the input
     fields for the classes in that section."""
 
-    get_best.controls = []
+    get_best.controls = []  # clear previous fields
     get_names.controls = []
 
     for desc, name in model.get_judges_best_in_fields(section.value):
         control = gui_support.NameChooser()
-        control.value = name    # may be blank if no winner entered yet
+        control.value = name  # may be blank if no winner entered yet
         control.label = desc
         control.height = 50
         control.on_blur = control.on_submit = gui_support.capture_input
@@ -61,18 +62,18 @@ def populate_page(event: ControlEvent) -> None:
         # editing previous results
         for class_id, names in previous_results:
             get_names.controls.append(
-                gui_support.Show_class_results(class_id, names)
+                gui_support.ShowClassResults(class_id, names)
             )
     else:
         for class_id in model.get_section_classes(section.value):
-            get_names.controls.append(gui_support.Show_class_results(class_id))
+            get_names.controls.append(gui_support.ShowClassResults(class_id))
     event.page.update()
 
 
 def post_to_model(event: ControlEvent) -> None:
     """Post all entered data to the model"""
 
-    if not get_names.controls:
+    if not get_names.controls:  # nothing to post
         return
     winner_list = [
         (
@@ -118,8 +119,7 @@ get_best = Row()
 get_names = Column()
 entry_box = ListView(
     controls=[get_names],
-    height=500,
-    auto_scroll=True,
+    height=600,
 )
 
 # page footer
@@ -137,6 +137,8 @@ def main(page: Page) -> None:
         None.
     """
 
+    page.window_maximized = True
+    page.vertical_alignment = MainAxisAlignment.SPACE_BETWEEN
     page.title = TITLE
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"
