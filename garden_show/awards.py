@@ -20,7 +20,7 @@ from garden_show.configuration import AWARDFILE, AWARDDATA
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
-awards = []
+awards: List[Award] = []
 
 
 class AwardType(StrEnum):
