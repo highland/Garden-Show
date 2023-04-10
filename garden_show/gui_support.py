@@ -5,7 +5,7 @@ Gui support with flet extensions
 @author: Mark
 """
 
-from typing import Set, List, Dict
+from typing import Set, List, Dict, Callable
 
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 
@@ -22,15 +22,15 @@ class NameChooser(TextField):
 
     def __init__(self, **rest) -> None:
         super().__init__(**rest)
-        self.candidates = self._get_names()
-        self.initials = self._get_initials()
-        self.on_change = self.offer_candidate
+        self.candidates: Set[Name] = self._get_names()
+        self.initials: Dict[Initials, Name] = self._get_initials()
+        self.on_change: Callable = self.offer_candidate
 
     def _get_names(self) -> Set[Name]:
         names = set()
         with open(NAMESFILE, encoding="UTF-8") as name_input:
             for name in name_input:
-                if name:
+                if name and len(name.split()) >= 2:
                     names.add(name.strip())
         return names
 
@@ -65,11 +65,11 @@ class NameChooser(TextField):
         self.update()
 
     def on_special(self, event: ControlEvent, keys: str) -> None:
-        """ Allow special keys to be implemented """
+        """Allow special keys to be implemented"""
         raise NotImplementedError()
 
     def save_names(self) -> None:
-        """ Back up names used for name hints """
+        """Back up names used for name hints"""
         name_list = list(self.candidates)
         name_list.sort()
         names_string = "\n".join(name_list)

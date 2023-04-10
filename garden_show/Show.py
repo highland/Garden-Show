@@ -98,8 +98,6 @@ class Exhibitor:
     def _add_result(self, result: Winner) -> None:
         """Add a single result.
         Only called by result object"""
-        if not self.results:
-            self.results = []
         self.results.append(result)
 
     def _remove_result(self, result: Winner) -> None:
@@ -115,10 +113,10 @@ def get_actual_exhibitor(name: Name) -> Exhibitor:
     """
     first_name, *other_names, last_name = name.split()
     match = Exhibitor(first_name, last_name, other_names)
-    if match in showdata.exhibitors:
-        index = showdata.exhibitors.index(match)
-        return showdata.exhibitors[index]
-    showdata.exhibitors.append(match)
+    if match in exhibitors:
+        index = exhibitors.index(match)
+        return exhibitors[index]
+    exhibitors.append(match)
     return match
 
 
@@ -194,8 +192,6 @@ class ShowClass:
     def _add_result(self, result: Winner) -> None:
         """Add a single result.
         Only called by the result object"""
-        if not self.results:
-            self.results = []
         self.results.append(result)
 
     def __eq__(self, other: Any) -> bool:
@@ -204,7 +200,7 @@ class ShowClass:
         return self.class_id == other.class_id
 
     def __str__(self) -> str:
-        firstline = f"{self.class_id}\t{self.description}"
+        firstline = f"{self.class_id}\t{self.description}\n"
         resultlines = "/n".join([f"{result}" for result in self.results])
         return firstline + resultlines
 
@@ -271,7 +267,7 @@ class Winner:
     def __str__(self) -> str:
         return (
             f"{self.exhibitor.full_name} {self.place.value}"
-            f" in {self.show_class.class_id}"
+            f"{self.show_class.class_id}"
         )
 
 
@@ -283,7 +279,7 @@ def calculate_points_winners() -> None:
         results: Dict[ExhibitorName, int] = Counter()
 
         def totals_for_class(class_id: ClassId) -> None:
-            show_class = showdata.schedule.classes[class_id]
+            show_class = schedule.classes[class_id]
             for winner in show_class.results:
                 results[winner.exhibitor.full_name] += winner.points
 
@@ -293,7 +289,7 @@ def calculate_points_winners() -> None:
                     totals_for_class(class_id)
             case awards.GroupType.SECTIONS:
                 for section_id in award.with_members:
-                    section = showdata.schedule.sections[section_id]
+                    section = schedule.sections[section_id]
                     for class_id in section.sub_sections:
                         totals_for_class(class_id)
 

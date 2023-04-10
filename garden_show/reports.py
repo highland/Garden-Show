@@ -30,9 +30,7 @@ def show_results_for_section(section_id):
     )
     for show_class in Show.schedule.sections[section_id].sub_sections.values():
         if show_class.results:
-            print(f"class {show_class}\n")
-            for result in show_class.results:
-                print(result)
+            print(f"class {show_class}")
 
 
 def show_results_by_exhibitor():

@@ -60,9 +60,11 @@ def populate_page(event: ControlEvent) -> None:
 
     if previous_results := model.get_previous_winners(section.value):
         # editing previous results
-        for class_id, names in previous_results:
+        for class_id, names, entry_count in previous_results:
             get_names.controls.append(
-                gui_support.ShowClassResults(class_id, names)
+                gui_support.ShowClassResults(
+                    class_id, names, num_entries=entry_count
+                )
             )
     else:
         for class_id in model.get_section_classes(section.value):
@@ -73,13 +75,15 @@ def populate_page(event: ControlEvent) -> None:
 def post_to_model(event: ControlEvent) -> None:
     """Post all entered data to the model"""
 
-    if not get_names.controls:  # nothing to post
+    if not get_names.controls:
+        print("Nothing to post")
         return
     winner_list = [
         (
             result.class_id,
             [winner.value for winner in result.winners if winner.value],
             result.winners[0].label == "First equals",
+            result.entry_count,
         )
         for result in get_names.controls
         if result.winners[0].value != "None"
