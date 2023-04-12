@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "garden-show"
+version = "0.1.0"
+description = "Allow organisers of a garden show to process entries and judges results for a show schedule and calculate award winners"
+authors = ["Mark Thomas <mark.highland@gmail.com>"]
+license = "GNU General Public License v3.0"
+readme = "README.md"
+packages = [{include = "garden_show"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flet = "^0.5.0"
+StrEnum = "^0.4.10"
+tomli = "^2.0.1"
+python-dateutil = "^2.8.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
