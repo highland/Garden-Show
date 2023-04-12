@@ -11,15 +11,19 @@ As the entries rely on a stable schedule,
 
 @author: Mark
 """
+import logging
 from typing import List, Tuple, Set
 
 from garden_show import Show
 from garden_show import awards
 
 ExhibitorName = str
+Reason = str
 EntryCount = str  # "1" or "2"
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
+
+log = logging.getLogger(__name__)
 
 
 def exhibitor_check(
@@ -102,7 +106,7 @@ def get_previous_winners(
         (
             show_class.class_id,
             [winner.exhibitor.full_name for winner in show_class.results],
-            show_class.no_of_entries
+            show_class.no_of_entries,
         )
         for show_class in section.sub_sections.values()
         if show_class.results
@@ -122,17 +126,17 @@ def add_class_winners(
 
 def get_judges_best_in_fields(
     section_id: SectionId,
-) -> Set[Tuple[str, ExhibitorName]]:
-    """Supply field description and current winner (if any)
+) -> Set[Tuple[str, ExhibitorName, Reason]]:
+    """Supply field description and current winner/reason (if any)
     to enable contruction of entry fields"""
     return {  # using a set to avoid trophy/rosette duplicates
-        (award.description, award.winner)
+        (award.description, award.winner, award.reason)
         for award in awards.bests_for_section(section_id)
     }
 
 
 def add_best_in_results(
-    section_id: SectionId, winners: List[ExhibitorName]
+    section_id: SectionId, winners: List[Tuple[ExhibitorName, Reason]]
 ) -> None:
     """Add winners to a Section"""
     section = Show.schedule.sections[section_id]
@@ -145,15 +149,18 @@ def add_best_in_results(
     ]
     section.trophies = []
     if trophy_wins and rosettte_wins:  # add both
-        for winner, trophy, rosette in zip(
+        for (winner, reason), trophy, rosette in zip(
             winners, trophy_wins, rosettte_wins
         ):
             trophy.winner = winner
+            trophy.reason = reason
             rosette.winner = winner
+            rosette.reason = reason
             section.trophies.append(trophy)
             section.trophies.append(rosette)
     else:  # add either trophy or rosette
         wins = trophy_wins if trophy_wins else rosettte_wins
-        for winner, award in zip(winners, wins):
+        for (winner, reason), award in zip(winners, wins):
             award.winner = winner
+            award.reason = reason
             section.trophies.append(award)

@@ -37,6 +37,7 @@ class Entry(UserControl):
         self.entry = entry
         self.description = description
         self.how_many = how_many
+        self.height = 20
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entry):

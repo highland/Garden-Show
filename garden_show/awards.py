@@ -20,6 +20,7 @@ from garden_show.configuration import AWARDFILE, AWARDDATA
 ClassId = str  # r'\D\d*'
 SectionId = str  # r"\D"
 ExhibitorName = str
+
 awards: List[Award] = []
 
 
@@ -57,6 +58,7 @@ class Award:
     name: str
     description: str = ""
     winner: ExhibitorName = ""
+    reason: str = ""
 
 
 def bests_for_section(section_id: SectionId) -> List[Award]:
