@@ -201,7 +201,9 @@ class ShowClass:
 
     def __str__(self) -> str:
         firstline = f"{self.class_id}\t{self.description}\n"
-        resultlines = "/n".join([f"{result}" for result in self.results])
+        resultlines = "\t" + "\n\t".join(
+            [f"{result}" for result in self.results]
+        )
         return firstline + resultlines
 
 
@@ -266,8 +268,8 @@ class Winner:
 
     def __str__(self) -> str:
         return (
-            f"{self.exhibitor.full_name} {self.place.value}"
-            f"{self.show_class.class_id}"
+            f"{self.place.value}{self.show_class.class_id}: "
+            f"{self.exhibitor.full_name}"
         )
 
 

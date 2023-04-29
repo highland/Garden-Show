@@ -149,18 +149,20 @@ def add_best_in_results(
     ]
     section.trophies = []
     if trophy_wins and rosettte_wins:  # add both
-        for (winner, reason), trophy, rosette in zip(
+        for (exhibitor_name, reason), trophy, rosette in zip(
             winners, trophy_wins, rosettte_wins
         ):
-            trophy.winner = winner
+            trophy.winner = exhibitor_name
             trophy.reason = reason
-            rosette.winner = winner
+            rosette.winner = exhibitor_name
             rosette.reason = reason
             section.trophies.append(trophy)
             section.trophies.append(rosette)
     else:  # add either trophy or rosette
         wins = trophy_wins if trophy_wins else rosettte_wins
-        for (winner, reason), award in zip(winners, wins):
-            award.winner = winner
+        for (exhibitor_name, reason), award in zip(winners, wins):
+            award.winner = exhibitor_name
             award.reason = reason
             section.trophies.append(award)
+    awards.save_awards()
+    Show.save_show_data(Show.showdata)

@@ -80,7 +80,6 @@ def populate_page(event: ControlEvent) -> None:
         for class_id in model.get_section_classes(section.value):
             get_names.controls.append(gui_support.ShowClassResults(class_id))
     section.read_only = True
-    log.info(f"bests are {get_best.controls[0].controls}")
     event.page.update()
 
 

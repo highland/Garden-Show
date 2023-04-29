@@ -15,8 +15,7 @@ def show_results_by_class():
     )
     for show_class in Show.schedule.classes.values():
         if show_class.results:
-            print(f"\nclass {show_class.class_id}"
-                  f"\n--------")
+            print(f"\nclass {show_class.class_id}" f"\n--------")
             for result in show_class.results:
                 print(result)
 
@@ -28,9 +27,16 @@ def show_results_for_section(section_id):
         =====================
         """
     )
-    for show_class in Show.schedule.sections[section_id].sub_sections.values():
+    section = Show.schedule.sections[section_id]
+    for show_class in section.sub_sections.values():
         if show_class.results:
             print(f"class {show_class}")
+    for award in section.trophies:
+        if award.wins is Show.awards.WinsType.TROPHY:
+            print(
+                f"{award.winner} wins {award.name}:\n\t{award.description} "
+                f"{f'for {award.reason}' if award.reason else ''}"
+            )
 
 
 def show_results_by_exhibitor():
@@ -44,7 +50,7 @@ def show_results_by_exhibitor():
         if exhibitor.results:
             print(f"Exhibitor {exhibitor}")
             for result in exhibitor.results:
-                print(result)
+                print(f"\t{result.place.value}{result.show_class.class_id}")
 
 
 def show_entries_by_exhibitor():
