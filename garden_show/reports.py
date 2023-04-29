@@ -37,6 +37,8 @@ def show_results_for_section(section_id):
                 f"{award.winner} wins {award.name}:\n\t{award.description} "
                 f"{f'for {award.reason}' if award.reason else ''}"
             )
+        elif award.wins is Show.awards.WinsType.ROSETTE:
+            print(f"{award.winner} wins a Rosette for {award.description}")
 
 
 def show_results_by_exhibitor():
@@ -46,11 +48,21 @@ def show_results_by_exhibitor():
         ====================
         """
     )
+    awards = Show.awards.get_all_awards()
     for exhibitor in Show.exhibitors:
         if exhibitor.results:
             print(f"Exhibitor {exhibitor}")
             for result in exhibitor.results:
                 print(f"\t{result.place.value}{result.show_class.class_id}")
+        for award in awards:
+            if award.winner == exhibitor.full_name:
+                if award.wins is Show.awards.WinsType.TROPHY:
+                    print(
+                        f"\tWinner of {award.name}:\n\t\t{award.description} "
+                        f"{f'for {award.reason}' if award.reason else ''}"
+                    )
+                elif award.wins is Show.awards.WinsType.ROSETTE:
+                    print(f"\tAwarded a Rosette for {award.description}")
 
 
 def show_entries_by_exhibitor():

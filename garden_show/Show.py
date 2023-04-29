@@ -71,6 +71,14 @@ class Exhibitor:
             and self.last_name == other.last_name
         )
 
+    def __lt__(self, other: "Exhibitor") -> bool:
+        if not isinstance(other, Exhibitor):
+            return NotImplemented
+        return self.last_name < other.last_name or (
+            self.last_name == other.last_name
+            and self.last_name < other.last_name
+        )
+
     @property
     def full_name(self) -> Name:
         """Return names as a single full name"""
@@ -309,6 +317,7 @@ def calculate_points_winners() -> None:
 
 def save_show_data(data: ShowData) -> None:
     """Back up schedule and exhibitors to disk"""
+    exhibitors.sort()
     with SAVEDDATA.open("wb") as save_file:
         pickle.dump(data, save_file)
 
