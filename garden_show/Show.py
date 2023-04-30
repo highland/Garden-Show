@@ -125,6 +125,7 @@ def get_actual_exhibitor(name: Name) -> Exhibitor:
         index = exhibitors.index(match)
         return exhibitors[index]
     exhibitors.append(match)
+    exhibitors.sort()
     return match
 
 
@@ -317,7 +318,6 @@ def calculate_points_winners() -> None:
 
 def save_show_data(data: ShowData) -> None:
     """Back up schedule and exhibitors to disk"""
-    exhibitors.sort()
     with SAVEDDATA.open("wb") as save_file:
         pickle.dump(data, save_file)
 
