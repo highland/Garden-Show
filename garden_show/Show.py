@@ -11,11 +11,11 @@ import pickle
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Tuple
+from enum import StrEnum
+
 
 from pathlib import Path
 from dateutil.parser import parse
-from strenum import StrEnum
-
 from garden_show.configuration import (
     SCHEDULEFILE,
     SAVEDDATA,
@@ -82,11 +82,7 @@ class Exhibitor:
     @property
     def full_name(self) -> Name:
         """Return names as a single full name"""
-        if self.other_names:
-            middle = " " + "".join(self.other_names) + " "
-        else:
-            middle = " "
-        return f"{self.first_name}{middle}{self.last_name}"
+        return " ".join([self.first_name, *self.other_names, self.last_name])
 
     def __hash__(self) -> int:
         return hash((self.first_name, self.last_name, self.other_names))
