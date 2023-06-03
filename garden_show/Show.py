@@ -76,7 +76,7 @@ class Exhibitor:
             return NotImplemented
         return self.last_name < other.last_name or (
             self.last_name == other.last_name
-            and self.last_name < other.last_name
+            and self.first_name < other.first_name
         )
 
     @property
