@@ -16,4 +16,4 @@
 (*) A spike to try out ZODB instead of straight pickle came to the
 conclusion that ZODB was overkill for this application.
 
-Uses python 3.10.9
+Uses python 3.11.3
