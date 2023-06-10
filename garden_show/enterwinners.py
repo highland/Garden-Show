@@ -21,14 +21,10 @@ from flet import (
     MainAxisAlignment,
     padding,
 )
-import logging
 
 from garden_show import model
 from garden_show import gui_support
 from garden_show.configuration import TITLE
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 
 def get_section_description(event: ControlEvent) -> None:
@@ -68,17 +64,14 @@ def populate_page(event: ControlEvent) -> None:
         control = Row([best, label, for_reason])
         get_best.controls.append(control)
 
-    if previous_results := model.get_previous_winners(section.value):
-        # editing previous results
-        for class_id, names, entry_count in previous_results:
-            get_names.controls.append(
-                gui_support.ShowClassResults(
-                    class_id, names, num_entries=entry_count
-                )
+    previous_results = model.get_previous_winners(section.value)
+    for class_id, names, entry_count in previous_results:
+        get_names.controls.append(
+            gui_support.ShowClassResults(
+                class_id, names, num_entries=entry_count
             )
-    else:
-        for class_id in model.get_section_classes(section.value):
-            get_names.controls.append(gui_support.ShowClassResults(class_id))
+        )
+
     section.read_only = True
     event.page.update()
 
@@ -98,10 +91,11 @@ def post_to_model(event: ControlEvent) -> None:
         )
         for result in get_names.controls
         if result.winners[0].value != "None"
+        and result.winners[1].value != "None"
     ]
     model.add_class_winners(winner_list)
     best_list = [
-        (best_row.controls[0].value, best_row.controls[-1].value)
+        (best_row.controls[0].value, best_row.controls[2].value)
         for best_row in get_best.controls
     ]
     model.add_best_in_results(section.value, best_list)

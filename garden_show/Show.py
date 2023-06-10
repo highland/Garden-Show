@@ -167,7 +167,10 @@ class ShowClass:
     no_of_entries: int = 0
 
     def add_winners(
-        self, winners: List[Name], has_first_equal: bool = False
+        self,
+        winners: List[Name],
+        has_first_equal: bool = False,
+        entry_count: int = 0,
     ) -> None:
         """Add winners (removing previous winners if they exist)
         Create Winners and connect to both Exhibitor and this show class."""

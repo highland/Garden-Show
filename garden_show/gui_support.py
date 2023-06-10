@@ -37,8 +37,11 @@ class NameChooser(TextField):
     def _get_initials(self) -> Dict[Initials, Name]:
         initials = {}
         for name in self.candidates:
-            first, *_, last = name.split()
-            initials[f"{first[0]}{last[0]}".upper()] = name
+            try:
+                first, *_, last = name.split()
+                initials[f"{first[0]}{last[0]}".upper()] = name
+            except ValueError:
+                pass  # one name; need two names for initial
         return initials
 
     def offer_candidate(self, event: ControlEvent) -> None:
@@ -110,7 +113,7 @@ class ShowClassResults(UserControl):
     """Allow entry of winners for a show class"""
 
     def __init__(
-        self, class_id: ClassId, names: List[str] = [], num_entries: int = 0
+        self, class_id: ClassId, names: List[str], num_entries: int
     ) -> None:
         super().__init__()
         self.class_id = class_id

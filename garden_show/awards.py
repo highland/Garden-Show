@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from typing import List
 from pathlib import Path
 
+from enum import StrEnum
 import tomli
-from strenum import StrEnum
 
 from garden_show.configuration import AWARDFILE, AWARDDATA
 
@@ -74,7 +74,10 @@ def bests_for_section(section_id: SectionId) -> List[Award]:
         for award in awards
         if award.type is AwardType.BEST
         and (
-            section_id in award.with_members
+            (
+                len(award.with_members) == 1
+                and award.with_members[0] == section_id
+            )
             or award.with_members[0].startswith(section_id)
         )
     ]
