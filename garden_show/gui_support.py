@@ -117,12 +117,12 @@ class ShowClassResults(UserControl):
     ) -> None:
         super().__init__()
         self.class_id = class_id
+        self.entry_count = str(num_entries)
         self.winners = [
             NameChooser(),
             NameChooser(),
             NameChooser(),
         ]
-        self.entry_count = num_entries
         if names:  # previous entry
             for winner, name in zip(self.winners, names):
                 winner.value = name

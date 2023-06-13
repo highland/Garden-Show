@@ -68,7 +68,7 @@ def populate_page(event: ControlEvent) -> None:
     for class_id, names, entry_count in previous_results:
         get_names.controls.append(
             gui_support.ShowClassResults(
-                class_id, names, num_entries=entry_count
+                class_id, names, entry_count
             )
         )
 
@@ -87,7 +87,7 @@ def post_to_model(event: ControlEvent) -> None:
             result.class_id,
             [winner.value for winner in result.winners if winner.value],
             result.winners[0].label == "First equals",
-            result.entry_count,
+            int(result.entry_count),
         )
         for result in get_names.controls
         if result.winners[0].value != "None"

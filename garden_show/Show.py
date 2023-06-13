@@ -174,6 +174,7 @@ class ShowClass:
     ) -> None:
         """Add winners (removing previous winners if they exist)
         Create Winners and connect to both Exhibitor and this show class."""
+        print(f"Enter add_winners {entry_count=}")
         if self.results:
             self.remove_results()
         for index, name in enumerate(winners):
@@ -187,6 +188,7 @@ class ShowClass:
                 place = places[index]
                 points = (3, 2, 1)[index]
             Winner(exhibitor, place, self, points)
+        self.no_of_entries = entry_count
         save_show_data(showdata)
 
     def remove_results(self) -> None:
@@ -212,7 +214,8 @@ class ShowClass:
         resultlines = "\t" + "\n\t".join(
             [f"{result}" for result in self.results]
         )
-        return firstline + resultlines
+        entryline = f"\n{self.no_of_entries} entries"
+        return firstline + resultlines + entryline
 
 
 def _load_schedule_from_file(file: Path = SCHEDULEFILE) -> Schedule:
