@@ -120,15 +120,16 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
             for award_def in data:
                 group_type = GroupType.SECTIONS
                 with_members = award_def.get("section")
-                award = Award(
-                    WinsType.ROSETTE,
-                    AwardType(award_type),
-                    with_members,
-                    group_type=GroupType.SECTIONS,
-                    name="",
-                    description="Best in section",
-                )
-                award_list.append(award)
+                for section in with_members:
+                    award = Award(
+                        WinsType.ROSETTE,
+                        AwardType(award_type),
+                        with_members=section,
+                        group_type=GroupType.SECTIONS,
+                        name="",
+                        description="Best in section",
+                    )
+                    award_list.append(award)
 
     return award_list
 

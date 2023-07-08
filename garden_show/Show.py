@@ -174,7 +174,6 @@ class ShowClass:
     ) -> None:
         """Add winners (removing previous winners if they exist)
         Create Winners and connect to both Exhibitor and this show class."""
-        print(f"Enter add_winners {entry_count=}")
         if self.results:
             self.remove_results()
         for index, name in enumerate(winners):
