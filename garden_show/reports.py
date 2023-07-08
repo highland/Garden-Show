@@ -21,6 +21,7 @@ def show_results_by_class():
 
 
 def show_results_for_section(section_id):
+    section_id = section_id.upper()
     print(
         f"""
         Results for section {section_id}
@@ -35,10 +36,13 @@ def show_results_for_section(section_id):
         if award.wins is Show.awards.WinsType.TROPHY:
             print(
                 f"{award.winner} wins {award.name}:\n\t{award.description} "
-                f"{f'for {award.reason}' if award.reason else ''}"
+                f"{f'for {award.reason}' if award.reason else ''}\n"
             )
         elif award.wins is Show.awards.WinsType.ROSETTE:
-            print(f"{award.winner} wins a Rosette for {award.description}")
+            print(
+                f"{award.winner} wins a Rosette for {award.description}"
+                f" {award.with_members[0]}"
+            )
 
 
 def show_results_by_exhibitor():
@@ -52,17 +56,26 @@ def show_results_by_exhibitor():
     for exhibitor in Show.exhibitors:
         if exhibitor.results:
             print(f"Exhibitor {exhibitor}")
-            for result in exhibitor.results:
-                print(f"\t{result.place.value}{result.show_class.class_id}")
+            exhibitor_results = sorted(
+                [
+                    (result.show_class.class_id, result.place)
+                    for result in exhibitor.results
+                ]
+            )
+            for class_id, place in exhibitor_results:
+                print(f"\t{place.value} in {class_id}")
         for award in awards:
             if award.winner == exhibitor.full_name:
                 if award.wins is Show.awards.WinsType.TROPHY:
                     print(
                         f"\tWinner of {award.name}:\n\t\t{award.description} "
-                        f"{f'for {award.reason}' if award.reason else ''}"
+                        f"{f'for {award.reason} section {award.with_members[0]}' if award.reason else ''}"
                     )
                 elif award.wins is Show.awards.WinsType.ROSETTE:
-                    print(f"\tAwarded a Rosette for {award.description}")
+                    print(
+                        f"\tAwarded a Rosette for {award.description}"
+                        f" {award.with_members[0]}"
+                    )
 
 
 def show_entries_by_exhibitor():

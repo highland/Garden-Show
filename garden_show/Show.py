@@ -32,10 +32,10 @@ ShowData = Tuple["Schedule", List["Exhibitor"]]
 class Place(StrEnum):
     """The four possible placings in a Show Class"""
 
-    FIRST = "1st in "
-    SECOND = "2nd in "
-    THIRD = "3rd in "
-    EQUAL = "1st= in "
+    FIRST = "1st"
+    SECOND = "2nd"
+    THIRD = "3rd"
+    EQUAL = "1st="
 
 
 places = Place.FIRST, Place.SECOND, Place.THIRD
@@ -213,7 +213,7 @@ class ShowClass:
         resultlines = "\t" + "\n\t".join(
             [f"{result}" for result in self.results]
         )
-        entryline = f"\n{self.no_of_entries} entries"
+        entryline = f"\n{self.no_of_entries} entries\n"
         return firstline + resultlines + entryline
 
 
@@ -277,10 +277,7 @@ class Winner:
         self.exhibitor._remove_result(self)
 
     def __str__(self) -> str:
-        return (
-            f"{self.place.value}{self.show_class.class_id}: "
-            f"{self.exhibitor.full_name}"
-        )
+        return f"{self.place.value}: {self.exhibitor.full_name}"
 
 
 def calculate_points_winners() -> None:
