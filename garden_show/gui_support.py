@@ -117,12 +117,16 @@ class ShowClassResults(UserControl):
     ) -> None:
         super().__init__()
         self.class_id = class_id
-        self.entry_count = str(num_entries)
         self.winners = [
             NameChooser(),
             NameChooser(),
             NameChooser(),
         ]
+        self.entry_count: TextField = TextField(
+            value=str(num_entries),
+            width=50,
+            height=50,
+        )
         if names:  # previous entry
             for winner, name in zip(self.winners, names):
                 winner.value = name
@@ -145,11 +149,7 @@ class ShowClassResults(UserControl):
                             width=250,
                         ),
                         *self.winners,
-                        TextField(
-                            value=self.entry_count,
-                            width=50,
-                            height=50,
-                        ),
+                        self.entry_count,
                     ]
                 ),
             ]

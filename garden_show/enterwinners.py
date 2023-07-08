@@ -87,7 +87,7 @@ def post_to_model(event: ControlEvent) -> None:
             result.class_id,
             [winner.value for winner in result.winners if winner.value],
             result.winners[0].label == "First equals",
-            int(result.entry_count),
+            int(result.entry_count.value),
         )
         for result in get_names.controls
         if result.winners[0].value != "None"
