@@ -3,7 +3,10 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
+from collections import defaultdict
 from garden_show import Show
+from typing import Dict
+from Show import Exhibitor
 
 
 def show_results_by_class():
@@ -93,3 +96,12 @@ def show_entries_by_exhibitor():
                     f"\t{entry.show_class}"
                     f"\t{entry.count if entry.count> 1 else ''}"
                 )
+
+
+def calculate_most_points():
+    for section in Show.schedule.sections:
+        totals: Dict[Exhibitor, int] = defaultdict(int)
+        for show_class in section.sub_sections.values():
+            for result in show_class.results:
+                totals[result.exhibitor] += result.points
+        print(f"section {section.section_id}: {section.description}")

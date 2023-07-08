@@ -92,42 +92,57 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
 
         for award_type, data in award_structure["trophies"].items():
             for award_def in data:
-                group_type = (
-                    GroupType.SECTIONS
-                    if award_def.get("section")
-                    else GroupType.CLASSES
-                    if award_def.get("show_class")
-                    else None
-                )
-                with_members = (
-                    award_def.get("section")
-                    if group_type == GroupType.SECTIONS
-                    else award_def.get("show_class")
-                    if group_type == GroupType.CLASSES
-                    else None
-                )
-                award = Award(
-                    WinsType.TROPHY,
-                    AwardType(award_type),
-                    with_members,
-                    group_type,
-                    award_def.get("name"),
-                    award_def.get("description", "Best in section"),
-                )
-                award_list.append(award)
+                for section in award_def.get("section"):
+                    desc_default = (
+                        "Best in section"
+                        if AwardType(award_type) == AwardType.BEST
+                        else "Most Points in section"
+                    )
+                    award = Award(
+                        WinsType.TROPHY,
+                        AwardType(award_type),
+                        section,
+                        GroupType.SECTIONS,
+                        award_def.get("name"),
+                        award_def.get("description", desc_default),
+                    )
+                    award_list.append(award)
+                if class_list := award_def.get("show_class"):
+                    desc_default = (
+                        "Best in class"
+                        if AwardType(award_type) == AwardType.BEST
+                        else "Most Points in class"
+                        if AwardType(award_type) == AwardType.POINTS
+                        else ""
+                    )
+                    award = Award(
+                        WinsType.TROPHY,
+                        AwardType(award_type),
+                        class_list,
+                        GroupType.CLASSES,
+                        award_def.get("name"),
+                        award_def.get("description", desc_default),
+                    )
+                    award_list.append(award)
 
         for award_type, data in award_structure["rosettes"].items():
             for award_def in data:
-                group_type = GroupType.SECTIONS
                 with_members = award_def.get("section")
                 for section in with_members:
+                    description = (
+                        "Best in section"
+                        if AwardType(award_type) == AwardType.BEST
+                        else "Most Points in section"
+                        if AwardType(award_type) == AwardType.POINTS
+                        else "First in section"
+                    )
                     award = Award(
                         WinsType.ROSETTE,
                         AwardType(award_type),
-                        with_members=section,
-                        group_type=GroupType.SECTIONS,
-                        name="",
-                        description="Best in section",
+                        section,
+                        GroupType.SECTIONS,
+                        "",
+                        description,
                     )
                     award_list.append(award)
 
