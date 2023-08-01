@@ -92,21 +92,22 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
 
         for award_type, data in award_structure["trophies"].items():
             for award_def in data:
-                for section in award_def.get("section"):
-                    desc_default = (
-                        "Best in section"
-                        if AwardType(award_type) == AwardType.BEST
-                        else "Most Points in section"
-                    )
-                    award = Award(
-                        WinsType.TROPHY,
-                        AwardType(award_type),
-                        section,
-                        GroupType.SECTIONS,
-                        award_def.get("name"),
-                        award_def.get("description", desc_default),
-                    )
-                    award_list.append(award)
+                if section_list := award_def.get("section"):
+                    for section in section_list:
+                        desc_default = (
+                            "Best in section"
+                            if AwardType(award_type) == AwardType.BEST
+                            else "Most Points in section"
+                        )
+                        award = Award(
+                            WinsType.TROPHY,
+                            AwardType(award_type),
+                            section,
+                            GroupType.SECTIONS,
+                            award_def.get("name"),
+                            award_def.get("description", desc_default),
+                        )
+                        award_list.append(award)
                 if class_list := award_def.get("show_class"):
                     desc_default = (
                         "Best in class"

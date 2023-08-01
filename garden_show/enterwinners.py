@@ -67,9 +67,7 @@ def populate_page(event: ControlEvent) -> None:
     previous_results = model.get_previous_winners(section.value)
     for class_id, names, entry_count in previous_results:
         get_names.controls.append(
-            gui_support.ShowClassResults(
-                class_id, names, entry_count
-            )
+            gui_support.ShowClassResults(class_id, names, entry_count)
         )
 
     section.read_only = True
@@ -95,7 +93,11 @@ def post_to_model(event: ControlEvent) -> None:
     ]
     model.add_class_winners(winner_list)
     best_list = [
-        (best_row.controls[0].value, best_row.controls[2].value)
+        (
+            best_row.controls[0].label,
+            best_row.controls[0].value,
+            best_row.controls[2].value,
+        )
         for best_row in get_best.controls
     ]
     model.add_best_in_results(section.value, best_list)

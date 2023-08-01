@@ -151,7 +151,7 @@ def get_judges_best_in_fields(
 
 
 def add_best_in_results(
-    section_id: SectionId, winners: List[Tuple[ExhibitorName, Reason]]
+    section_id: SectionId, winners: List[Tuple[str, ExhibitorName, Reason]]
 ) -> None:
     """Add winners to a Section"""
     section = Show.schedule.sections[section_id]
@@ -159,25 +159,20 @@ def add_best_in_results(
     trophy_wins = [
         award for award in bests if award.wins is awards.WinsType.TROPHY
     ]
-    rosettte_wins = [
+    rosette_wins = [
         award for award in bests if award.wins is awards.WinsType.ROSETTE
     ]
     section.trophies = []
-    if trophy_wins and rosettte_wins:  # add both
-        for (exhibitor_name, reason), trophy, rosette in zip(
-            winners, trophy_wins, rosettte_wins
-        ):
-            trophy.winner = exhibitor_name
-            trophy.reason = reason
-            rosette.winner = exhibitor_name
-            rosette.reason = reason
-            section.trophies.append(trophy)
-            section.trophies.append(rosette)
-    else:  # add either trophy or rosette
-        wins = trophy_wins if trophy_wins else rosettte_wins
-        for (exhibitor_name, reason), award in zip(winners, wins):
-            award.winner = exhibitor_name
-            award.reason = reason
-            section.trophies.append(award)
+    for desc, exhibitor_name, reason in winners:
+        for award in trophy_wins:
+            if desc == award.description:
+                award.winner = exhibitor_name
+                award.reason = reason
+                section.trophies.append(award)
+        for award in rosette_wins:
+            if desc == award.description:
+                award.winner = exhibitor_name
+                award.reason = reason
+                section.trophies.append(award)
     awards.save_awards()
     Show.save_show_data(Show.showdata)
