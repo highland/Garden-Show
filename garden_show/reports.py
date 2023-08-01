@@ -3,10 +3,7 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
-from collections import defaultdict
 from garden_show import Show
-from typing import Dict
-from Show import Exhibitor
 
 
 def show_results_by_class():
@@ -98,10 +95,50 @@ def show_entries_by_exhibitor():
                 )
 
 
-def calculate_most_points():
-    for section in Show.schedule.sections:
-        totals: Dict[Exhibitor, int] = defaultdict(int)
-        for show_class in section.sub_sections.values():
-            for result in show_class.results:
-                totals[result.exhibitor] += result.points
-        print(f"section {section.section_id}: {section.description}")
+def show_most_points():
+    print(
+        """
+        Summary of Exhibitors with most points
+        =====================================
+        """
+    )
+    points_awards = [
+        award
+        for award in Show.awards.get_all_awards()
+        if award.type == Show.awards.AwardType.POINTS and award.winner
+    ]
+
+    print("   Trophies for most points")
+    print("   ------------------------")
+
+    trophy_points_awards = [
+        award
+        for award in points_awards
+        if award.wins == Show.awards.WinsType.TROPHY
+    ]
+
+    for award in trophy_points_awards:
+        print(f"\n     {award.name} goes to {award.winner}")
+        print(
+            f"        {award.description} {award.with_members}"
+            f" with {award.reason}"
+        )
+
+    print("\n   Rosettes for most points")
+    print("   ------------------------")
+
+    rosette_points_awards = [
+        award
+        for award in points_awards
+        if award.wins == Show.awards.WinsType.ROSETTE
+    ]
+
+    for award in rosette_points_awards:
+        print(f"\n     {award.winner}")
+        print(
+            f"        for {award.description} {award.with_members}"
+            f" with {award.reason}"
+        )
+
+
+Show.calculate_points_winners()

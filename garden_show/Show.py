@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import datetime
 import pickle
-# from collections import Counter
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Tuple
 from enum import StrEnum
@@ -280,38 +280,40 @@ class Winner:
         return f"{self.place.value}: {self.exhibitor.full_name}"
 
 
-# def calculate_points_winners() -> None:
-#     """Determine the winners in 'most points in ...' type awards"""
+def calculate_points_winners() -> None:
+    """Determine the winners in 'most points in ...' type awards"""
 
-#     for award in awards.get_all_awards():
-#         award.winner = []
-#         results: Dict[ExhibitorName, int] = Counter()
+    for award in awards.get_all_awards():
+        if (
+            award.group_type == awards.GroupType.CLASSES
+            or award.type != awards.AwardType.POINTS
+        ):
+            continue
+        award_section_id = award.with_members[0]
+        section = schedule.sections.get(award_section_id)
+        if not section:
+            continue
+        totals: Dict[Exhibitor, int] = Counter()
+        for show_class in section.sub_sections.values():
+            for result in show_class.results:
+                totals[result.exhibitor.full_name] += result.points
+        # any winners?
+        if len(totals) > 0:
+            top_three = totals.most_common(3)
+            best = top_three[0]
+            award.winner, best_points = best
+            award.reason = f"{best_points} points"
 
-#         def totals_for_class(class_id: ClassId) -> None:
-#             show_class = schedule.classes[class_id]
-#             for winner in show_class.results:
-#                 results[winner.exhibitor.full_name] += winner.points
-
-#         match award.group_type:
-#             case awards.GroupType.CLASSES:
-#                 for class_id in award.with_members:
-#                     totals_for_class(class_id)
-#             case awards.GroupType.SECTIONS:
-#                 for section_id in award.with_members:
-#                     section = schedule.sections[section_id]
-#                     for class_id in section.sub_sections:
-#                         totals_for_class(class_id)
-
-#         winners = results.most_common()
-#         first, first_points = winners[0]
-#         award.winner.append(first)
-
-#         # check for ties
-#         for other, points in winners[1:]:
-#             if not points == first_points:
-#                 break
-#             award.winner.append(other)
-#     awards.save_awards()
+            # check for ties
+            i = 1
+            while (
+                i < len(top_three)
+                and (other_points := top_three[i][1])
+                and other_points == best_points
+            ):
+                award.winner = list(award.winner).append(top_three[i][0])
+                i += 1
+    awards.save_awards()
 
 
 def save_show_data(data: ShowData) -> None:
