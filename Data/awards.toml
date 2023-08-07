@@ -16,6 +16,7 @@ description = "Best rose"
 [[trophies.best]]
 name = "Badenoch Gardening Club Trophy"
 show_class = [ "B1", "B2", "B3", "B4", "B5", "B6", "B13", "B14",]
+description = "Best cut flower (not sweet pea or rose)"
 
 [[trophies.best]]
 name = "Badenoch Gardening Club Trophy"
@@ -39,18 +40,22 @@ description = "Best club plant"
 [[trophies.best]]
 name = "Sutherland Cup"
 section = [ "E",]
+description = "Best floral art"
 
 [[trophies.best]]
 name = "Archie Peebles Trophy"
 section = [ "F",]
+description = "Best fushsia"
 
 [[trophies.best]]
 name = "Iain MacDonald Trophy"
 section = [ "G",]
+description = "Best container"
 
 [[trophies.best]]
 name = "Marielle Barclay Picture"
 section = [ "K",]
+description = "Best entry in preserves & sweets"
 
 [[trophies.points]]
 name = "Stuart Sim Cup"
@@ -68,14 +73,17 @@ section = [ "B",]
 [[trophies.points]]
 name = "Iain MacDonald Cup"
 section = [ "Q", "R", "S",]
+description = "Most points by a Young Gardener in Sections Q, R & S"
 
 [[trophies.points]]
 name = "Jeanette MacDonald Shield"
 section = [ "K",]
+description = "Most points in preserves & sweets"
 
 [[trophies.points]]
 name = "Balgonie Dairy Cup"
 section = [ "L",]
+description = "Most points in baking section"
 
 [rosettes]
 [[rosettes.best]]
@@ -83,6 +91,3 @@ section = [ "A", "B", "C", "E", "F", "G", "K", "L", "M",]
 
 [[rosettes.points]]
 section = [ "A", "B", "K", "L", "M",]
-
-[[rosettes.position]]
-section = [ "Q", "R", "S",]

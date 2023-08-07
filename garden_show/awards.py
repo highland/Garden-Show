@@ -29,7 +29,6 @@ class AwardType(StrEnum):
 
     BEST = "best"
     POINTS = "points"
-    POSITION = "position"
 
 
 class GroupType(StrEnum):
@@ -146,7 +145,6 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
                         description,
                     )
                     award_list.append(award)
-
     return award_list
 
 

@@ -1,25 +1,38 @@
 import flet
-from garden_show.configuration import IMAGEFILE
+import subprocess
+from garden_show.configuration import IMAGEFILE, TITLE
 
 
 def main(page: flet.Page):
-    page.title = "Images Example"
+    page.title = TITLE
     page.theme_mode = flet.ThemeMode.LIGHT
-    page.padding = 50
+    page.padding = 20
     page.update()
+
+    def run_entries_form(e):
+        subprocess.run("python entryform.py", shell=True)
+
+    def run_results_form(e):
+        subprocess.run("pythonenterwinners.py")
+
 
     img = flet.Image(
         src=IMAGEFILE,
-        fit=flet.ImageFit.CONTAIN,
+        width=1049,
+        height=879,
+        fit=flet.ImageFit.COVER,
     )
 
-    entries = flet.TextButton(text="Entries Form")
+    entries = flet.Column(
+        [
+            flet.TextButton(text="Entries Form", on_click=run_entries_form),
+            flet.TextButton(text="Results Form", on_click=run_results_form),
+        ]
+    )
 
     page.add(img)
     page.overlay.append(entries)
     page.update()
-
-
 
     # for i in range(0, 30):
     #     images.controls.append(
