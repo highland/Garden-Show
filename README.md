@@ -5,8 +5,8 @@
  This had become unmanageable over the years as changes accumulated.
 
  The replacement project will be written in python with a simple frontend.
- Uses flet for GUI, dill for data persistence*,
- fpdf for report generation as Pdfs,
+ Uses flet for GUI, pickle for data persistence*,
+ reportlab for report generation as Pdfs,
  and batch input of the schedule from a text file. The awards to be presented
  in the show are defined in a .toml file.
 

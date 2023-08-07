@@ -13,8 +13,7 @@ def main(page: flet.Page):
         subprocess.run("python entryform.py", shell=True)
 
     def run_results_form(e):
-        subprocess.run("pythonenterwinners.py")
-
+        subprocess.run("python enterwinners.py")
 
     img = flet.Image(
         src=IMAGEFILE,
@@ -23,7 +22,7 @@ def main(page: flet.Page):
         fit=flet.ImageFit.COVER,
     )
 
-    entries = flet.Column(
+    actions = flet.Column(
         [
             flet.TextButton(text="Entries Form", on_click=run_entries_form),
             flet.TextButton(text="Results Form", on_click=run_results_form),
@@ -31,21 +30,8 @@ def main(page: flet.Page):
     )
 
     page.add(img)
-    page.overlay.append(entries)
+    page.overlay.append(actions)
     page.update()
-
-    # for i in range(0, 30):
-    #     images.controls.append(
-    #         flet.Image(
-    #             src=f"https://picsum.photos/200/200?{i}",
-    #             width=200,
-    #             height=200,
-    #             fit=flet.ImageFit.NONE,
-    #             repeat=flet.ImageRepeat.NO_REPEAT,
-    #             border_radius=flet.border_radius.all(10),
-    #         )
-    #     )
-    # page.update()
 
 
 flet.app(target=main)
