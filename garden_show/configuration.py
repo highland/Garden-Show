@@ -17,3 +17,6 @@ SAVEDDATA: Path = _ROOT / "data.pkl"
 AWARDFILE: Path = _ROOT / "awards.toml"
 AWARDDATA: Path = _ROOT / "awards.pkl"
 IMAGEFILE: Path = _ROOT / "Graphic.png"
+JUDGESRESULTS: Path = _ROOT / "JudgesResults.pdf"
+
+ACROBAT: str = "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"

@@ -80,19 +80,14 @@ def get_section_entries(section_id: SectionId) -> Set[ExhibitorName]:
     return members
 
 
-def add_exhibitor_and_entries(
-    name: ExhibitorName,
-    is_member: bool,
-    entries: List[Tuple[ClassId, EntryCount]],
-) -> None:
-    """Add new exhibitor (removing previous entries if they exist)
-    Create Entries."""
+def add_exhibitor(name: ExhibitorName, is_member: bool) -> None:
+    """Add new exhibitor"""
     exhibitor = Show.get_actual_exhibitor(name)
     exhibitor.member = is_member
-    exhibitor.delete_entries()
-    Show.exhibitors.append(exhibitor)
-    for show_class, entry_count in entries:
-        Show.Entry(exhibitor, show_class, entry_count)
+
+
+def get_exhibitors() -> str:
+    return Show.exhibitors.join("\n")
 
 
 def get_previous_winners(

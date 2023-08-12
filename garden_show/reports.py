@@ -78,23 +78,6 @@ def show_results_by_exhibitor():
                     )
 
 
-def show_entries_by_exhibitor():
-    print(
-        """
-        Entries by Exhibitor
-        ====================
-        """
-    )
-    for exhibitor in Show.exhibitors:
-        if exhibitor.entries:
-            print(f"Exhibitor {exhibitor}")
-            for entry in exhibitor.entries:
-                print(
-                    f"\t{entry.show_class}"
-                    f"\t{entry.count if entry.count> 1 else ''}"
-                )
-
-
 def show_most_points():
     print(
         """

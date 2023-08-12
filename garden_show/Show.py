@@ -49,7 +49,6 @@ class Exhibitor:
     last_name: Name
     other_names: List[Name] = field(default_factory=list)
     member: bool = True
-    entries: List[Entry] = field(default_factory=list)
     results: List[Winner] = field(default_factory=list)
 
     def __repr__(self) -> str:
@@ -87,18 +86,6 @@ class Exhibitor:
     def __hash__(self) -> int:
         return hash((self.first_name, self.last_name, self.other_names))
 
-    def delete_entries(self) -> None:
-        """
-        Remove the entries for this exhibitor
-        """
-        self.entries = []  # none left
-        save_show_data(showdata)
-
-    def _add_entry(self, entry: Entry) -> None:
-        """Add a single entry.
-        Only called by the entry object"""
-        self.entries.append(entry)
-
     def _add_result(self, result: Winner) -> None:
         """Add a single result.
         Only called by result object"""
@@ -122,6 +109,7 @@ def get_actual_exhibitor(name: Name) -> Exhibitor:
         return exhibitors[index]
     exhibitors.append(match)
     exhibitors.sort()
+    save_show_data(showdata)
     return match
 
 
@@ -237,23 +225,6 @@ def _load_schedule_from_file(file: Path = SCHEDULEFILE) -> Schedule:
                 new_schedule.classes[class_id] = show_class
                 current_section.sub_sections[class_id] = show_class
     return new_schedule
-
-
-@dataclass
-class Entry:
-    """An entry by an exhibitor for a class in the show
-
-    2 entries max are allowed for a single class.
-    """
-
-    exhibitor: Exhibitor
-    show_class: ShowClass
-    count: int = 1
-
-    def __post_init__(self) -> None:
-        """Link to collections in exhibitor and show class"""
-        self.exhibitor._add_entry(self)
-        save_show_data(showdata)
 
 
 @dataclass
