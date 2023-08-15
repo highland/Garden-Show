@@ -9,8 +9,8 @@ def main(page: flet.Page):
     page.padding = 20
     page.update()
 
-    def run_entries_form(e):
-        subprocess.run("python entryform.py", shell=True)
+    def add_exhibitors(e):
+        subprocess.run("python addexhibitors.py", shell=True)
 
     def run_results_form(e):
         subprocess.run("python enterwinners.py")
@@ -24,7 +24,7 @@ def main(page: flet.Page):
 
     actions = flet.Column(
         [
-            flet.TextButton(text="Entries Form", on_click=run_entries_form),
+            flet.TextButton(text="Add Exhibitors", on_click=add_exhibitors),
             flet.TextButton(text="Results Form", on_click=run_results_form),
         ]
     )

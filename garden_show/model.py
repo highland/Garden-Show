@@ -86,8 +86,8 @@ def add_exhibitor(name: ExhibitorName, is_member: bool) -> None:
     exhibitor.member = is_member
 
 
-def get_exhibitors() -> str:
-    return Show.exhibitors.join("\n")
+def get_exhibitors() -> List[str]:
+    return [exhibitor.full_name for exhibitor in Show.exhibitors]
 
 
 def get_previous_winners(

@@ -254,6 +254,23 @@ class Winner:
 def calculate_points_winners() -> None:
     """Determine the winners in 'most points in ...' type awards"""
 
+    def handle_tie() -> Winner:
+        # TODO clean up to allow check more than two ties
+        first_counts = [0, 0]   # use Counters? - count firsts seconds thirds..
+        for show_class in section.sub_sections.values():
+            # count number of firsts to tie-break
+            for result in show_class.results:
+                if result.place in (Place.FIRST, Place.EQUAL):
+                    if result.exhibitor == award.winner:
+                        first_counts[0] += 1
+                    else:
+                        if result.exhibitor == top_three[1][0]:
+                            first_counts[1] += 1
+        if first_counts[1] > first_counts[0]:
+            return top_three[1][0]  # switch winner
+        else:
+            return award.winner     # no change
+
     for award in awards.get_all_awards():
         if (
             award.group_type == awards.GroupType.CLASSES
@@ -271,19 +288,13 @@ def calculate_points_winners() -> None:
         # any winners?
         if len(totals) > 0:
             top_three = totals.most_common(3)
-            best = top_three[0]
-            award.winner, best_points = best
+            award.winner, best_points = top_three[0]
             award.reason = f"{best_points} points"
 
             # check for ties
-            i = 1
-            while (
-                i < len(top_three)
-                and (other_points := top_three[i][1])
-                and other_points == best_points
-            ):
-                award.winner = list(award.winner).append(top_three[i][0])
-                i += 1
+            if top_three[1][1] == best_points:  # Tie
+                award.winner = handle_tie()
+
     awards.save_awards()
 
 
