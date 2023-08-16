@@ -7,7 +7,7 @@ from garden_show.model import get_judges_best_in_fields
 
 
 def write_header(sheet: Worksheet) -> None:
-    sheet.write(0, 0, "Class")
+    sheet.write(0, 0, "Class*")
     sheet.write(0, 1, "Description")
     sheet.write(0, 2, "First")
     sheet.write(0, 3, "Second")
@@ -37,7 +37,11 @@ classes = workbook.add_format({"text_wrap": True, "valign": "top"})
 
 for section in Show.schedule.sections.values():
     worksheet = workbook.add_worksheet(f"Section {section.section_id}")
-    worksheet.set_margins(0.4, 0.4)
+    worksheet.set_header("*Write no. of entries in class column")
+    worksheet.set_footer(
+        f"{section.description}  {Show.schedule.year}"
+    )
+    worksheet.set_margins(0.4, 0.4, 0.6, 0.5)
     worksheet.hide_gridlines(0)
     worksheet.set_default_row(30)
     worksheet.set_column(0, 0, width=7)
@@ -51,7 +55,7 @@ for section in Show.schedule.sections.values():
         worksheet.write(row, 0, show_class.class_id)
         worksheet.write(row, 1, show_class.description)
         worksheet.set_row(row, cell_format=classes)
-    write_bests(worksheet, row + 2, section.section_id)
+    write_bests(worksheet, row + 1, section.section_id)
 workbook.close()
 
 subprocess.run([EXCEL, JUDGESSHEETS])

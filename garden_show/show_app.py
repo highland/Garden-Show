@@ -10,7 +10,10 @@ def main(page: flet.Page):
     page.update()
 
     def add_exhibitors(e):
-        subprocess.run("python addexhibitors.py", shell=True)
+        subprocess.run("python addexhibitors.py")
+
+    def generate_results_form(e):
+        subprocess.run("python judges_results.py", shell=True)
 
     def run_results_form(e):
         subprocess.run("python enterwinners.py")
@@ -25,7 +28,10 @@ def main(page: flet.Page):
     actions = flet.Column(
         [
             flet.TextButton(text="Add Exhibitors", on_click=add_exhibitors),
-            flet.TextButton(text="Results Form", on_click=run_results_form),
+            flet.TextButton(
+                text="Generate Judges Result Forms", on_click=generate_results_form
+            ),
+            flet.TextButton(text="Enter Results", on_click=run_results_form),
         ]
     )
 
