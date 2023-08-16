@@ -87,6 +87,7 @@ def add_exhibitor(name: ExhibitorName, is_member: bool) -> None:
 
 
 def get_exhibitors() -> List[str]:
+    """Return a list of exhibitor's full names"""
     return [exhibitor.full_name for exhibitor in Show.exhibitors]
 
 
@@ -136,13 +137,13 @@ def add_class_winners(
 
 def get_judges_best_in_fields(
     section_id: SectionId,
-) -> Set[Tuple[str, ExhibitorName, Reason]]:
+) -> Tuple[Tuple[str, ExhibitorName, Reason]]:
     """Supply field description and current winner/reason (if any)
     to enable contruction of entry fields"""
-    return {  # using a set to avoid trophy/rosette duplicates
+    return (
         (award.description, award.winner, award.reason)
         for award in awards.bests_for_section(section_id)
-    }
+    )
 
 
 def add_best_in_results(

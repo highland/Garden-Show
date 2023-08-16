@@ -68,18 +68,35 @@ def bests_for_section(section_id: SectionId) -> List[Award]:
     global awards
     if not awards:
         awards = get_all_awards()
-    return [
+    trophies = [
         award
         for award in awards
-        if award.type is AwardType.BEST
+        if (award.type is AwardType.BEST and award.wins is WinsType.TROPHY)
         and (
             (
                 len(award.with_members) == 1
                 and award.with_members[0] == section_id
             )
-            or award.with_members[0].startswith(section_id)
+            or (
+                len(award.with_members) > 1
+                and award.with_members[0].startswith(section_id)
+            )
         )
     ]
+    if trophies:
+        bests = trophies
+    else:
+        bests = [
+            award
+            for award in awards
+            if (
+                award.type is AwardType.BEST
+                and award.wins is WinsType.ROSETTE
+                and award.with_members[0] == section_id
+            )
+        ]
+
+    return bests
 
 
 def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:

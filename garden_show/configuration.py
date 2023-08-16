@@ -17,6 +17,6 @@ SAVEDDATA: Path = _ROOT / "data.pkl"
 AWARDFILE: Path = _ROOT / "awards.toml"
 AWARDDATA: Path = _ROOT / "awards.pkl"
 IMAGEFILE: Path = _ROOT / "Graphic.png"
-JUDGESRESULTS: Path = _ROOT / "JudgesResults.pdf"
+JUDGESSHEETS: Path = _ROOT / "JudgesSheets.xlsx"
 
-ACROBAT: str = "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
+EXCEL: str = "C:/Program Files/Microsoft Office/root/Office16/EXCEL.EXE"
