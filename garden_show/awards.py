@@ -125,10 +125,9 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
                             award_def.get("name"),
                             award_def.get("description", desc_default),
                         )
-                        print(award_def.get("restriction"))
                         if restriction := award_def.get("restriction"):
                             award.restriction = restriction
-                            award_list.append(award)
+                        award_list.append(award)
                 if class_list := award_def.get("show_class"):
                     desc_default = (
                         "Best in class"

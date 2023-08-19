@@ -64,7 +64,7 @@ section = [ "A",]
 [[trophies.points]]
 name = "Green Gardener Trophy"
 section = [ "A",]
-restriction = "not in previous_veg_trophy_winners.txt"
+restriction = "previous_veg_trophy_winners.txt"
 
 [[trophies.points]]
 name = "Buchanan Trophy"

@@ -290,7 +290,8 @@ def calculate_points_winners() -> None:
         if check := award.restriction:
             with open(_ROOT / check) as rejects:
                 for name in rejects:
-                    del total_points[name]
+                    exhibitor = get_actual_exhibitor(name)
+                    del total_points[exhibitor.full_name]
         # any winners?
         if len(total_points) > 0:
             top_three = total_points.most_common(3)
