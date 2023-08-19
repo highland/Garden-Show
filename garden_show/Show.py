@@ -254,46 +254,55 @@ class Winner:
 def calculate_points_winners() -> None:
     """Determine the winners in 'most points in ...' type awards"""
 
-    def handle_tie() -> Winner:
-        # TODO clean up to allow check more than two ties
-        first_counts = [0, 0]   # use Counters? - count firsts seconds thirds..
-        for show_class in section.sub_sections.values():
-            # count number of firsts to tie-break
-            for result in show_class.results:
-                if result.place in (Place.FIRST, Place.EQUAL):
-                    if result.exhibitor == award.winner:
-                        first_counts[0] += 1
-                    else:
-                        if result.exhibitor == top_three[1][0]:
-                            first_counts[1] += 1
-        if first_counts[1] > first_counts[0]:
-            return top_three[1][0]  # switch winner
-        else:
-            return award.winner     # no change
+    def _handle_tie() -> Winner:
+        for also_check in (total_firsts, total_seconds, total_thirds):
+            # merge counters
+            total_points.update(also_check)
+            first_two = total_points.most_common(2)
+            if first_two[0][1] > first_two[1][1]:  # winner!
+                return top_three[1][0]
+            return None  # no winner found
+
+    total_points: Dict[Exhibitor, int] = Counter()
+    total_firsts: Dict[Exhibitor, int] = Counter()
+    total_seconds: Dict[Exhibitor, int] = Counter()
+    total_thirds: Dict[Exhibitor, int] = Counter()
 
     for award in awards.get_all_awards():
         if (
             award.group_type == awards.GroupType.CLASSES
             or award.type != awards.AwardType.POINTS
-        ):
+        ):  # guard clause: must be award for points in a section
             continue
         award_section_id = award.with_members[0]
         section = schedule.sections.get(award_section_id)
-        if not section:
+        if not section:  # ensure section
             continue
-        totals: Dict[Exhibitor, int] = Counter()
+        # main loop - gather data
         for show_class in section.sub_sections.values():
             for result in show_class.results:
-                totals[result.exhibitor.full_name] += result.points
+                total_points[result.exhibitor.full_name] += result.points
+                match result.place:
+                    case Place.FIRST | Place.EQUAL:
+                        total_firsts[result.exhibitor.full_name] += 1
+                    case Place.SECOND:
+                        total_seconds[result.exhibitor.full_name] += 1
+                    case Place.THIRD:
+                        total_thirds[result.exhibitor.full_name] += 1
         # any winners?
-        if len(totals) > 0:
-            top_three = totals.most_common(3)
+        if len(total_points) > 0:
+            top_three = total_points.most_common(3)
             award.winner, best_points = top_three[0]
             award.reason = f"{best_points} points"
 
             # check for ties
-            if top_three[1][1] == best_points:  # Tie
-                award.winner = handle_tie()
+            if top_three[1][1] == best_points:  # Tie 1st and 2nd (or more)
+                award.winner = _handle_tie()
+                award.reason += (
+                    f" with {total_firsts[award.winner]} firsts"
+                    f" {total_seconds[award.winner]} seconds"
+                    f" and {total_thirds[award.winner]} thirds"
+                )
 
     awards.save_awards()
 
