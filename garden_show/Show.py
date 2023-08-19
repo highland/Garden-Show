@@ -263,12 +263,12 @@ def calculate_points_winners() -> None:
                 return top_three[1][0]
             return None  # no winner found
 
-    total_points: Dict[Exhibitor, int] = Counter()
-    total_firsts: Dict[Exhibitor, int] = Counter()
-    total_seconds: Dict[Exhibitor, int] = Counter()
-    total_thirds: Dict[Exhibitor, int] = Counter()
-
     for award in awards.get_all_awards():
+        total_points: Dict[Exhibitor, int] = Counter()
+        total_firsts: Dict[Exhibitor, int] = Counter()
+        total_seconds: Dict[Exhibitor, int] = Counter()
+        total_thirds: Dict[Exhibitor, int] = Counter()
+
         if (
             award.group_type == awards.GroupType.CLASSES
             or award.type != awards.AwardType.POINTS

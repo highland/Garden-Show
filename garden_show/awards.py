@@ -29,6 +29,7 @@ class AwardType(StrEnum):
 
     BEST = "best"
     POINTS = "points"
+    POSITION = "position"
 
 
 class GroupType(StrEnum):
