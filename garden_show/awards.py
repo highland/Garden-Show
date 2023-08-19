@@ -59,6 +59,7 @@ class Award:
     description: str = ""
     winner: ExhibitorName = ""
     reason: str = ""
+    restriction: str = ""
 
 
 def bests_for_section(section_id: SectionId) -> List[Award]:
@@ -124,7 +125,10 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
                             award_def.get("name"),
                             award_def.get("description", desc_default),
                         )
-                        award_list.append(award)
+                        print(award_def.get("restriction"))
+                        if restriction := award_def.get("restriction"):
+                            award.restriction = restriction
+                            award_list.append(award)
                 if class_list := award_def.get("show_class"):
                     desc_default = (
                         "Best in class"

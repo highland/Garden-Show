@@ -16,10 +16,7 @@ from enum import StrEnum
 
 from pathlib import Path
 from dateutil.parser import parse
-from garden_show.configuration import (
-    SCHEDULEFILE,
-    SAVEDDATA,
-)
+from garden_show.configuration import SCHEDULEFILE, SAVEDDATA, _ROOT
 from garden_show import awards
 
 Name = str
@@ -289,6 +286,11 @@ def calculate_points_winners() -> None:
                         total_seconds[result.exhibitor.full_name] += 1
                     case Place.THIRD:
                         total_thirds[result.exhibitor.full_name] += 1
+        # any restrictions?
+        if check := award.restriction:
+            with open(_ROOT / check) as rejects:
+                for name in rejects:
+                    del total_points[name]
         # any winners?
         if len(total_points) > 0:
             top_three = total_points.most_common(3)
