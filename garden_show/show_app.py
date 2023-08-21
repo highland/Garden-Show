@@ -13,10 +13,13 @@ def main(page: flet.Page):
         subprocess.run("python addexhibitors.py")
 
     def generate_results_form(e):
-        subprocess.run("python judges_results.py", shell=True)
+        subprocess.run("python judges_results.py")
 
     def run_results_form(e):
         subprocess.run("python enterwinners.py")
+
+    def run_output_awards(e):
+        subprocess.run("python output_results.py")
 
     img = flet.Image(
         src=IMAGEFILE,
@@ -32,6 +35,7 @@ def main(page: flet.Page):
                 text="Generate Judges Result Forms", on_click=generate_results_form
             ),
             flet.TextButton(text="Enter Results", on_click=run_results_form),
+            flet.TextButton(text="Output Awards", on_click=run_output_awards),
         ]
     )
 

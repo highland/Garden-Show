@@ -32,15 +32,15 @@ def write_bests(sheet: Worksheet, heading_line: int, section_id: str) -> None:
 
 # Create a workbook and add a worksheet.
 workbook = Workbook(JUDGESSHEETS)
-heading = workbook.add_format({"bold": True, "font_size": 16, "valign": "top"})
-classes = workbook.add_format({"text_wrap": True, "valign": "top"})
+heading = workbook.add_format({"bold": True, "font_size": 16, "valign": "top", "border": 2})
+classes = workbook.add_format(
+    {"text_wrap": True, "valign": "top", "border": 1}
+)
 
 for section in Show.schedule.sections.values():
     worksheet = workbook.add_worksheet(f"Section {section.section_id}")
     worksheet.set_header("*Write no. of entries in class column")
-    worksheet.set_footer(
-        f"{section.description}  {Show.schedule.year}"
-    )
+    worksheet.set_footer(f"{section.description}  {Show.schedule.year}")
     worksheet.set_margins(0.4, 0.4, 0.6, 0.5)
     worksheet.hide_gridlines(0)
     worksheet.set_default_row(30)
