@@ -72,10 +72,7 @@ def show_results_by_exhibitor():
                         f"{f'for {award.reason} section {award.with_members[0]}' if award.reason else ''}"
                     )
                 elif award.wins is Show.awards.WinsType.ROSETTE:
-                    print(
-                        f"\tAwarded a Rosette for {award.description}"
-                        f" {award.with_members[0]}"
-                    )
+                    print(f"\tAwarded a Rosette for {award.description}")
 
 
 def show_most_points():

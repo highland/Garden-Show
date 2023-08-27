@@ -76,12 +76,10 @@ def bests_for_section(section_id: SectionId) -> List[Award]:
         if (award.type is AwardType.BEST and award.wins is WinsType.TROPHY)
         and (
             (
-                len(award.with_members) == 1
-                and award.with_members[0] == section_id
+                award.with_members[0] == section_id
             )
             or (
-                len(award.with_members) > 1
-                and award.with_members[0].startswith(section_id)
+                award.with_members[0].startswith(section_id)
             )
         )
     ]
@@ -111,51 +109,43 @@ def _load_award_structure_from_file(file: Path = AWARDFILE) -> List[Award]:
         for award_type, data in award_structure["trophies"].items():
             for award_def in data:
                 if section_list := award_def.get("section"):
-                    for section in section_list:
-                        desc_default = (
-                            "Best in section"
-                            if AwardType(award_type) == AwardType.BEST
-                            else "Most Points in section"
-                        )
-                        award = Award(
-                            WinsType.TROPHY,
-                            AwardType(award_type),
-                            section,
-                            GroupType.SECTIONS,
-                            award_def.get("name"),
-                            award_def.get("description", desc_default),
-                        )
-                        if restriction := award_def.get("restriction"):
-                            award.restriction = restriction
-                        award_list.append(award)
-                if class_list := award_def.get("show_class"):
+                    section = section_list[0]
                     desc_default = (
-                        "Best in class"
+                        f"Best in section {section}"
                         if AwardType(award_type) == AwardType.BEST
-                        else "Most Points in class"
-                        if AwardType(award_type) == AwardType.POINTS
-                        else ""
+                        else f"Most Points in section {section}"
                     )
+                    award = Award(
+                        WinsType.TROPHY,
+                        AwardType(award_type),
+                        section_list,
+                        GroupType.SECTIONS,
+                        award_def.get("name"),
+                        award_def.get("description", desc_default),
+                    )
+                    if restriction := award_def.get("restriction"):
+                        award.restriction = restriction
+                if class_list := award_def.get("show_class"):
                     award = Award(
                         WinsType.TROPHY,
                         AwardType(award_type),
                         class_list,
                         GroupType.CLASSES,
                         award_def.get("name"),
-                        award_def.get("description", desc_default),
+                        award_def.get("description"),
                     )
-                    award_list.append(award)
+                award_list.append(award)
 
         for award_type, data in award_structure["rosettes"].items():
             for award_def in data:
                 with_members = award_def.get("section")
                 for section in with_members:
                     description = (
-                        "Best in section"
+                        f"Best in section {section}"
                         if AwardType(award_type) == AwardType.BEST
-                        else "Most Points in section"
+                        else f"Most Points in section {section}"
                         if AwardType(award_type) == AwardType.POINTS
-                        else "First in section"
+                        else f"First in section {section}"
                     )
                     award = Award(
                         WinsType.ROSETTE,
