@@ -131,11 +131,20 @@ class ShowClassResults(UserControl):
             for winner, name in zip(self.winners, names):
                 winner.value = name
 
+    def shift_focus(self, event: ControlEvent) -> None:
+        capture_input(event)
+        source = event.control
+        index = self.winners.index(source)
+        if index < 2:
+            self.winners[index + 1].focus()
+        else:
+            self.entry_count.focus()
+
     def build(self) -> Column:
         labels = ("First", "Second", "Third")
         for winner, label in zip(self.winners, labels):
             winner.on_special = self.handle_ties
-            winner.on_blur = winner.on_submit = capture_input
+            winner.on_blur = winner.on_submit = self.shift_focus
             winner.height = 50
             winner.label = label
         return Column(

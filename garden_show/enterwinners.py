@@ -72,6 +72,8 @@ def populate_page(event: ControlEvent) -> None:
 
     section.read_only = True
     event.page.update()
+    if get_best.controls:
+        get_best.controls[0].controls[0].focus()
 
 
 def post_to_model(event: ControlEvent) -> None:
