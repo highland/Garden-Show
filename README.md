@@ -6,7 +6,7 @@
 
  The replacement project will be written in python with a simple frontend.
  Uses flet for GUI, pickle for data persistence*,
- fpdf for report generation as Pdfs,
+ xlsxwriter for report generation as Excel spreadsheets,
  and batch input of the schedule from a text file. The awards to be presented
  in the show are defined in a .toml file.
 
