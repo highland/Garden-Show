@@ -198,7 +198,10 @@ class ShowClass:
         resultlines = "\t" + "\n\t".join(
             [f"{result}" for result in self.results]
         )
-        entryline = f"\n{self.no_of_entries} entries\n"
+        entryline = (
+            f"\n{self.no_of_entries}"
+            f" {'entry' if self.no_of_entries == 1 else 'entries'}"
+        )
         return firstline + resultlines + entryline
 
 
@@ -251,11 +254,12 @@ class Winner:
 def calculate_points_winners() -> None:
     """Determine the winners in 'most points in ...' type awards"""
 
-    def _handle_tie() -> Winner:
+    def _handle_tie():
         for also_check in (total_firsts, total_seconds, total_thirds):
             # merge counters
-            total_points.update(also_check)
-            first_two = total_points.most_common(2)
+            running_totals = total_points.copy()
+            running_totals.update(also_check)
+            first_two = running_totals.most_common(2)
             if first_two[0][1] > first_two[1][1]:  # winner!
                 return top_three[1][0]
             return None  # no winner found
