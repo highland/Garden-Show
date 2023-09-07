@@ -3,9 +3,12 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
+import subprocess
+from xlsxwriter.workbook import Workbook
+from xlsxwriter.worksheet import Worksheet
 from garden_show import Show
 from collections import Counter
-from garden_show.configuration import _ROOT
+from garden_show.configuration import _ROOT, ALLREPORTS, EXCEL
 
 
 def show_results_by_class():
@@ -233,5 +236,114 @@ def show_bests():
         print(f"\n     {award.winner}")
         print(f"        for {award.description}")
 
+
+def all_reports_to_xlsx() -> None:
+
+    workbook = Workbook(ALLREPORTS)
+    heading = workbook.add_format({"bold": True, "font_size": 16, "valign": "top"})
+
+    def exhibitors() -> None:
+        worksheet = workbook.add_worksheet("Results by Exhibitor")
+        worksheet.set_column(0, 0, width=16)
+        worksheet.set_column(1, 1, width=100)
+
+        worksheet.set_row(0, cell_format=heading)
+        worksheet.write(0, 0, "Exhibitor")
+        worksheet.write(0, 1, "Results")
+
+        awards = Show.awards.get_all_awards()
+        row = 1
+        for exhibitor in Show.exhibitors:
+            if exhibitor.results:
+                worksheet.write(row, 0, f"{exhibitor}")
+                exhibitor_results = sorted(
+                    [
+                        (result.show_class.class_id, result.place)
+                        for result in exhibitor.results
+                    ]
+                )
+                for row, (class_id, place) in enumerate(exhibitor_results,
+                                                        start=row):
+                    worksheet.write(row, 1, f"\t{place.value} in {class_id}")
+            for award in awards:
+                if award.winner == exhibitor.full_name:
+                    row = row + 1
+                    if award.wins is Show.awards.WinsType.TROPHY:
+                        worksheet.write(
+                            row, 1,
+                            f"\tWinner of {award.name}:\n\t\t{award.description} "
+                            f"{f'for {award.reason} section {award.with_members[0]}' if award.reason else ''}")
+                    elif award.wins is Show.awards.WinsType.ROSETTE:
+                        worksheet.write(
+                            row, 1,
+                            f"\tAwarded a Rosette for {award.description}")
+
+    def judges_results() -> None:
+        def results_all_sections() -> None:
+            def results_for_section(start_row, section_id) -> int:
+                section_id = section_id.upper()
+                worksheet.set_row(start_row, cell_format=heading)
+                worksheet.set_row(start_row + 1, cell_format=heading)
+                worksheet.write(
+                    start_row, 0,
+                    f"Section {section_id}")
+                worksheet.write(start_row + 1, 0, "Class")
+                worksheet.write(start_row + 1, 1, "Description")
+                worksheet.write(start_row + 1, 2, "1st")
+                worksheet.write(start_row + 1, 3, "2nd")
+                worksheet.write(start_row + 1, 4, "3rd")
+                worksheet.write(start_row + 1, 5, "Entries")
+                row = start_row + 2
+                section = Show.schedule.sections[section_id]
+                for show_class in section.sub_sections.values():
+                    if show_class.results:
+                        worksheet.write(row, 0, f"{show_class.class_id}")
+                        worksheet.write(row, 1, f"{show_class.description}")
+                        for col, result in enumerate(show_class.results, start=2):
+                            worksheet.write(row, col, f"{result.exhibitor}")
+                        worksheet.write_number(
+                            row, 5,
+                            show_class.no_of_entries
+                        )
+                        row += 1
+                for award in section.trophies:
+                    if award.wins is Show.awards.WinsType.TROPHY:
+                        worksheet.write(
+                            row, 0,
+                            f"{award.winner} wins {award.name}: {award.description} "
+                            f"{f'for {award.reason}' if award.reason else ''}")
+                    elif award.wins is Show.awards.WinsType.ROSETTE:
+                        worksheet.write(
+                            row, 0,
+                            f"{award.winner} wins a Rosette for {award.description}"
+                            f"{award.with_members[0]}")
+                    row += 1
+                return row
+            row = 0
+            for section in Show.schedule.sections.keys():
+                row = results_for_section(row, section)
+        worksheet = workbook.add_worksheet("Results by Class")
+        worksheet.set_column(0, 0, width=12)
+        worksheet.set_column(1, 1, width=50)
+        worksheet.set_column(2, 4, width=16)
+
+        results_all_sections()
+
+    exhibitors()
+    judges_results()
+    # classes = workbook.add_format(
+    #     {"text_wrap": True, "valign": "top", "border": 1}
+    # )
+
+    # worksheet.set_header("*Write no. of entries in class column")
+    # worksheet.set_footer(f"{section.description}  {Show.schedule.year}")
+    # worksheet.set_margins(0.4, 0.4, 0.6, 0.5)
+    # worksheet.hide_gridlines(0)
+    # worksheet.set_default_row(30)
+    # worksheet.set_column(0, 0, width=7)
+    # worksheet.set_column(1, 1, width=24, cell_format=classes)
+    # worksheet.set_column(2, 4, width=20)
+    # write_header(worksheet)
+    workbook.close()
 
 Show.calculate_points_winners()
