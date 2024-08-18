@@ -56,7 +56,7 @@ def main(page: Page) -> None:
     member = Switch(label="Member?", label_position="left", value=False)
     save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
     show_all = ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
-
+    populate_exhibitor_list()
     page.title = TITLE
     page.horizontal_alignment = "center"
     page.scroll = "adaptive"

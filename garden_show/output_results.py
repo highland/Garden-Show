@@ -47,7 +47,7 @@ def output_awards() -> None:
         if (
             award.wins == Show.awards.WinsType.ROSETTE
             and award.winner
-            and not award.type == Show.awards.AwardType.BEST
+#            and not award.type == Show.awards.AwardType.BEST
         )
     ]
 

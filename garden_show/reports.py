@@ -113,7 +113,7 @@ def show_points_data() -> None:
             _, best_points = top_three[0]
 
             # check for ties
-            if top_three[1][1] == best_points:  # Tie 1st and 2nd (or more)
+            if (len(total_points) > 1) and (top_three[1][1] == best_points):  # Tie 1st and 2nd (or more)
                 award.winner = _handle_tie()
 
         print("    Points, #1st, #2nd, #3rd:\n")
@@ -240,7 +240,8 @@ def show_bests():
 def all_reports_to_xlsx() -> None:
 
     workbook = Workbook(ALLREPORTS)
-    heading = workbook.add_format({"bold": True, "font_size": 16, "valign": "top"})
+    heading = workbook.add_format({"bold": True, "font_size": 16,
+                                   "valign": "top"})
 
     def exhibitors() -> None:
         worksheet = workbook.add_worksheet("Results by Exhibitor")

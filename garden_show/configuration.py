@@ -9,7 +9,7 @@ from pathlib import Path
 TITLE: str = "Badenoch Gardening Club"
 
 # _ROOT: Path = Path("D:/BGC Show/Garden-Show/Data")
-_ROOT: Path = Path("D:/BGC Show/Garden-Show/Data/2023 Data")
+_ROOT: Path = Path("D:/BGC Show/Garden-Show/Data/2024 Data")
 assert _ROOT.exists()
 
 SCHEDULEFILE: Path = _ROOT / "schedule.txt"
@@ -22,4 +22,4 @@ JUDGESSHEETS: Path = _ROOT / "JudgesSheets.xlsx"
 ALLREPORTS: Path = _ROOT / "AllReports.xlsx"
 RESULTS: Path = _ROOT / "Results.xlsx"
 
-EXCEL: str = "C:/Program Files/Microsoft Office/root/Office16/EXCEL.EXE"
+EXCEL: str = "C:/Program Files (x86)/Microsoft Office/root/Office16/EXCEL.EXE"

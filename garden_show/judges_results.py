@@ -32,7 +32,8 @@ def write_bests(sheet: Worksheet, heading_line: int, section_id: str) -> None:
 
 # Create a workbook and add a worksheet.
 workbook = Workbook(JUDGESSHEETS)
-heading = workbook.add_format({"bold": True, "font_size": 16, "valign": "top", "border": 2})
+heading = workbook.add_format({"bold": True, "font_size": 16,
+                               "valign": "top", "border": 2})
 classes = workbook.add_format(
     {"text_wrap": True, "valign": "top", "border": 1}
 )

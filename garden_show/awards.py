@@ -75,12 +75,8 @@ def bests_for_section(section_id: SectionId) -> List[Award]:
         for award in awards
         if (award.type is AwardType.BEST and award.wins is WinsType.TROPHY)
         and (
-            (
-                award.with_members[0] == section_id
-            )
-            or (
-                award.with_members[0].startswith(section_id)
-            )
+            (award.with_members[0] == section_id)
+            or (award.with_members[0].startswith(section_id))
         )
     ]
     if trophies:

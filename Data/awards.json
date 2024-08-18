@@ -1,0 +1,173 @@
+{
+    "rosettes": {
+        "best": [
+            {
+                "section": [
+                    "A",
+                    "B",
+                    "C",
+                    "E",
+                    "F",
+                    "G",
+                    "K",
+                    "L",
+                    "M"
+                ]
+            }
+        ],
+        "points": [
+            {
+                "section": [
+                    "A",
+                    "B",
+                    "K",
+                    "L",
+                    "M"
+                ]
+            }
+        ]
+    },
+    "trophies": {
+        "best": [
+            {
+                "name": "Evelyn Littlejohn Trophy",
+                "section": [
+                    "A"
+                ]
+            },
+            {
+                "description": "Best sweet pea",
+                "name": "Enid Furness Trophy",
+                "show_class": [
+                    "B7",
+                    "B8"
+                ]
+            },
+            {
+                "description": "Best rose",
+                "name": "Barclay Trophy",
+                "show_class": [
+                    "B10",
+                    "B11",
+                    "B12"
+                ]
+            },
+            {
+                "description": "Best cut flower (not sweet pea or rose)",
+                "name": "Badenoch Gardening Club Trophy",
+                "show_class": [
+                    "B1",
+                    "B2",
+                    "B3",
+                    "B4",
+                    "B5",
+                    "B6",
+                    "B13",
+                    "B14"
+                ]
+            },
+            {
+                "name": "Badenoch Gardening Club Trophy",
+                "section": [
+                    "C"
+                ]
+            },
+            {
+                "description": "Best foliage pot plant",
+                "name": "Jean Burnard Trophy",
+                "show_class": [
+                    "D1",
+                    "D2"
+                ]
+            },
+            {
+                "description": "Best flowering pot plant",
+                "name": "Hutchison Bros Trophy",
+                "show_class": [
+                    "D3",
+                    "D4",
+                    "D5"
+                ]
+            },
+            {
+                "description": "Best club plant",
+                "name": "Betty Murray Trophy",
+                "show_class": [
+                    "D6"
+                ]
+            },
+            {
+                "description": "Best floral art",
+                "name": "Sutherland Cup",
+                "section": [
+                    "E"
+                ]
+            },
+            {
+                "description": "Best fushsia",
+                "name": "Archie Peebles Trophy",
+                "section": [
+                    "F"
+                ]
+            },
+            {
+                "description": "Best container",
+                "name": "Iain MacDonald Trophy",
+                "section": [
+                    "G"
+                ]
+            },
+            {
+                "description": "Best entry in preserves & sweets",
+                "name": "Marielle Barclay Picture",
+                "section": [
+                    "K"
+                ]
+            }
+        ],
+        "points": [
+            {
+                "name": "Stuart Sim Cup",
+                "section": [
+                    "A"
+                ]
+            },
+            {
+                "name": "Green Gardener Trophy",
+                "restriction": "previous_veg_trophy_winners.txt",
+                "section": [
+                    "A"
+                ]
+            },
+            {
+                "name": "Buchanan Trophy",
+                "section": [
+                    "B"
+                ]
+            },
+            {
+                "description": "Most points by a Young Gardener in Sections Q, R & S",
+                "name": "Iain MacDonald Cup",
+                "section": [
+                    "Q",
+                    "R",
+                    "S"
+                ]
+            },
+            {
+                "description": "Most points in preserves & sweets",
+                "name": "Jeanette MacDonald Shield",
+                "section": [
+                    "K"
+                ]
+            },
+            {
+                "description": "Most points in baking section",
+                "name": "Balgonie Dairy Cup",
+                "section": [
+                    "L"
+                ]
+            }
+        ]
+    }
+}

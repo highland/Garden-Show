@@ -27,11 +27,9 @@ def set_up_exhibitors(tx: Transaction) -> None:
     """Save all current exhibitors to database"""
 
     def create_exhibitor(tx: Transaction, exhibitor: Show.Exhibitor) -> None:
-        tx.run('CREATE (e: Exhibitor {'
-               + f'name: "{exhibitor.full_name}", '
-               + f'member: "{exhibitor.member}"'
-               + '})')
-
+        tx.run('CREATE (e: Exhibitor {name: $name, member: $member})',
+               name=exhibitor.full_name,
+               member=exhibitor.member)
     for exhibitor in Show.exhibitors:
         create_exhibitor(tx, exhibitor)
 
@@ -40,39 +38,41 @@ def load_schedule_from_file(tx: Transaction,
                             file: Path = SCHEDULEFILE) -> None:
 
     def create_show(tx: Transaction, year: int, date: datetime) -> None:
-        tx.run('CREATE (s: Show {'
-               + f'year: "{year}", '
-               + f'date: "{date}"'
-               + '})')
+        tx.run('CREATE (s: Show {year: $year, date: $date})',
+               year=year,
+               date=date)
 
     def create_section(tx: Transaction, id: SectionId, desc: str) -> None:
-        tx.run('CREATE (s: Section {'
-               + f'letter: "{id}", '
-               + f'description: "{desc}"'
-               + '})')
+        tx.run('CREATE (s: Section {letter: $class_id, description: $desc})',
+               class_id=id,
+               desc=desc)
 
     def connect_to_show(tx: Transaction, year: int, id: SectionId) -> None:
-        tx.run('MATCH (show: Show) WHERE '
-               + f'show.year = "{year}"'
-               + '\nMATCH (section: Section) WHERE '
-               + f'section.letter = "{id}"'
-               + '\nCREATE (show) - [:SCHEDULES ] -> (section)')
+        tx.run('''
+               MATCH (show: Show) WHERE show.year = $year
+               MATCH (section: Section) WHERE section.letter = $id
+               CREATE (show) - [:SCHEDULES ] -> (section)
+               ''',
+               year=year,
+               id=id)
 
     def create_class(tx: Transaction, class_id: ClassId, desc: str) -> None:
-        desc = desc.replace('"', '\"')
-        tx.run('CREATE (c: Class {'
-               + f'class_id: "{class_id}", '
-               + f"description: '{desc}'"
-               + '})')
+        # desc = desc.replace('"', '\"')
+        tx.run('CREATE (c: Class {class_id: $id, description: $desc})',
+               id=class_id,
+               desc=desc)
 
     def connect_to_section(tx: Transaction,
                            class_id: ClassId,
                            section_id: SectionId) -> None:
-        tx.run('MATCH (section: Section) WHERE '
-               + f'section.letter = "{section_id}"'
-               + '\nMATCH (class: Class) WHERE '
-               + f'class.class_id = "{class_id}"'
-               + '\nCREATE (section) - [:CONTAINS ] -> (class)')
+        tx.run('''
+               MATCH (section: Section) WHERE section.letter = $section_id
+               MATCH (class: Class) WHERE class.class_id = $class_id
+               CREATE (section) - [:CONTAINS ] -> (class)
+               ''',
+               class_id=class_id,
+               section_id=section_id
+               )
 
     with file.open(encoding="UTF-8") as datafile:
         date_line = parse(datafile.readline().rstrip())
@@ -94,7 +94,7 @@ def load_schedule_from_file(tx: Transaction,
                 connect_to_section(tx, class_id, current_section)
 
 
-with driver.session() as session:
+with driver.session(database='neo4j') as session:
     # execute_write runs a task within a write transaction
     session.execute_write(set_up_exhibitors)
     session.execute_write(load_schedule_from_file)

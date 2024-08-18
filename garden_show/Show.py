@@ -275,41 +275,42 @@ def calculate_points_winners() -> None:
             or award.type != awards.AwardType.POINTS
         ):  # guard clause: must be award for points in a section
             continue
-        award_section_id = award.with_members[0]
-        section = schedule.sections.get(award_section_id)
-        if not section:  # ensure section
-            continue
-        # main loop - gather data
-        for show_class in section.sub_sections.values():
-            for result in show_class.results:
-                total_points[result.exhibitor.full_name] += result.points
-                match result.place:
-                    case Place.FIRST | Place.EQUAL:
-                        total_firsts[result.exhibitor.full_name] += 1
-                    case Place.SECOND:
-                        total_seconds[result.exhibitor.full_name] += 1
-                    case Place.THIRD:
-                        total_thirds[result.exhibitor.full_name] += 1
-        # any restrictions?
-        if check := award.restriction:
-            with open(_ROOT / check) as rejects:
-                for name in rejects:
-                    exhibitor = get_actual_exhibitor(name)
-                    del total_points[exhibitor.full_name]
-        # any winners?
-        if len(total_points) > 0:
-            top_three = total_points.most_common(3)
-            award.winner, best_points = top_three[0]
-            award.reason = f"{best_points} points"
+        for award_section_id in award.with_members:
+            section = schedule.sections.get(award_section_id)
+            if not section:  # ensure section
+                continue
+            # main loop - gather data
+            for show_class in section.sub_sections.values():
+                for result in show_class.results:
+                    total_points[result.exhibitor.full_name] += result.points
+                    match result.place:
+                        case Place.FIRST | Place.EQUAL:
+                            total_firsts[result.exhibitor.full_name] += 1
+                        case Place.SECOND:
+                            total_seconds[result.exhibitor.full_name] += 1
+                        case Place.THIRD:
+                            total_thirds[result.exhibitor.full_name] += 1
+            # any restrictions?
+            if check := award.restriction:
+                with open(_ROOT / check) as rejects:
+                    for name in rejects:
+                        exhibitor = get_actual_exhibitor(name)
+                        del total_points[exhibitor.full_name]
+            # any winners?
+            if len(total_points) > 0:
+                top_three = total_points.most_common(3)
+                award.winner, best_points = top_three[0]
+                award.reason = f"{best_points} points"
 
-            # check for ties
-            if top_three[1][1] == best_points:  # Tie 1st and 2nd (or more)
-                award.winner = _handle_tie()
-                award.reason += (
-                    f" with {total_firsts[award.winner]} firsts"
-                    f" {total_seconds[award.winner]} seconds"
-                    f" and {total_thirds[award.winner]} thirds"
-                )
+                # check for ties
+                if (len(total_points) > 1) and (top_three[1][1] == best_points):
+                    # Tie 1st and 2nd (or more)
+                    award.winner = _handle_tie()
+                    award.reason += (
+                        f" with {total_firsts[award.winner]} firsts"
+                        f" {total_seconds[award.winner]} seconds"
+                        f" and {total_thirds[award.winner]} thirds"
+                    )
 
     awards.save_awards()
 
