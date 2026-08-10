@@ -45,7 +45,7 @@ description = "Best floral art"
 [[trophies.best]]
 name = "Archie Peebles Trophy"
 section = [ "F",]
-description = "Best fuchsia"
+description = "Best fushsia"
 
 [[trophies.best]]
 name = "Iain MacDonald Trophy"
@@ -72,8 +72,8 @@ section = [ "B",]
 
 [[trophies.points]]
 name = "Iain MacDonald Cup"
-section = [ "Q", "R", "S", "T", "U"]
-description = "Most points by a Young Gardener in Sections Q, R, S, T & U"
+section = [ "Q", "R", "S",]
+description = "Most points by a Young Gardener in Sections Q, R & S"
 
 [[trophies.points]]
 name = "Jeanette MacDonald Shield"

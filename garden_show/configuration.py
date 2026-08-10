@@ -8,8 +8,8 @@ from pathlib import Path
 
 TITLE: str = "Badenoch Gardening Club"
 
+_ROOT: Path = Path("D:/BGC Show/Garden-Show/Data")
 # _ROOT: Path = Path("D:/BGC Show/Garden-Show/Data")
-_ROOT: Path = Path("D:/BGC Show/Garden-Show/Data/2024 Data")
 assert _ROOT.exists()
 
 SCHEDULEFILE: Path = _ROOT / "schedule.txt"
@@ -19,7 +19,7 @@ AWARDFILE: Path = _ROOT / "awards.toml"
 AWARDDATA: Path = _ROOT / "awards.pkl"
 IMAGEFILE: Path = _ROOT / "Graphic.png"
 JUDGESSHEETS: Path = _ROOT / "JudgesSheets.xlsx"
-ALLREPORTS: Path = _ROOT / "AllReports.xlsx"
+ALLREPORTS: Path = _ROOT / "2026 Results by Exhibitor and Class.xlsx"
 RESULTS: Path = _ROOT / "Results.xlsx"
 
 EXCEL: str = "C:/Program Files (x86)/Microsoft Office/root/Office16/EXCEL.EXE"

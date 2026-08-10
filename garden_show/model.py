@@ -14,8 +14,8 @@ As the entries rely on a stable schedule,
 import logging
 from typing import List, Tuple, Set
 
-from garden_show import Show
-from garden_show import awards
+import Show
+import awards
 
 ExhibitorName = str
 Reason = str

@@ -9,8 +9,8 @@ from typing import Set, List, Dict, Callable
 
 from flet import TextField, ControlEvent, UserControl, Text, Column, Row
 
-from garden_show import model
-from garden_show.configuration import NAMESFILE
+import model
+from configuration import NAMESFILE
 
 ClassId = str  # r"\D\d*"
 Name = str

@@ -6,9 +6,9 @@ Created on Mon Aug 21 13:14:02 2023
 """
 import subprocess
 from xlsxwriter.workbook import Workbook
-from garden_show import Show
+import Show
 
-from garden_show.configuration import RESULTS, EXCEL
+from configuration import RESULTS, EXCEL
 
 
 def output_awards() -> None:

@@ -72,8 +72,8 @@ section = [ "B",]
 
 [[trophies.points]]
 name = "Iain MacDonald Cup"
-section = [ "Q", "R", "S", "T", "U"]
-description = "Most points by a Young Gardener in Sections Q, R, S, T & U"
+section = [ "Q", "R", "S", "T",]
+description = "Most points by a Young Gardener in Sections Q, R, S & T"
 
 [[trophies.points]]
 name = "Jeanette MacDonald Shield"

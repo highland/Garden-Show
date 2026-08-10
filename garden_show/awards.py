@@ -14,7 +14,7 @@ from pathlib import Path
 from enum import StrEnum
 import tomli
 
-from garden_show.configuration import AWARDFILE, AWARDDATA
+from configuration import AWARDFILE, AWARDDATA
 
 
 ClassId = str  # r'\D\d*'

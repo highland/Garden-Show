@@ -16,8 +16,8 @@ from enum import StrEnum
 
 from pathlib import Path
 from dateutil.parser import parse
-from garden_show.configuration import SCHEDULEFILE, SAVEDDATA, _ROOT
-from garden_show import awards
+from configuration import SCHEDULEFILE, SAVEDDATA, _ROOT
+import awards
 
 Name = str
 ClassId = str  # r'\D\d*'

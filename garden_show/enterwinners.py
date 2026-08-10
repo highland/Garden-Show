@@ -22,14 +22,18 @@ from flet import (
     padding,
 )
 
-from garden_show import model
-from garden_show import gui_support
-from garden_show.configuration import TITLE
+import model
+import gui_support
+from configuration import TITLE
+import nest_asyncio
 
 
 def get_section_description(event: ControlEvent) -> None:
-    """On choosing the section to be entered,
-    fill in the description for that section."""
+    """Add description for section.
+
+    On choosing the section to be entered,
+    fill in the description for that section.
+    """
     if not section.value or section.read_only:
         return
     section_entered = section.value[-1].upper()  # take the last char typed
@@ -45,9 +49,11 @@ def get_section_description(event: ControlEvent) -> None:
 
 
 def populate_page(event: ControlEvent) -> None:
-    """On choosing the section to be entered, lay out the input
-    fields for the classes in that section."""
+    """Populate page for section.
 
+    On choosing the section to be entered, lay out the input
+    fields for the classes in that section.
+    """
     get_best.controls = []  # clear previous fields
     get_names.controls = []
 
@@ -77,8 +83,7 @@ def populate_page(event: ControlEvent) -> None:
 
 
 def post_to_model(event: ControlEvent) -> None:
-    """Post all entered data to the model"""
-
+    """Post all entered data to the model."""
     if not get_names.controls:
         print("Nothing to post")
         return
@@ -107,7 +112,7 @@ def post_to_model(event: ControlEvent) -> None:
 
 
 def clear_all(event: ControlEvent) -> None:
-    """Clear the screen for a new section"""
+    """Clear the screen for a new section."""
     section.value = ""
     description.value = ""
     get_best.controls = []
@@ -147,13 +152,13 @@ save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
 
 def main(page: Page) -> None:
     """
-    Entry point for flet application
+    Entry point for flet application.
+
     Args:
         page (Page): The window supplied by flet
     Returns:
         None.
     """
-
     page.window_maximized = True
     page.vertical_alignment = MainAxisAlignment.SPACE_EVENLY
     page.title = TITLE
@@ -166,4 +171,5 @@ def main(page: Page) -> None:
     page.update()
 
 
+nest_asyncio.apply()
 app(target=main)

@@ -1,9 +1,9 @@
 import subprocess
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.worksheet import Worksheet
-from garden_show import Show
-from garden_show.configuration import JUDGESSHEETS, EXCEL
-from garden_show.model import get_judges_best_in_fields
+import Show
+from configuration import JUDGESSHEETS, EXCEL
+from model import get_judges_best_in_fields
 
 
 def write_header(sheet: Worksheet) -> None:

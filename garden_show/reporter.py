@@ -6,8 +6,9 @@ Created on Sun Apr 30 14:57:37 2023
 """
 
 from enum import Enum
-from garden_show import Show
+import Show
 import flet as ft
+import nest_asyncio
 
 
 class Style(Enum):
@@ -96,4 +97,5 @@ def main(page: ft.Page):
     page.add(output)
 
 
+nest_asyncio.apply()
 ft.app(target=main)

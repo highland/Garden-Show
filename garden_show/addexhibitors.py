@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-GUI supporting recording and editing the Entry Forms
+GUI supporting recording and editing the Entry Forms.
+
 @author: Mark
 """
 
@@ -18,14 +19,16 @@ from flet import (
     Switch,
 )
 
-import garden_show.model
-import garden_show.gui_support
-from garden_show.configuration import TITLE
+import model
+import gui_support
+from configuration import TITLE
+import nest_asyncio
 
 
 def main(page: Page) -> None:
     """
-    Entry point for flet application
+    Entry point for flet application.
+
     Args:
         page (Page): The window supplied by flet
     Returns:
@@ -35,24 +38,24 @@ def main(page: Page) -> None:
     def post_to_model(_: ControlEvent) -> None:
         if not exhibitor_name.value:
             return
-        garden_show.model.add_exhibitor(exhibitor_name.value, member.value)
+        model.add_exhibitor(exhibitor_name.value, member.value)
         exhibitor_name.value = ""
         populate_exhibitor_list()
 
     def populate_exhibitor_list() -> None:
         show_all.controls = []
-        for exhibitor_name in garden_show.model.get_exhibitors():
+        for exhibitor_name in model.get_exhibitors():
             show_all.controls.append(Text(exhibitor_name))
         page.update()
 
     title = Text("Add Exhibitor", style=TextThemeStyle.HEADLINE_SMALL)
     # first line
-    exhibitor_name = garden_show.gui_support.NameChooser()
+    exhibitor_name = gui_support.NameChooser()
     exhibitor_name.label = "Name"
     exhibitor_name.autofocus = True
     exhibitor_name.on_submit = (
         exhibitor_name.on_blur
-    ) = garden_show.gui_support.capture_input
+    ) = gui_support.capture_input
     member = Switch(label="Member?", label_position="left", value=False)
     save = ElevatedButton("Save", icon=icons.SAVE, on_click=post_to_model)
     show_all = ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
@@ -66,4 +69,5 @@ def main(page: Page) -> None:
     page.update()
 
 
+nest_asyncio.apply()
 app(target=main)

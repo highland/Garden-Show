@@ -1,6 +1,7 @@
 import flet
 import subprocess
-from garden_show.configuration import IMAGEFILE, TITLE
+from configuration import IMAGEFILE, TITLE
+import nest_asyncio
 
 
 def main(page: flet.Page):
@@ -41,7 +42,9 @@ def main(page: flet.Page):
 
     page.add(img)
     page.overlay.append(actions)
+    page.window.maximized
     page.update()
 
 
+nest_asyncio.apply()
 flet.app(target=main)

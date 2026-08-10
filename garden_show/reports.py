@@ -3,12 +3,19 @@ Created on Wed Jan 25 19:54:58 2023
 
 @author: Mark
 """
-import subprocess
+
 from xlsxwriter.workbook import Workbook
-from xlsxwriter.worksheet import Worksheet
-from garden_show import Show
+import Show
 from collections import Counter
-from garden_show.configuration import _ROOT, ALLREPORTS, EXCEL
+from configuration import _ROOT, ALLREPORTS
+
+
+def show_summary_totals():
+    entry_count = 0
+    for show_class in Show.schedule.classes.values():
+        entry_count += show_class.no_of_entries
+    entrants = len(Show.exhibitors)
+    print(f"There were {entry_count} entries from {entrants} exhibitors")
 
 
 def show_results_by_class():
@@ -113,7 +120,9 @@ def show_points_data() -> None:
             _, best_points = top_three[0]
 
             # check for ties
-            if (len(total_points) > 1) and (top_three[1][1] == best_points):  # Tie 1st and 2nd (or more)
+            if (len(total_points) > 1) and (
+                top_three[1][1] == best_points
+            ):  # Tie 1st and 2nd (or more)
                 award.winner = _handle_tie()
 
         print("    Points, #1st, #2nd, #3rd:\n")
@@ -240,8 +249,9 @@ def show_bests():
 def all_reports_to_xlsx() -> None:
 
     workbook = Workbook(ALLREPORTS)
-    heading = workbook.add_format({"bold": True, "font_size": 16,
-                                   "valign": "top"})
+    heading = workbook.add_format(
+        {"bold": True, "font_size": 16, "valign": "top"}
+    )
 
     def exhibitors() -> None:
         worksheet = workbook.add_worksheet("Results by Exhibitor")
@@ -263,21 +273,27 @@ def all_reports_to_xlsx() -> None:
                         for result in exhibitor.results
                     ]
                 )
-                for row, (class_id, place) in enumerate(exhibitor_results,
-                                                        start=row):
+                for row, (class_id, place) in enumerate(
+                    exhibitor_results, start=row
+                ):
                     worksheet.write(row, 1, f"\t{place.value} in {class_id}")
+                row += 1
             for award in awards:
                 if award.winner == exhibitor.full_name:
-                    row = row + 1
                     if award.wins is Show.awards.WinsType.TROPHY:
                         worksheet.write(
-                            row, 1,
-                            f"\tWinner of {award.name}:\n\t\t{award.description} "
-                            f"{f'for {award.reason} section {award.with_members[0]}' if award.reason else ''}")
+                            row,
+                            1,
+                            f"\tWinner of {award.name}: {award.description} "
+                            f"{f'for {award.reason} section {award.with_members[0]}' if award.reason else ''}",
+                        )
                     elif award.wins is Show.awards.WinsType.ROSETTE:
                         worksheet.write(
-                            row, 1,
-                            f"\tAwarded a Rosette for {award.description}")
+                            row,
+                            1,
+                            f"\tAwarded a Rosette for {award.description}",
+                        )
+                    row += 1
 
     def judges_results() -> None:
         def results_all_sections() -> None:
@@ -285,9 +301,7 @@ def all_reports_to_xlsx() -> None:
                 section_id = section_id.upper()
                 worksheet.set_row(start_row, cell_format=heading)
                 worksheet.set_row(start_row + 1, cell_format=heading)
-                worksheet.write(
-                    start_row, 0,
-                    f"Section {section_id}")
+                worksheet.write(start_row, 0, f"Section {section_id}")
                 worksheet.write(start_row + 1, 0, "Class")
                 worksheet.write(start_row + 1, 1, "Description")
                 worksheet.write(start_row + 1, 2, "1st")
@@ -300,29 +314,34 @@ def all_reports_to_xlsx() -> None:
                     if show_class.results:
                         worksheet.write(row, 0, f"{show_class.class_id}")
                         worksheet.write(row, 1, f"{show_class.description}")
-                        for col, result in enumerate(show_class.results, start=2):
+                        for col, result in enumerate(
+                            show_class.results, start=2
+                        ):
                             worksheet.write(row, col, f"{result.exhibitor}")
-                        worksheet.write_number(
-                            row, 5,
-                            show_class.no_of_entries
-                        )
+                        worksheet.write_number(row, 5, show_class.no_of_entries)
                         row += 1
                 for award in section.trophies:
                     if award.wins is Show.awards.WinsType.TROPHY:
                         worksheet.write(
-                            row, 0,
+                            row,
+                            0,
                             f"{award.winner} wins {award.name}: {award.description} "
-                            f"{f'for {award.reason}' if award.reason else ''}")
+                            f"{f'for {award.reason}' if award.reason else ''}",
+                        )
                     elif award.wins is Show.awards.WinsType.ROSETTE:
                         worksheet.write(
-                            row, 0,
+                            row,
+                            0,
                             f"{award.winner} wins a Rosette for {award.description}"
-                            f"{award.with_members[0]}")
+                            f"{award.with_members[0]}",
+                        )
                     row += 1
                 return row
+
             row = 0
             for section in Show.schedule.sections.keys():
                 row = results_for_section(row, section)
+
         worksheet = workbook.add_worksheet("Results by Class")
         worksheet.set_column(0, 0, width=12)
         worksheet.set_column(1, 1, width=50)
@@ -346,5 +365,6 @@ def all_reports_to_xlsx() -> None:
     # worksheet.set_column(2, 4, width=20)
     # write_header(worksheet)
     workbook.close()
+
 
 Show.calculate_points_winners()
